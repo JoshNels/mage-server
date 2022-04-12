@@ -43,35 +43,35 @@ module.exports = function (app, security) {
     }
   }
 
-  app.post('/api/exports',
-    passport.authenticate('bearer'),
-    parseQueryParams,
-    getEvent,
-    authorizeEventAccess,
-    mapUsers,
-    mapDevices,
-    function (req, res, next) {
-      const document = {
-        userId: req.user._id,
-        exportType: req.body.exportType,
-        options: {
-          eventId: req.body.eventId,
-          filter: req.parameters.filter
-        }
-      };
+  // app.post('/api/exports',
+  //   passport.authenticate('bearer'),
+  //   parseQueryParams,
+  //   getEvent,
+  //   authorizeEventAccess,
+  //   mapUsers,
+  //   mapDevices,
+  //   function (req, res, next) {
+  //     const document = {
+  //       userId: req.user._id,
+  //       exportType: req.body.exportType,
+  //       options: {
+  //         eventId: req.body.eventId,
+  //         filter: req.parameters.filter
+  //       }
+  //     };
 
-      Export.createExport(document).then(result => {
-        const response = exportXform.transform(result, { path: req.getPath() });
-        res.location(`${req.route.path}/${result._id.toString()}`).status(201).json(response);
+  //     Export.createExport(document).then(result => {
+  //       const response = exportXform.transform(result, { path: req.getPath() });
+  //       res.location(`${req.route.path}/${result._id.toString()}`).status(201).json(response);
 
-        //TODO figure out event, users and devices
-        exportData(result._id, req.event, req.users, req.devices).catch(err => {
-          log.error(`Error exporting ${result._id}`, err);
-          Export.updateExport(result._id, {status: Export.ExportStatus.Failed});
-        });
-      }).catch(err => next(err));
-    }
-  );
+  //       //TODO figure out event, users and devices
+  //       exportData(result._id, req.event, req.users, req.devices).catch(err => {
+  //         log.error(`Error exporting ${result._id}`, err);
+  //         Export.updateExport(result._id, {status: Export.ExportStatus.Failed});
+  //       });
+  //     }).catch(err => next(err));
+  //   }
+  // );
 
   /**
    * Get all exports

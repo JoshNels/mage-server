@@ -65,7 +65,7 @@ function transform(team, ret, options) {
   delete ret._id;
 
   if (team.populated('userIds')) {
-    ret.users = userTransformer.transform(ret.userIds, {path: options.path});
+    ret.users = userTransformer.transform(ret.userIds, {path: options.path, redact: true});
     delete ret.userIds;
   } else {
     let objectIdStrings = new Set();

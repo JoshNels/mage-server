@@ -1,5 +1,8 @@
 module.exports = function(app, security) {
 
+  const vetObservations = true;
+  const userObservationLimit = 100;
+
   const async = require('async')
     , api = require('../api')
     , log = require('winston')
@@ -26,6 +29,16 @@ module.exports = function(app, security) {
       event: req.event,
       path: req.getPath().match(/(.*observations)/)[0]
     };
+  }
+
+  function validateObservationLimit(req, res, next) {
+    new api.Observation(req.event, req.user).userObservationCount(function(err, count) {
+      if (err || (count >= userObservationLimit)) {
+        res.sendStatus(429);
+      } else {
+        next();
+      }
+    });
   }
 
   function validateObservationReadAccess(req, res, next) {
@@ -309,6 +322,7 @@ module.exports = function(app, security) {
     '/api/events/:eventId/observations/id',
     passport.authenticate('bearer'),
     validateObservationCreateAccess(false),
+    validateObservationLimit,
     function (req, res, next) {
       new api.Observation().createObservationId(function(err, doc) {
         if (err) return next(err);
@@ -355,49 +369,68 @@ module.exports = function(app, security) {
     }
   );
 
-  app.get(
-    '/api/events/:eventId/observations/(:observationId).zip',
+  app.put(
+    '/api/events/:eventId/observations/:existingObservationId/vet',
     passport.authenticate('bearer'),
-    validateObservationReadAccess,
-    getUserForObservation,
-    getIconForObservation,
+    authorizeEventAccess('UPDATE_OBSERVATION_ALL', 'update'),
     function (req, res) {
-      const formMap = {};
-      req.event.forms.forEach(function (form) {
-        const fieldsByName = {};
-        form.fields.forEach(function (field) {
-          fieldsByName[field.name] = field;
-        });
-        form.fieldsByName = fieldsByName;
+      new api.Observation(req.event).vet(req.params.existingObservationId, req.observation, function (err, updatedObservation) {
+        if (err) return next(err);
 
-        formMap[form.id] = form;
-      });
-
-      const archive = archiver('zip');
-      archive.pipe(res);
-
-      app.render('observation', {
-        event: req.event,
-        formMap: formMap,
-        observation: req.observation,
-        center: turfCentroid(req.observation).geometry,
-        user: req.observationUser
-      }, function (err, html) {
-        archive.append(html, { name: req.observation._id + '/index.html' });
-
-        if (req.observationIcon) {
-          const iconPath = path.join(environment.iconBaseDirectory, req.observationIcon.relativePath);
-          archive.file(iconPath, { name: req.observation._id + '/media/icon.png' });
+        if (!updatedObservation) {
+          return res.status(404).send(`Observation with ID ${req.params.existingObservationId} does not exist`);
         }
 
-        req.observation.attachments.forEach(function (attachment) {
-          archive.file(path.join(environment.attachmentBaseDirectory, attachment.relativePath), { name: req.observation._id + '/media/' + attachment.name });
-        });
-
-        archive.finalize();
+        const response = observationXform.transform(updatedObservation, transformOptions(req));
+        res.json(response);
       });
     }
-  );
+  )
+
+  // No observation download
+  // app.get(
+  //   '/api/events/:eventId/observations/(:observationId).zip',
+  //   passport.authenticate('bearer'),
+  //   validateObservationReadAccess,
+  //   getUserForObservation,
+  //   getIconForObservation,
+  //   function (req, res) {
+  //     const formMap = {};
+  //     req.event.forms.forEach(function (form) {
+  //       const fieldsByName = {};
+  //       form.fields.forEach(function (field) {
+  //         fieldsByName[field.name] = field;
+  //       });
+  //       form.fieldsByName = fieldsByName;
+
+  //       formMap[form.id] = form;
+  //     });
+
+  //     const archive = archiver('zip');
+  //     archive.pipe(res);
+
+  //     app.render('observation', {
+  //       event: req.event,
+  //       formMap: formMap,
+  //       observation: req.observation,
+  //       center: turfCentroid(req.observation).geometry,
+  //       user: req.observationUser
+  //     }, function (err, html) {
+  //       archive.append(html, { name: req.observation._id + '/index.html' });
+
+  //       if (req.observationIcon) {
+  //         const iconPath = path.join(environment.iconBaseDirectory, req.observationIcon.relativePath);
+  //         archive.file(iconPath, { name: req.observation._id + '/media/icon.png' });
+  //       }
+
+  //       req.observation.attachments.forEach(function (attachment) {
+  //         archive.file(path.join(environment.attachmentBaseDirectory, attachment.relativePath), { name: req.observation._id + '/media/' + attachment.name });
+  //       });
+
+  //       archive.finalize();
+  //     });
+  //   }
+  // );
 
   app.get(
     '/api/events/:eventId/observations/:observationIdInPath',
@@ -410,7 +443,10 @@ module.exports = function(app, security) {
         if (err) {
           return next(err);
         }
-        if (!observation) {
+        
+        const observationUserId = observation.userId && observation.userId._id ? observation.userId._id : observation.userId
+        const isUserObservation = observationUserId === req.user._id
+        if (!observation || isUserObservation || (vetObservations && !observation.vetted && !access.userHasPermission(req.user, 'READ_OBSERVATION_ALL'))) {
           return res.sendStatus(404);
         }
         const response = observationXform.transform(observation, transformOptions(req));
@@ -434,6 +470,20 @@ module.exports = function(app, security) {
 
       new api.Observation(req.event).getAll(options, function(err, observations) {
         if (err) return next(err);
+
+        if (vetObservations && !access.userHasPermission(req.user, 'READ_OBSERVATION_ALL')) {
+          observations = observations.filter(observation => {
+            let observationUserId;
+            if (observation.userId && observation.userId._id) {
+              observationUserId = observation.userId._id.toString();
+            } else if (observation.userId) {
+              observationUserId = observation.userId.toString();
+            }
+            const isUserObservation = observationUserId === req.user._id.toString()
+            return isUserObservation || observation.vetted
+          })
+        }
+
         res.json(observationXform.transform(observations, transformOptions(req)));
       });
     }

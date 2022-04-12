@@ -1,10 +1,18 @@
 const OpenIdConnectStrategy = require('passport-openidconnect').Strategy
+  , axios = require('axios')
+  , os = require('os')
+  , crypto = require('crypto')
+  , path = require('path')
+  , util = require('util')
+  , stream = require('stream')
   , log = require('winston')
   , User = require('../models/user')
   , Role = require('../models/role')
   , TokenAssertion = require('./verification').TokenAssertion
   , api = require('../api')
   , { app, passport, tokenService } = require('./index');
+
+const pipeline = util.promisify(stream.pipeline);
 
 function configure(strategy) {
   log.info(`Configuring ${strategy.title} authentication`);
@@ -31,7 +39,7 @@ function configure(strategy) {
 
       if (!user) {
         // Create an account for the user
-        Role.getRole('USER_ROLE', function (err, role) {
+        Role.getRole('USER_NO_EDIT_ROLE', async function (err, role) {
           if (err) return done(err);
 
           const user = {
@@ -49,13 +57,42 @@ function configure(strategy) {
             }
           };
 
-          new api.User().create(user).then(newUser => {
-            if (!newUser.authentication.authenticationConfiguration.enabled) {
-              log.warn(newUser.authentication.authenticationConfiguration.title + " authentication is not enabled");
-              return done(null, false, { message: 'Authentication method is not enabled, please contact a MAGE administrator for assistance.' });
+          // If user has an avatar, save it
+          const options = {};
+          if (jsonProfile[strategy.settings.profile.avatarUrl]) {
+            // download it.
+            try {
+              const response = await axios({
+                method: 'get',
+                url: jsonProfile[strategy.settings.profile.avatarUrl],
+                responseType: 'stream'
+              });
+
+              const tmpdir = os.tmpdir();
+              const bytes = crypto.randomBytes(16);
+              const file = `${bytes.toString('hex')}.png`;
+              const filePath = path.join(tmpdir, file);
+              await pipeline(response.data, fs.createWriteStream(filePath));
+
+              options.avatar = {
+                destination: tmpdir,
+                filename: file,
+                path: filePath,
+                mimetype: response.headers['content-type'],
+                size: response.headers['content-length']
+              }
+            } catch (err) {
+              log.warn('Could not save user avatar', err);
             }
-            return done(null, newUser);
-          }).catch(err => done(err));
+
+            new api.User().create(user, options).then(newUser => {
+              if (!newUser.authentication.authenticationConfiguration.enabled) {
+                log.warn(newUser.authentication.authenticationConfiguration.title + " authentication is not enabled");
+                return done(null, false, { message: 'Authentication method is not enabled, please contact a MAGE administrator for assistance.' });
+              }
+              return done(null, newUser);
+            }).catch(err => done(err));
+          }
         });
       } else if (!user.active) {
         return done(null, user, { message: "User is not approved, please contact your MAGE administrator to approve your account." });
@@ -145,6 +182,9 @@ function setDefaults(strategy) {
   }
   if (!strategy.settings.profile.id) {
     strategy.settings.profile.id = 'sub';
+  }
+  if (!strategy.settings.profile.avatarUrl) {
+    strategy.settings.profile.avatarUrl = 'picture';
   }
 }
 

@@ -146,17 +146,17 @@ module.exports = function(app, security) {
   );
 
   // create new location(s) for a specific user and event
-  app.post(
-    '/api/events/:eventId/locations',
-    passport.authenticate('bearer'),
-    access.authorize('CREATE_LOCATION'),
-    validateLocations,
-    function(req, res, next) {
-      location.createLocations(req.locations, req.user, req.event, function(err, locations) {
-        if (err) return next(err);
+  // app.post(
+  //   '/api/events/:eventId/locations',
+  //   passport.authenticate('bearer'),
+  //   access.authorize('CREATE_LOCATION'),
+  //   validateLocations,
+  //   function(req, res, next) {
+  //     location.createLocations(req.locations, req.user, req.event, function(err, locations) {
+  //       if (err) return next(err);
 
-        res.json(locations);
-      });
-    }
-  );
+  //       res.json(locations);
+  //     });
+  //   }
+  // );
 };

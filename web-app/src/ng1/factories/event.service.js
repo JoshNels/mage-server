@@ -154,6 +154,7 @@ function EventService($rootScope, $q, $timeout, $http, $httpParamSerializer, Obs
     removeLayersChangedListener: removeLayersChangedListener,
     getEventById: getEventById,
     saveObservation: saveObservation,
+    approveObservation: approveObservation,
     addObservationFavorite: addObservationFavorite,
     removeObservationFavorite: removeObservationFavorite,
     markObservationAsImportant: markObservationAsImportant,
@@ -248,6 +249,19 @@ function EventService($rootScope, $q, $timeout, $http, $httpParamSerializer, Obs
         event.filteredObservationsById[observation.id] = observation;
         isNewObservation ? observationsChanged({added: [observation]}) : observationsChanged({updated: [observation]});
       }
+    });
+
+    return promise;
+  }
+
+  function approveObservation(observation) {
+    const resource = new Observation(observation)
+    const event = eventsById[resource.eventId];
+
+    const promise = ObservationService.approveObservationForEvent(event, resource)
+
+    promise.then(function (observation) {
+      event.filteredObservationsById[observation.id] = observation;
     });
 
     return promise;

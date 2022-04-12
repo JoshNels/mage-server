@@ -9,7 +9,8 @@ module.exports = {
       major: parseInt(version[0]),
       minor: parseInt(version[1]),
       micro: parseInt(version[2])
-    }
+    },
+    locationServiceDisabled: true
   },
   server: {
     locationServices: {

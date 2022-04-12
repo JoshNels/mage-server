@@ -75,7 +75,7 @@ module.exports = function(app, security) {
   // get all devices
   app.get('/api/devices',
     passport.authenticate('bearer'),
-    access.authorize('READ_DEVICE'),
+    access.authorize('CREATE_DEVICE'),
     resource.getDevices
   );
 

@@ -33,6 +33,13 @@ function Observation($resource) {
     },
     get: {
       method: 'GET'
+    },
+    approve: {
+      method: 'PUT',
+      url: '/api/events/:eventId/observations/:id/vet',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }
   });
 

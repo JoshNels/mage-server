@@ -8,6 +8,7 @@ function ObservationService($q, $httpParamSerializer, Observation, ObservationAt
   const service = {
     getObservationsForEvent: getObservationsForEvent,
     saveObservationForEvent: saveObservationForEvent,
+    approveObservationForEvent: approveObservationForEvent,
     archiveObservationForEvent: archiveObservationForEvent,
     addObservationFavorite: addObservationFavorite,
     removeObservationFavorite: removeObservationFavorite,
@@ -45,6 +46,16 @@ function ObservationService($q, $httpParamSerializer, Observation, ObservationAt
       deferred.resolve(updatedObservation);
     }, function(err) {
       deferred.reject(err);
+    });
+
+    return deferred.promise;
+  }
+
+  function approveObservationForEvent(event, observation) {
+    var deferred = $q.defer();
+
+    observation.$approve({}, function(approvedObservation) {
+      deferred.resolve(approvedObservation);
     });
 
     return deferred.promise;

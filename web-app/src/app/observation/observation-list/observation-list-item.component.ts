@@ -28,6 +28,8 @@ export class ObservationListItemComponent implements OnChanges {
 
   @ViewChild(MatRipple) ripple: MatRipple
 
+  isMyObservation = false
+
   edit = false
   canEdit = false
   canEditImportant = false
@@ -64,6 +66,7 @@ export class ObservationListItemComponent implements OnChanges {
     if (changes.observation?.currentValue) {
       this.updateFavorites()
       this.importantEditor.description = this.observation.important ? this.observation.important.description : null
+      this.isMyObservation = this.userService.myself.id === this.observation.user.id
     }
   }
 

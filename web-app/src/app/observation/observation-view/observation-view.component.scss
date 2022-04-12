@@ -1,3 +1,6 @@
+@import '~@angular/material/theming';
+@import "variables.scss";
+
 .navigation {
   display: flex;
 }
@@ -18,6 +21,54 @@
   bottom: 0;
   width: 100%;
   overflow-y: auto;
+}
+
+.vet-banner {
+  background: white;
+  border-bottom: 1px solid rgba($color: #000000, $alpha: .12);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.vet-banner-container {
+  margin: 16px;
+  display: flex;
+  flex-direction: row;
+}
+
+.vet-banner__icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+  color: mat-color($app-primary);
+}
+
+.vet-banner-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.vet-banner-content__title {
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: rgba(0, 0, 0, .87);
+}
+
+.vet-banner-content__summary {
+  font-size: 16px;
+  white-space: pre-wrap;
+  color: rgba($color: #000000, $alpha: .87);
+}
+
+.vet-banner-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
 .item-card {

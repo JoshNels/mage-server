@@ -316,11 +316,12 @@ module.exports = function (app, security) {
 
         let data = null;
 
+        const isAdmin = access.userHasPermission(req.user, 'DELETE_USER');
         if (pageInfo != null) {
           data = pageInfoTransformer.transform(pageInfo, req);
-          data.users = userTransformer.transform(users, { path: req.getRoot() });
+          data.users = userTransformer.transform(users, { path: req.getRoot(), redact: !isAdmin });
         } else {
-          data = userTransformer.transform(users, { path: req.getRoot() });
+          data = userTransformer.transform(users, { path: req.getRoot(), redact: !isAdmin });
         }
 
         res.json(data);
@@ -357,38 +358,38 @@ module.exports = function (app, security) {
     '/api/users/myself',
     passport.authenticate('bearer'),
     function (req, res) {
-      var user = userTransformer.transform(req.user, { path: req.getRoot() });
+      var user = userTransformer.transform(req.user, { path: req.getRoot(), redact: false });
       res.json(user);
     }
   );
 
   // TODO: should be patch
   // update myself
-  app.put(
-    '/api/users/myself',
-    passport.authenticate('bearer'),
-    upload.single('avatar'),
-    function (req, res, next) {
-      if (req.param('username')) req.user.username = req.param('username');
-      if (req.param('displayName')) req.user.displayName = req.param('displayName');
-      if (req.param('email')) req.user.email = req.param('email');
+  // app.put(
+  //   '/api/users/myself',
+  //   passport.authenticate('bearer'),
+  //   upload.single('avatar'),
+  //   function (req, res, next) {
+  //     if (req.param('username')) req.user.username = req.param('username');
+  //     if (req.param('displayName')) req.user.displayName = req.param('displayName');
+  //     if (req.param('email')) req.user.email = req.param('email');
 
-      var phone = req.param('phone');
-      if (phone) {
-        req.user.phones = [{
-          type: "Main",
-          number: phone
-        }];
-      }
+  //     var phone = req.param('phone');
+  //     if (phone) {
+  //       req.user.phones = [{
+  //         type: "Main",
+  //         number: phone
+  //       }];
+  //     }
 
-      new api.User().update(req.user, { avatar: req.file }, function (err, updatedUser) {
-        if (err) return next(err);
+  //     new api.User().update(req.user, { avatar: req.file }, function (err, updatedUser) {
+  //       if (err) return next(err);
 
-        updatedUser = userTransformer.transform(updatedUser, { path: req.getRoot() });
-        res.json(updatedUser);
-      });
-    }
-  );
+  //       updatedUser = userTransformer.transform(updatedUser, { path: req.getRoot() });
+  //       res.json(updatedUser);
+  //     });
+  //   }
+  // );
 
   app.put(
     '/api/users/myself/password',
@@ -455,7 +456,9 @@ module.exports = function (app, security) {
     passport.authenticate('bearer'),
     access.authorize('READ_USER'),
     function (req, res) {
-      var user = userTransformer.transform(req.userParam, { path: req.getRoot() });
+      const isAdmin = access.userHasPermission(req.user, 'DELETE_USER');
+
+      var user = userTransformer.transform(req.userParam, { path: req.getRoot(), redact: !isAdmin });
       res.json(user);
     }
   );
@@ -499,10 +502,12 @@ module.exports = function (app, security) {
       const files = req.files || {};
       const [avatar] = files.avatar || [];
       const [icon] = files.icon || [];
+      const isAdmin = access.userHasPermission(req.user, 'DELETE_USER');
+
       new api.User().update(user, { avatar, icon }, function (err, updatedUser) {
         if (err) return next(err);
 
-        updatedUser = userTransformer.transform(updatedUser, { path: req.getRoot() });
+        updatedUser = userTransformer.transform(updatedUser, { path: req.getRoot(), redact: !isAdmin });
         res.json(updatedUser);
       });
     }

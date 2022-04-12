@@ -13,6 +13,21 @@
   </mat-toolbar>
 
   <div class="item-content">
+    <div class="vet-banner" *ngIf="!observation.vetted" @error>
+      <div class="vet-banner-container">
+        <mat-icon class="vet-banner__icon" fontSet="material-icons-outlined">report_problem</mat-icon>
+
+        <div class="vet-banner-content">
+          <div *ngIf="isMyObservation && !canEditImportant" class="vet-banner-content__title">This observation is pending approval from a MAGE administrator and is not yet visible to other users.</div>
+          <div *ngIf="!isMyObservation || canEditImportant" class="vet-banner-content__title">This observation is pending approval and is currently hidden from users.  Please review content prior to approval.</div>
+        </div>
+      </div>
+    
+      <div class="vet-banner-actions" *ngIf="!isMyObservation || canEditImportant">
+        <button mat-button color="primary" (click)="onApprove()">APPROVE</button>
+      </div>
+    </div>
+
     <mat-card class="item-card">
       <div *ngIf="observation?.important" class="item-important">
         <mat-icon class="item-important--icon">flag</mat-icon>

@@ -58,19 +58,20 @@ const AttachmentSchema = new Schema({
 // Creates the Schema for the Attachments object
 const ObservationSchema = new Schema({
   type: { type: String, enum: ['Feature'], required: true},
-  lastModified: {type: Date, required: false},
-  userId: {type: Schema.Types.ObjectId, ref: 'User', required: false, sparse: true},
-  deviceId: {type: Schema.Types.ObjectId, required: false, sparse: true},
+  lastModified: { type: Date, required: false },
+  vetted: { type: Boolean, required: false },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: false, sparse: true },
+  deviceId: { type: Schema.Types.ObjectId, required: false, sparse: true },
   geometry: Schema.Types.Mixed,
   properties: Schema.Types.Mixed,
   attachments: [AttachmentSchema],
   states: [StateSchema],
   important: {
-    userId: {type: Schema.Types.ObjectId, ref: 'User', required: false},
-    timestamp: {type: Date, required: false},
-    description: {type: String, required: false}
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    timestamp: { type: Date, required: false },
+    description: { type: String, required: false }
   },
-  favoriteUserIds: [{type: Schema.Types.ObjectId, ref: 'User'}]
+  favoriteUserIds: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 },{
   strict: false,
   timestamps: {
@@ -312,6 +313,10 @@ exports.getObservationId = function(id, callback) {
   });
 };
 
+exports.userObservationCount = function(event, user, callback) {
+  observationModel(event).count({userId: user._id}, callback);
+}
+
 exports.getLatestObservation = function(event, callback) {
   observationModel(event).findOne({}, {lastModified: true}, {sort: {"lastModified": -1}, limit: 1}, callback);
 };
@@ -370,6 +375,7 @@ exports.updateObservation = function(event, observationId, update, callback) {
         });
       }
 
+      observation.vetted = false;
       observation.type = update.type;
       observation.geometry = update.geometry;
       observation.properties = update.properties;
@@ -391,6 +397,16 @@ exports.updateObservation = function(event, observationId, update, callback) {
     })
     .catch(err => callback(err)); 
 };
+
+exports.vet = function(event, observationId, callback) {
+  const update = {
+    $set: {
+      vetted: true
+    }
+  };
+
+  observationModel(event).findByIdAndUpdate(observationId, update, { new: true }, callback);
+}
 
 exports.removeObservation = function(event, observationId, callback) {
   observationModel(event).findByIdAndRemove(observationId, callback);

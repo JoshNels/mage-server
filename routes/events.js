@@ -480,7 +480,7 @@ module.exports = function(app, security) {
       Event.getUsers(req.event._id, function(err, users) {
         if (err) return next(err);
 
-        users = userTransformer.transform(users, {path: req.getRoot()});
+        users = userTransformer.transform(users, {path: req.getRoot(), redact: true});
         res.json(users);
       });
     }

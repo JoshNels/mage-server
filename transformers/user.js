@@ -5,6 +5,17 @@ function transformUser(user, options) {
   if (!user) return null;
 
   user = user.toObject ? user.toObject({path: options.path, transform: User.transform}) : user;
+  delete user.authentication;
+
+  if (options.redact) {
+    user = {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      roleId: user.roleId,
+      lastUpdated: user.lastUpdated
+    }
+  }
 
   return user;
 }

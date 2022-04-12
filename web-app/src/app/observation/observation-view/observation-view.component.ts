@@ -32,6 +32,8 @@ export class ObservationViewComponent implements OnChanges {
   @Output() close = new EventEmitter<void>()
   @Output() delete = new EventEmitter<any>()
 
+  isMyObservation = false
+
   edit = false
   canEdit = false
   canEditImportant = false
@@ -68,6 +70,7 @@ export class ObservationViewComponent implements OnChanges {
     if (changes.observation) {
       this.updateFavorites()
       this.importantEditor.description = this.observation.important ? this.observation.important.description : null
+      this.isMyObservation = this.userService.myself.id === this.observation.user.id
     }
   }
 
@@ -98,6 +101,12 @@ export class ObservationViewComponent implements OnChanges {
         userIds: this.observation.favoriteUserIds || []
       },
       autoFocus: false
+    })
+  }
+
+  onApprove(): void {
+    this.eventService.approveObservation(this.observation).then(() => {
+      this.observation.vetted = true
     })
   }
 

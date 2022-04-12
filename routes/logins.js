@@ -34,7 +34,7 @@ module.exports = function(app, security) {
 
   app.get(
     '/api/logins',
-    access.authorize('READ_USER'),
+    access.authorize('CREATE_USER'),
     function(req, res, next) {
       var options = {};
 

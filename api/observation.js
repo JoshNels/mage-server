@@ -194,6 +194,10 @@ Observation.prototype.validateObservationId = function(id, callback) {
   });
 };
 
+Observation.prototype.userObservationCount = function(callback) {
+  ObservationModel.userObservationCount(this._event, this._user, callback);
+}
+
 // TODO create is gone, do I need to figure out if this is an observation create?
 Observation.prototype.update = function(observationId, observation, callback) {
   if (this._user) observation.userId = this._user._id;
@@ -230,6 +234,10 @@ Observation.prototype.update = function(observationId, observation, callback) {
     callback(err, updatedObservation);
   });
 };
+
+Observation.prototype.vet = function (observationId, observation, callback) {
+  ObservationModel.vet(this._event, observationId, callback);
+}
 
 Observation.prototype.addFavorite = function(observationId, user, callback) {
   ObservationModel.addFavorite(this._event, observationId, user, callback);

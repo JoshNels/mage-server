@@ -49,7 +49,7 @@ class UserController {
   }
 
   saveUser() {
-    var user = {
+    const user = {
       username: this.user.username,
       displayName: this.user.displayName,
       email: this.user.email,
@@ -61,7 +61,7 @@ class UserController {
     }
 
     // TODO throw in progress
-    var progress = e => {
+    const progress = e => {
       if(e.lengthComputable){
         this.$timeout(() => {
           this.uploading = true;
@@ -77,7 +77,7 @@ class UserController {
 
     const failed = data => {
       self.$timeout(() => {
-        self.status("Error", data, "alert-danger");
+        self.status("Permission Denied", "Profile was not updated.", "alert-danger");
       });
     };
 

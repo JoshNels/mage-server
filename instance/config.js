@@ -4,7 +4,7 @@ const baseDir = path.resolve(__dirname, '../scratch')
 
 module.exports = {
   mage: {
-    address: '127.0.0.1',
+    address: '0.0.0.0',
     port: 4242,
     attachmentDir: path.join(baseDir, 'attachments'),
     exportDir: path.join(baseDir, 'exports'),
@@ -36,6 +36,7 @@ module.exports = {
         '@ngageoint/mage.nga-msi',
         '@ngageoint/mage.random',
         '@ngageoint/mage.image.service',
+        '@ngageoint/mage.arcgis'
       ],
       webUIPlugins: [
       ],

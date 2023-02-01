@@ -1,1 +1,0 @@
-{"version":3,"file":"ArcGISPluginConfig.js","sourceRoot":"","sources":["../src/ArcGISPluginConfig.ts"],"names":[],"mappings":";;;AAsBe,QAAA,yBAAyB,GAAG,MAAM,CAAC,MAAM,CAA+B;IACnF,OAAO,EAAE,IAAI;IACb,eAAe,EAAE,EAAE;IACnB,SAAS,EAAE,GAAG;IACd,aAAa,EAAE,CAAC,oFAAoF,CAAC;CACtG,CAAC,CAAA"}

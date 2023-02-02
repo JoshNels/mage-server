@@ -2,7 +2,7 @@ import { ObservationAttrs } from '@ngageoint/mage.service/lib/entities/observati
 import { Point } from 'geojson'
 
 // Define the structure of the converted arc objects.
-interface ArcObject {
+export interface ArcObject {
     x: number;
     y: number;
     z: number;
@@ -21,7 +21,7 @@ export class ObservationsTransformer {
      * @param observations The observations to convert.
      * @returns The json string of the observations.
      */
-    transform(observations: ObservationAttrs[]) : string {
+    transform(observations: ObservationAttrs[]) : ArcObject[] {
         let jsonObservations = '';
 
         let arcObjects : ArcObject[] = [];
@@ -31,9 +31,7 @@ export class ObservationsTransformer {
             arcObjects.push(arcObject);
         }
 
-        jsonObservations = JSON.stringify(arcObjects);
-        
-        return jsonObservations;
+        return arcObjects;
     }
 
     /**

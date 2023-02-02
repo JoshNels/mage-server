@@ -4,6 +4,7 @@ import { ObservationRepositoryForEvent } from "@ngageoint/mage.service/lib/entit
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { Point } from 'geojson'
 import { ObservationsTransformer } from './ObservationsTransformer'
+import { ObservationsSender } from "./ObservationsSender";
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -57,6 +58,11 @@ export class ObservationProcessor {
     _transformer: ObservationsTransformer;
 
     /**
+     * Sends the json string of observations to any configured ArcGIS feature layer.
+     */
+    _sender: ObservationsSender;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -71,6 +77,7 @@ export class ObservationProcessor {
         this._lastTimeStamp = Date.now();
         this._console = console;
         this._transformer = new ObservationsTransformer();
+        this._sender = new ObservationsSender(config, console);
     }
 
     /**
@@ -111,13 +118,15 @@ export class ObservationProcessor {
                     this._console.info('ArcGIS newest observation count ' + latestObs.totalCount);
                     let jsonObservations = this._transformer.transform(latestObs.items);
                     this._console.info('ArcGIS json ' + jsonObservations);
+                    this._sender.send(jsonObservations);
                     for (let i = 0, j = 0; latestObs != null && latestObs.totalCount != null && i < latestObs.totalCount; i++, j++) {
                         if(j >= latestObs.pageSize) {
                             j = 0;
                             pagingSettings.pageIndex++;
                             latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings)
-                            let jsonObservations = this._transformer.transform(latestObs.items);
+                            jsonObservations = this._transformer.transform(latestObs.items);
                             this._console.info('ArcGIS json ' + jsonObservations);
+                            this._sender.send(jsonObservations);
                         }
 
                         if(latestObs != null && latestObs.totalCount != null) {

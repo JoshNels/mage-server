@@ -24,5 +24,5 @@ export interface ArcGISPluginConfig {
     enabled: true,
     intervalSeconds: 60,
     batchSize: 100,
-    featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer']
+    featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0']
   })

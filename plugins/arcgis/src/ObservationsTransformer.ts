@@ -3,11 +3,12 @@ import { Point } from 'geojson'
 
 // Define the structure of the converted arc objects.
 export interface ArcObject {
-    x: number;
-    y: number;
-    z: number;
-    spatialReference: {
-        wkid: number;
+    geometry: {
+        x: number;
+        y: number;
+        spatialReference: {
+            wkid: number;
+        }
     };
 }
 
@@ -40,14 +41,12 @@ export class ObservationsTransformer {
      * @returns The converted ArcObject.
      */
     private geojsonToArcGIS(observation: ObservationAttrs) : ArcObject {
-        let arcObject = {x: 0, y: 0, z: 0, spatialReference: {wkid: 4326 }};
+        let arcObject = {geometry: {x: 0, y: 0, spatialReference: {wkid: 4326 }}};
         if(observation.geometry.type == 'Point') {
             const pointgeom = observation.geometry as Point;
-            arcObject.x = pointgeom.coordinates[0];
-            arcObject.y = pointgeom.coordinates[1];
-            if(pointgeom.coordinates.length >3) {
-                arcObject.z = pointgeom.coordinates[2];
-            }
+            arcObject.geometry.x = pointgeom.coordinates[0];
+            arcObject.geometry.y = pointgeom.coordinates[1];
+
         }
         return arcObject;
     }

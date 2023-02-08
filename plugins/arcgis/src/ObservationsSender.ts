@@ -32,21 +32,15 @@ export class ObservationsSender {
      * @returns The json string of the observations.
      */
     send(observations: ArcObject[]) {
-        const content = { 
-            f: 'json', 
-            features: observations, 
-            gdbVersion: null, 
-            rollbackOnFailure: true,
-            timeReferenceUnknownClient: false };
-
-        const contentString = JSON.stringify(content);
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations);
 
         this._console.info('ArcGIS addFeatures url ' + this._url);
         this._console.info('ArcGIS addFeatures content ' + contentString);
         fetch(this._url, {
             method: 'POST',
             body: contentString,
-            headers: {'Content-Type': 'application/json'} })
+            headers: {'content-type': 'application/x-www-form-urlencoded',
+                      'accept': 'application/json'} })
             .then((response) => {
                 return response.text();
             })

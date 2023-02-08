@@ -1,5 +1,6 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObject } from "./ObservationsTransformer";
+import fetch from 'node-fetch';
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -17,10 +18,10 @@ export class ObservationsSender {
     _console: Console;
 
     /**
-         * Constructor.
-         * @param config The plugins configuration.
-         * @param console Used to log to the console.
-         */
+     * Constructor.
+     * @param config The plugins configuration.
+     * @param console Used to log to the console.
+     */
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._url = config.featureLayers[0] + '/addFeatures';
         this._console = console;
@@ -39,8 +40,11 @@ export class ObservationsSender {
         fetch(this._url, {
             method: 'POST',
             body: contentString,
-            headers: {'content-type': 'application/x-www-form-urlencoded',
-                      'accept': 'application/json'} })
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded',
+                'accept': 'application/json'
+            }
+        })
             .then((response) => {
                 return response.text();
             })

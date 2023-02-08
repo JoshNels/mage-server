@@ -1,6 +1,6 @@
 import { PagingParameters } from "@ngageoint/mage.service/lib/entities/entities.global";
 import { MageEventRepository } from "@ngageoint/mage.service/lib/entities/events/entities.events";
-import { ObservationRepositoryForEvent } from "@ngageoint/mage.service/lib/entities/observations/entities.observations";
+import { EventScopedObservationRepository, ObservationRepositoryForEvent } from "@ngageoint/mage.service/lib/entities/observations/entities.observations";
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { Point } from 'geojson'
 import { ObservationsTransformer } from './ObservationsTransformer'
@@ -15,12 +15,12 @@ export class ObservationProcessor {
     /**
      * The number of seconds to sleep before checking for new observations.
      */
-    _intervalSeconds : number;
+    _intervalSeconds: number;
 
     /**
      * The max number of records to send to arc per request.
      */
-    _batchSize : number;
+    _batchSize: number;
 
     /**
      * True if the processor is currently active, false otherwise.
@@ -76,7 +76,7 @@ export class ObservationProcessor {
         this._obsRepos = obsRepos;
         this._lastTimeStamp = Date.now();
         this._console = console;
-        this._transformer = new ObservationsTransformer();
+        this._transformer = new ObservationsTransformer(this._console);
         this._sender = new ObservationsSender(config, console);
     }
 
@@ -100,12 +100,12 @@ export class ObservationProcessor {
      * Processes any new observations and then schedules its next run if it hasn't been stopped.
      */
     private async processAndScheduleNext() {
-        if(this._isRunning) {
+        if (this._isRunning) {
             this._console.info('ArcGIS plugin processing new observations...');
             const queryTime = this._lastTimeStamp;
             this._lastTimeStamp = Date.now();
             const activeEvents = await this._eventRepo.findActiveEvents();
-            for(const activeEvent of activeEvents) {
+            for (const activeEvent of activeEvents) {
                 this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
                 const obsRepo = await this._obsRepos(activeEvent.id);
                 const pagingSettings = {
@@ -113,37 +113,46 @@ export class ObservationProcessor {
                     pageIndex: 0,
                     includeTotalCount: true
                 }
-                let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
-                if(latestObs != null && latestObs.totalCount != null) {
-                    this._console.info('ArcGIS newest observation count ' + latestObs.totalCount);
-                    let jsonObservations = this._transformer.transform(latestObs.items);
-                    this._console.info('ArcGIS json ' + jsonObservations);
-                    this._sender.send(jsonObservations);
-                    for (let i = 0, j = 0; latestObs != null && latestObs.totalCount != null && i < latestObs.totalCount; i++, j++) {
-                        if(j >= latestObs.pageSize) {
-                            j = 0;
-                            pagingSettings.pageIndex++;
-                            latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings)
-                            jsonObservations = this._transformer.transform(latestObs.items);
-                            this._console.info('ArcGIS json ' + jsonObservations);
-                            this._sender.send(jsonObservations);
-                        }
-
-                        if(latestObs != null && latestObs.totalCount != null) {
-                            const observation = latestObs.items[j];
-                            if(observation.geometry.type == 'Point') {
-                                const pointgeom = observation.geometry as Point;
-                                this._console.info('ArcGIS new point at ' + pointgeom.coordinates + ' with id ' + observation.id);
-                            }
-                        }
-                    }
-                } else {
-                    this._console.info('ArcGIS no new observations')
+                let totalCount = 0;
+                let morePages = true;
+                while (morePages) {
+                    morePages = await this.queryAndSend(obsRepo, pagingSettings, queryTime, totalCount);
                 }
             }
-            if(this._isRunning) {
-                this._nextTimeout = setTimeout(() => {this.processAndScheduleNext()}, this._intervalSeconds * 1000);
+            if (this._isRunning) {
+                this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, this._intervalSeconds * 1000);
             }
         }
+    }
+
+    /**
+     * Queries for new observations and sends them to any configured arc servers.
+     * @param obsRepo The observation repo for an event.
+     * @param pagingSettings Current paging settings.
+     * @param queryTime The time to query for.
+     * @param totalProcessed An output parameter that keeps track of the total number of observations currently processed.
+     * @returns True if this needs to be called again to get the next page of observations.
+     */
+    private async queryAndSend(obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, totalProcessed: number): Promise<boolean> {
+        let morePages = false;
+
+        let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
+        if (latestObs != null && latestObs.totalCount != null && latestObs.totalCount > 0) {
+            if (pagingSettings.pageIndex == 0) {
+                this._console.info('ArcGIS newest observation count ' + latestObs.totalCount);
+            }
+            const jsonObservations = this._transformer.transform(latestObs.items);
+            this._console.info('ArcGIS json ' + jsonObservations);
+            this._sender.send(jsonObservations);
+            totalProcessed += latestObs.items.length;
+            pagingSettings.pageIndex++;
+            if (totalProcessed < latestObs.totalCount) {
+                morePages = true;
+            }
+        } else {
+            this._console.info('ArcGIS no new observations')
+        }
+
+        return morePages;
     }
 }

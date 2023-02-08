@@ -18,16 +18,29 @@ export interface ArcObject {
 export class ObservationsTransformer {
 
     /**
+     * Used to log to the console.
+     */
+    _console: Console;
+
+    /**
+     * Constructor.
+     * @param console Used to log to the console.
+     */
+    constructor(console: Console) {
+        this._console = console;
+    }
+
+    /**
      * Converts the specified observations into a json string that can be sent to an arcgis server.
      * @param observations The observations to convert.
      * @returns The json string of the observations.
      */
-    transform(observations: ObservationAttrs[]) : ArcObject[] {
+    transform(observations: ObservationAttrs[]): ArcObject[] {
         let jsonObservations = '';
 
-        let arcObjects : ArcObject[] = [];
+        let arcObjects: ArcObject[] = [];
 
-        for(let i = 0; i < observations.length; i++) {
+        for (let i = 0; i < observations.length; i++) {
             const arcObject = this.geojsonToArcGIS(observations[i]);
             arcObjects.push(arcObject);
         }
@@ -40,10 +53,11 @@ export class ObservationsTransformer {
      * @param observation The observation to convert.
      * @returns The converted ArcObject.
      */
-    private geojsonToArcGIS(observation: ObservationAttrs) : ArcObject {
-        let arcObject = {geometry: {x: 0, y: 0, spatialReference: {wkid: 4326 }}};
-        if(observation.geometry.type == 'Point') {
+    private geojsonToArcGIS(observation: ObservationAttrs): ArcObject {
+        let arcObject = { geometry: { x: 0, y: 0, spatialReference: { wkid: 4326 } } };
+        if (observation.geometry.type == 'Point') {
             const pointgeom = observation.geometry as Point;
+            this._console.info('ArcGIS new point at ' + pointgeom.coordinates + ' with id ' + observation.id);
             arcObject.geometry.x = pointgeom.coordinates[0];
             arcObject.geometry.y = pointgeom.coordinates[1];
 

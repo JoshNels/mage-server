@@ -39,8 +39,7 @@
   "homepage": "https://github.com/ngageoint/mage-server#readme",
   "dependencies": {
     "@terraformer/arcgis": "2.1.2",
-    "@types/geojson": "^7946.0.7",
-    "node-fetch": "^2.6.9"
+    "@types/geojson": "^7946.0.7"
   },
   "peerDependencies": {
     "@ngageoint/mage.service": "^6.3.0-beta",

@@ -1,6 +1,5 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
-import { ArcObject } from "./ObservationsTransformer";
-import fetch from 'node-fetch';
+import { ArcObject } from "./ArcObject";
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.

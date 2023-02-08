@@ -1,16 +1,6 @@
 import { ObservationAttrs } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 import { Point } from 'geojson'
-
-// Define the structure of the converted arc objects.
-export interface ArcObject {
-    geometry: {
-        x: number;
-        y: number;
-        spatialReference: {
-            wkid: number;
-        }
-    };
-}
+import { ArcObject } from './ArcObject'
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.

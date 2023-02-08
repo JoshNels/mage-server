@@ -5,6 +5,7 @@
     ],
     "compilerOptions": {
       "rootDir": ".",
-      "outDir": "../lib"
+      "outDir": "../lib",
+      "sourceMap": true
     }
   }

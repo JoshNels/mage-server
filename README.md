@@ -64,15 +64,42 @@ but be aware some path-separator related bugs may exist
 
 ### Install Node.js
 
-The MAGE server is a [Node.js](https://nodejs.org) application, so of course you'll need to install Node on your
-platform of choice.  [Node Version Manager](https://github.com/nvm-sh/nvm) is a nice tool to use for installing and
+The MAGE server is a [Node.js](https://nodejs.org/en/about/) application, so of course you'll need to install Node on your
+platform of choice.  [Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script) is a nice tool to use for installing and
 managing different versions of Node, as opposed to various package managers.  At the time of this writing, MAGE
 requires Node >= 14.15.x.
 
+#### Install [Node.js](https://nodejs.org/) with Node Version Manager
+
+```bash
+$ nvm install --lts
+$ node --version
+```
+
 ### Install MongoDB
 
-Before running a MAGE server, you'll need to install and start [MongoDB](https://www.mongodb.com/try/download/community).
-At the time of this writing, MAGE supports MongoDB version 4.x.
+Before running a MAGE server, you'll need to [download](https://www.mongodb.com/try/download/community) / [install](https://www.mongodb.com/docs/manual/administration/install-community/) and start MongoDB.
+MAGE supports MongoDB version >= 4.x <= 5.x.
+
+#### Install with [Homebrew](https://brew.sh/)
+
+```bash
+$ brew tap mongodb/brew
+$ brew install mongodb-community@5.0
+$ mongo --version
+```
+
+#### Starting
+
+To start the mongo daemon type the following:
+```bash
+$ mongod --config <filename>
+```
+
+The mongodb configuation file will live in a different place depending on your system:
+* homebrew: `/usr/local/etc/mongod.conf`
+* yum: `/etc/mongod.conf`
+* apt: `/etc/mongodb.conf`
 
 ### Install MAGE server packages
 
@@ -213,8 +240,8 @@ Upgrading the MAGE server essentially consists of the same process as [installin
 ## Building from source
 
 First, clone the MAGE server GitHub repository, or download a release source tarball and extract the contents to an
-empty directory, such as `mage-server`.  The project has a monorepo structure.  The main packages to build are [`@ngageoint/mage.service`](./service/)
-and [`@ngageoint/mage.web-app`](./web-app/).  There are more optional packages in the [`plugins`](./plugins/)
+empty directory, such as `mage-server`.  The project has a monorepo structure.  The main packages to build are [`service`](./service/)
+and [`web-app`](./web-app/).  There are more optional packages in the [`plugins`](./plugins/)
 directory.  The [`instance`](./instance/) package is an example of assembling all the packages into a running MAGE
 server instance.
 

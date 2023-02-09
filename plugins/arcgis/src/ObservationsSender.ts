@@ -1,5 +1,6 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObject } from "./ArcObject";
+import https from 'https';
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -7,9 +8,24 @@ import { ArcObject } from "./ArcObject";
 export class ObservationsSender {
 
     /**
-     * The url to the add features api for a specific feature layer.
+     * The host to send observations to.
      */
-    _url: string;
+    _host: string;
+
+    /**
+     * The port to send observations at.
+     */
+    _port: string;
+
+    /**
+     * The path to the feature layer to send observations too.
+     */
+    _path: string;
+
+    /**
+     * The full url to the feature layer receiving observations.
+     */
+    _url: URL;
 
     /**
      * Used to log to the console.
@@ -22,7 +38,10 @@ export class ObservationsSender {
      * @param console Used to log to the console.
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
-        this._url = config.featureLayers[0] + '/addFeatures';
+        this._url = new URL(config.featureLayers[0] + '/addFeatures');
+        this._host = this._url.host;
+        this._port = this._url.port;
+        this._path = this._url.pathname;
         this._console = console;
     }
 
@@ -36,19 +55,30 @@ export class ObservationsSender {
 
         this._console.info('ArcGIS addFeatures url ' + this._url);
         this._console.info('ArcGIS addFeatures content ' + contentString);
-        fetch(this._url, {
+
+        // An object of options to indicate where to post to
+        var post_options = {
+            host: this._host,
+            port: this._port,
+            path: this._path,
             method: 'POST',
-            body: contentString,
             headers: {
                 'content-type': 'application/x-www-form-urlencoded',
+                'content-length': Buffer.byteLength(contentString),
                 'accept': 'application/json'
             }
-        })
-            .then((response) => {
-                return response.text();
-            })
-            .then((data) => {
-                this._console.info('ArcGIS addFeatures response ' + data);
+        };
+
+        // Set up the request
+        var post_req = https.request(post_options, function (res) {
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.log('Response: ' + chunk);
             });
+        });
+
+        // post the data
+        post_req.write(contentString);
+        post_req.end();
     }
 }

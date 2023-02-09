@@ -141,7 +141,8 @@ export class ObservationProcessor {
             if (pagingSettings.pageIndex == 0) {
                 this._console.info('ArcGIS newest observation count ' + latestObs.totalCount);
             }
-            const jsonObservations = this._transformer.transform(latestObs.items);
+            const mageEvent = await this._eventRepo.findById(obsRepo.eventScope);
+            const jsonObservations = this._transformer.transform(latestObs.items, mageEvent);
             this._console.info('ArcGIS json ' + jsonObservations);
             this._sender.send(jsonObservations);
             totalProcessed += latestObs.items.length;

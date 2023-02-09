@@ -6,5 +6,8 @@ export interface ArcObject {
         spatialReference: {
             wkid: number;
         }
-    };
+    },
+    attributes: {
+        [key: string]: any
+    }
 }

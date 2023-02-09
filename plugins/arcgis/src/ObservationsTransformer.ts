@@ -89,7 +89,11 @@ export class ObservationsTransformer {
                 for (let formProperty in form) {
                     const field = mageEvent.formFieldFor(formProperty, formId)
                     if (field != null && field.type !== FormFieldType.Attachment) {
-                        arcObject.attributes[field.title] = form[formProperty]
+                        let value = form[formProperty]
+                        if (field.type == FormFieldType.DateTime) {
+                            value = new Date(value).getTime()
+                        }
+                        arcObject.attributes[field.title] = value
                     }
                 }
             }

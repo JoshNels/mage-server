@@ -29,9 +29,8 @@ export class ObservationsTransformer {
      * @returns The json string of the observations.
      */
     transform(observations: ObservationAttrs[], mageEvent: MageEvent | null): ArcObject[] {
-        let jsonObservations = '';
 
-        let arcObjects: ArcObject[] = [];
+        const arcObjects: ArcObject[] = [];
 
         for (let i = 0; i < observations.length; i++) {
             const arcObject = this.observationToArcGIS(observations[i], mageEvent);
@@ -48,9 +47,10 @@ export class ObservationsTransformer {
      * @returns The converted ArcObject.
      */
     private observationToArcGIS(observation: ObservationAttrs, mageEvent: MageEvent | null): ArcObject {
-        let arcObject: ArcObject = { geometry: { x: 0, y: 0, spatialReference: { wkid: 4326 } }, attributes: {} }
+        const arcObject: ArcObject = {} as ArcObject
 
-        if (observation.geometry.type == 'Point') {
+        arcObject.geometry = { x: 0, y: 0, spatialReference: { wkid: 4326 } }
+        if (observation.geometry.type == 'Point') { // TODO: LineString & Polygon
             const pointgeom = observation.geometry as Point
             this._console.info('ArcGIS new point at ' + pointgeom.coordinates + ' with id ' + observation.id)
             arcObject.geometry.x = pointgeom.coordinates[0]
@@ -58,15 +58,13 @@ export class ObservationsTransformer {
         }
 
         if (observation.properties != null) {
-            let properties: { [name: string]: any } = observation.properties
-            for (let property in properties) {
-                let value = properties[property]
+            const properties: { [name: string]: any } = observation.properties
+            for (const property in properties) {
+                const value = properties[property]
                 if (property == 'forms') {
-                    if (mageEvent != null) {
-                        this.formsToArcGIS(value, mageEvent, arcObject);
-                    }
+                    this.formsToArcGIS(value, mageEvent, arcObject);
                 } else {
-                    arcObject.attributes[property] = value
+                    this.addAttribute(property, value, arcObject)
                 }
             }
         }
@@ -80,25 +78,42 @@ export class ObservationsTransformer {
      * @param mageEvent The MAGE event.
      * @param arcObject The converted ArcObject.
      */
-     private formsToArcGIS(forms: [{ [name: string]: any }], mageEvent: MageEvent, arcObject: ArcObject) {
-
+     private formsToArcGIS(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject) {
+        
         for (let i = 0; i < forms.length; i++) {
-            let form = forms[i]
-            let formId = form['formId']
-            if (formId != null) {
-                for (let formProperty in form) {
+            const form = forms[i]
+            const formId = form['formId']
+            for (const formProperty in form) {
+                const value = form[formProperty]
+                if (mageEvent != null && formId != null) {
                     const field = mageEvent.formFieldFor(formProperty, formId)
                     if (field != null && field.type !== FormFieldType.Attachment) {
-                        let value = form[formProperty]
-                        if (field.type == FormFieldType.DateTime) {
-                            value = new Date(value).getTime()
-                        }
-                        arcObject.attributes[field.title] = value
+                        this.addAttribute(field.title, value, arcObject)
                     }
+                } else {
+                    this.addAttribute(formProperty, value, arcObject)
                 }
             }
         }
 
      }
+
+    /**
+     * Add an ArcObject attribute.
+     * @param key The attribute key.
+     * @param value The attribute value.
+     * @param arcObject The converted ArcObject.
+     */
+    private addAttribute(key: string, value: any, arcObject: ArcObject) {
+        if (arcObject.attributes == null) {
+            arcObject.attributes = {}
+        }
+        if (value != null) {
+            if (Object.prototype.toString.call(value) === '[object Date]') {
+                value = new Date(value).getTime()
+            }
+        }
+        arcObject.attributes[key] = value
+    }
 
 }

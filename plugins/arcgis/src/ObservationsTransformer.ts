@@ -1,8 +1,8 @@
 import { ObservationAttrs } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
-import { MageEvent } from "@ngageoint/mage.service/lib/entities/events/entities.events"
+import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.events'
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
-import { Point } from 'geojson'
-import { ArcObject, ArcPoint } from './ArcObject'
+import { Geometry, Point, LineString, Polygon } from 'geojson'
+import { ArcGeometry, ArcObject, ArcPoint, ArcPolyline, ArcPolygon } from './ArcObject'
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -49,38 +49,134 @@ export class ObservationsTransformer {
     private observationToArcGIS(observation: ObservationAttrs, mageEvent: MageEvent | null): ArcObject {
         const arcObject: ArcObject = {} as ArcObject
 
-        if (observation.geometry.type == 'Point') { // TODO: LineString & Polygon
-            const pointgeom = observation.geometry as Point
-            this._console.info('ArcGIS new point at ' + pointgeom.coordinates + ' with id ' + observation.id)
-            const arcPoint: ArcPoint = {} as ArcPoint
-            arcPoint.x = pointgeom.coordinates[0]
-            arcPoint.y = pointgeom.coordinates[1]
-            arcPoint.spatialReference = { wkid: 4326 }
-            arcObject.geometry = arcPoint
+        this.observationToAttributes(observation, mageEvent, arcObject)
+
+        if (observation.geometry != null) {
+            this.geometryToArcGeometry(observation.geometry, observation.id, arcObject)
         }
 
         if (observation.properties != null) {
-            const properties: { [name: string]: any } = observation.properties
-            for (const property in properties) {
-                const value = properties[property]
-                if (property == 'forms') {
-                    this.formsToArcGIS(value, mageEvent, arcObject)
-                } else {
-                    this.addAttribute(property, value, arcObject)
-                }
-            }
+            this.propertiesToAttributes(observation.properties, mageEvent, arcObject)
         }
 
         return arcObject
     }
 
     /**
-     * Converts observation forms data to an ArcObject.
-     * @param forms The observation forms to convert.
+     * Converts and adds observation values to ArcObject attributes.
+     * @param observation The observation to convert.
      * @param mageEvent The MAGE event.
      * @param arcObject The converted ArcObject.
      */
-     private formsToArcGIS(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject) {
+    private observationToAttributes(observation: ObservationAttrs, mageEvent: MageEvent | null, arcObject: ArcObject) {
+        this.addAttribute('id', observation.id, arcObject)
+        this.addAttribute('eventId', observation.eventId, arcObject)
+        if (mageEvent != null) {
+            this.addAttribute('eventName', mageEvent.name, arcObject)
+        }
+        if (observation.userId != null) {
+            this.addAttribute('userId', observation.userId, arcObject)
+        }
+        if (observation.deviceId != null) {
+            this.addAttribute('deviceId', observation.deviceId, arcObject)
+        }
+        this.addAttribute('createdAt', observation.createdAt, arcObject)
+        this.addAttribute('lastModified', observation.lastModified, arcObject)
+    }
+
+    /**
+     * Converts and sets an observation geometry to an ArcObject geometry.
+     * @param geometry The observation geometry to convert.
+     * @param observationId The observation id.
+     * @param arcObject The converted ArcObject.
+     */
+    private geometryToArcGeometry(geometry: Geometry, observationId: string, arcObject: ArcObject) {
+
+        var arcGeometry: ArcGeometry = {} as ArcGeometry
+
+        switch (geometry.type) {
+            case 'Point':
+                arcGeometry = this.pointToArcPoint(geometry as Point, observationId)
+                break;
+            case 'LineString':
+                arcGeometry = this.lineStringToArcPolyline(geometry as LineString, observationId)
+                break;
+            case 'Polygon':
+                arcGeometry = this.polygonToArcPolygon(geometry as Polygon, observationId)
+                break;
+            default:
+                break;
+        }
+
+        arcGeometry.spatialReference = { wkid: 4326 }
+        arcObject.geometry = arcGeometry
+
+    }
+
+    /**
+     * Converts an observation Point to an ArcPoint.
+     * @param point The observation Point to convert.
+     * @param observationId The observation id.
+     * @returns The converted ArcPoint.
+     */
+    private pointToArcPoint(point: Point, observationId: string): ArcPoint {
+        this._console.info('ArcGIS new point at ' + point.coordinates + ' with id ' + observationId)
+        const arcPoint: ArcPoint = {} as ArcPoint
+        arcPoint.x = point.coordinates[0]
+        arcPoint.y = point.coordinates[1]
+        return arcPoint
+    }
+
+    /**
+     * Converts an observation LineString to an ArcPolyline.
+     * @param lineString The observation LineString to convert.
+     * @param observationId The observation id.
+     * @returns The converted ArcPolyline.
+     */
+    private lineStringToArcPolyline(lineString: LineString, observationId: string): ArcPolyline {
+        this._console.info('ArcGIS new linestring at ' + lineString.coordinates + ' with id ' + observationId)
+        const arcPolyline: ArcPolyline = {} as ArcPolyline
+        // TODO
+        return arcPolyline
+    }
+
+    /**
+     * Converts an observation Polygon to an ArcPolygon.
+     * @param polygon The observation Polygon to convert.
+     * @param observationId The observation id.
+     * @returns The converted ArcPolygon.
+     */
+    private polygonToArcPolygon(polygon: Polygon, observationId: string): ArcPolygon {
+        this._console.info('ArcGIS new polygon at ' + polygon.coordinates + ' with id ' + observationId)
+        const arcPolygon: ArcPolygon = {} as ArcPolygon
+        // TODO
+        return arcPolygon
+    }
+
+    /**
+     * Converts and adds observation properties to ArcObject attributes.
+     * @param properties The observation properties to convert.
+     * @param mageEvent The MAGE event.
+     * @param arcObject The converted ArcObject.
+     */
+    private propertiesToAttributes(properties: { [name: string]: any }, mageEvent: MageEvent | null, arcObject: ArcObject) {
+        for (const property in properties) {
+            const value = properties[property]
+            if (property == 'forms') {
+                this.formsToAttributes(value, mageEvent, arcObject)
+            } else {
+                this.addAttribute(property, value, arcObject)
+            }
+        }
+    }
+
+    /**
+     * Converts and adds observation property forms data to ArcObject attributes.
+     * @param forms The observation property forms to convert.
+     * @param mageEvent The MAGE event.
+     * @param arcObject The converted ArcObject.
+     */
+     private formsToAttributes(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject) {
         
         for (let i = 0; i < forms.length; i++) {
             const form = forms[i]

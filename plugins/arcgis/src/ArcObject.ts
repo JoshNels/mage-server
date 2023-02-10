@@ -17,3 +17,11 @@ export interface ArcPoint extends ArcGeometry {
     x: number
     y: number
 }
+
+export interface ArcPolyline extends ArcGeometry {
+    paths: number[][][]
+}
+
+export interface ArcPolygon extends ArcGeometry {
+    rings: number[][][]
+}

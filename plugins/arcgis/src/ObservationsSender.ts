@@ -1,5 +1,5 @@
-import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
-import { ArcObject } from "./ArcObject";
+import { ArcGISPluginConfig } from './ArcGISPluginConfig';
+import { ArcObject } from './ArcObject';
 import https from 'https';
 
 /**

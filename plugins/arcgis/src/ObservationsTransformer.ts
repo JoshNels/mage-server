@@ -136,7 +136,7 @@ export class ObservationsTransformer {
     private lineStringToArcPolyline(lineString: LineString, observationId: string): ArcPolyline {
         this._console.info('ArcGIS new linestring at ' + lineString.coordinates + ' with id ' + observationId)
         const arcPolyline: ArcPolyline = {} as ArcPolyline
-        // TODO
+        arcPolyline.paths = [lineString.coordinates]
         return arcPolyline
     }
 
@@ -149,7 +149,7 @@ export class ObservationsTransformer {
     private polygonToArcPolygon(polygon: Polygon, observationId: string): ArcPolygon {
         this._console.info('ArcGIS new polygon at ' + polygon.coordinates + ' with id ' + observationId)
         const arcPolygon: ArcPolygon = {} as ArcPolygon
-        // TODO
+        arcPolygon.rings = polygon.coordinates
         return arcPolygon
     }
 

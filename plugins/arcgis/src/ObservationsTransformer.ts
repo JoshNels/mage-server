@@ -2,7 +2,7 @@ import { ObservationAttrs } from '@ngageoint/mage.service/lib/entities/observati
 import { MageEvent } from "@ngageoint/mage.service/lib/entities/events/entities.events"
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { Point } from 'geojson'
-import { ArcObject } from './ArcObject'
+import { ArcObject, ArcPoint } from './ArcObject'
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -12,14 +12,14 @@ export class ObservationsTransformer {
     /**
      * Used to log to the console.
      */
-    _console: Console;
+    _console: Console
 
     /**
      * Constructor.
      * @param console Used to log to the console.
      */
     constructor(console: Console) {
-        this._console = console;
+        this._console = console
     }
 
     /**
@@ -30,14 +30,14 @@ export class ObservationsTransformer {
      */
     transform(observations: ObservationAttrs[], mageEvent: MageEvent | null): ArcObject[] {
 
-        const arcObjects: ArcObject[] = [];
+        const arcObjects: ArcObject[] = []
 
         for (let i = 0; i < observations.length; i++) {
-            const arcObject = this.observationToArcGIS(observations[i], mageEvent);
-            arcObjects.push(arcObject);
+            const arcObject = this.observationToArcGIS(observations[i], mageEvent)
+            arcObjects.push(arcObject)
         }
 
-        return arcObjects;
+        return arcObjects
     }
 
     /**
@@ -49,12 +49,14 @@ export class ObservationsTransformer {
     private observationToArcGIS(observation: ObservationAttrs, mageEvent: MageEvent | null): ArcObject {
         const arcObject: ArcObject = {} as ArcObject
 
-        arcObject.geometry = { x: 0, y: 0, spatialReference: { wkid: 4326 } }
         if (observation.geometry.type == 'Point') { // TODO: LineString & Polygon
             const pointgeom = observation.geometry as Point
             this._console.info('ArcGIS new point at ' + pointgeom.coordinates + ' with id ' + observation.id)
-            arcObject.geometry.x = pointgeom.coordinates[0]
-            arcObject.geometry.y = pointgeom.coordinates[1]
+            const arcPoint: ArcPoint = {} as ArcPoint
+            arcPoint.x = pointgeom.coordinates[0]
+            arcPoint.y = pointgeom.coordinates[1]
+            arcPoint.spatialReference = { wkid: 4326 }
+            arcObject.geometry = arcPoint
         }
 
         if (observation.properties != null) {
@@ -62,7 +64,7 @@ export class ObservationsTransformer {
             for (const property in properties) {
                 const value = properties[property]
                 if (property == 'forms') {
-                    this.formsToArcGIS(value, mageEvent, arcObject);
+                    this.formsToArcGIS(value, mageEvent, arcObject)
                 } else {
                     this.addAttribute(property, value, arcObject)
                 }

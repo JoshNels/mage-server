@@ -43,6 +43,9 @@ export class ObservationsTransformer {
             this.propertiesToAttributes(observation.properties, mageEvent, arcObject)
         }
 
+        // TODO DELETE THE FOLLOWING LINE (Temporary observation id as description value override)
+        this.addAttribute('description', observation.id, arcObject)
+
         return arcObject
     }
 
@@ -172,13 +175,15 @@ export class ObservationsTransformer {
             const formId = form['formId']
             for (const formProperty in form) {
                 const value = form[formProperty]
-                if (mageEvent != null && formId != null) {
-                    const field = mageEvent.formFieldFor(formProperty, formId)
-                    if (field != null && field.type !== FormFieldType.Attachment) {
-                        this.addAttribute(field.title, value, arcObject)
+                if (value != null) {
+                    if (mageEvent != null && formId != null) {
+                        const field = mageEvent.formFieldFor(formProperty, formId)
+                        if (field != null && field.type !== FormFieldType.Attachment) {
+                            this.addAttribute(field.title, value, arcObject)
+                        }
+                    } else {
+                        this.addAttribute(formProperty, value, arcObject)
                     }
-                } else {
-                    this.addAttribute(formProperty, value, arcObject)
                 }
             }
         }
@@ -192,15 +197,15 @@ export class ObservationsTransformer {
      * @param arcObject The converted ArcObject.
      */
     private addAttribute(key: string, value: any, arcObject: ArcObject) {
-        if (arcObject.attributes == null) {
-            arcObject.attributes = {}
-        }
         if (value != null) {
+            if (arcObject.attributes == null) {
+                arcObject.attributes = {}
+            }
             if (Object.prototype.toString.call(value) === '[object Date]') {
                 value = new Date(value).getTime()
             }
+            arcObject.attributes[key] = value
         }
-        arcObject.attributes[key] = value
     }
 
 }

@@ -163,7 +163,7 @@ export class ObservationProcessor {
                 arcObjects.push(arcObject)
             }
             this._console.info('ArcGIS json ' + arcObjects);
-            this._sender.send(arcObjects);
+            this._sender.sendAdds(arcObjects);
             newNumberLeft -= latestObs.items.length;
             pagingSettings.pageIndex++;
         } else {

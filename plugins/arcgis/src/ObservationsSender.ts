@@ -1,6 +1,7 @@
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ArcObject } from './ArcObject';
 import https from 'https';
+import { HttpClient } from './HttpClient';
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -8,24 +9,14 @@ import https from 'https';
 export class ObservationsSender {
 
     /**
-     * The host to send observations to.
-     */
-    _host: string;
-
-    /**
-     * The port to send observations at.
-     */
-    _port: string;
-
-    /**
-     * The path to the feature layer to send observations too.
-     */
-    _path: string;
-
-    /**
      * The full url to the feature layer receiving observations.
      */
-    _url: URL;
+    _urlAdd: string;
+
+    /**
+     * The full url to the feature layer receiving updates.
+     */
+    _urlUpdate: string;
 
     /**
      * Used to log to the console.
@@ -33,52 +24,48 @@ export class ObservationsSender {
     _console: Console;
 
     /**
+     * Used to send the observations to an arc server.
+     */
+    _httpClient: HttpClient;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
-        this._url = new URL(config.featureLayers[0] + '/addFeatures');
-        this._host = this._url.host;
-        this._port = this._url.port;
-        this._path = this._url.pathname;
+        this._urlAdd = config.featureLayers[0] + '/addFeatures';
+        this._urlUpdate = config.featureLayers[0] + '/updateFeatures';
         this._console = console;
+        this._httpClient = new HttpClient(console);
     }
 
     /**
-     * Converts the specified observations into a json string that can be sent to an arcgis server.
+     * Converts the specified observations into a json string that can be sent to an arcgis server and
+     * sends them to an arc server for adding.
+     * @param observations The observations to convert.
+     */
+    sendAdds(observations: ArcObject[]) {
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations);
+
+        this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
+        this._console.info('ArcGIS addFeatures content ' + contentString);
+
+        this._httpClient.sendPost(this._urlAdd, contentString);
+    }
+
+    /**
+     * Converts the specified observations into a json string that can be sent to an arcgis server and
+     * sends thme to an arc server for updating.
      * @param observations The observations to convert.
      * @returns The json string of the observations.
      */
-    send(observations: ArcObject[]) {
+    sendUpdates(observations: ArcObject[]) {
         const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations);
 
-        this._console.info('ArcGIS addFeatures url ' + this._url);
-        this._console.info('ArcGIS addFeatures content ' + contentString);
+        this._console.info('ArcGIS updateFeatures url ' + this._urlUpdate);
+        this._console.info('ArcGIS updateFeatures content ' + contentString);
 
-        // An object of options to indicate where to post to
-        var post_options = {
-            host: this._host,
-            port: this._port,
-            path: this._path,
-            method: 'POST',
-            headers: {
-                'content-type': 'application/x-www-form-urlencoded',
-                'content-length': Buffer.byteLength(contentString),
-                'accept': 'application/json'
-            }
-        };
-
-        // Set up the request
-        var post_req = https.request(post_options, function (res) {
-            res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
-            });
-        });
-
-        // post the data
-        post_req.write(contentString);
-        post_req.end();
+        this._httpClient.sendPost(this._urlUpdate, contentString);
     }
 }

@@ -2,6 +2,7 @@ import { InitPluginHook } from '@ngageoint/mage.service/lib/plugins.api'
 import { GetAppRequestContext, WebRoutesHooks } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.web'
 import { ObservationRepositoryToken } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.observations'
 import { MageEventRepositoryToken } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.events'
+import { UserRepositoryToken } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.users'
 import { SettingPermission } from '@ngageoint/mage.service/lib/entities/authorization/entities.permissions'
 import express from 'express'
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from './ArcGISPluginConfig'
@@ -24,7 +25,8 @@ const console = Object.create(globalThis.console, consoleOverrides) as Console
 
 const InjectedServices = {
   eventRepo: MageEventRepositoryToken,
-  obsRepoForEvent: ObservationRepositoryToken
+  obsRepoForEvent: ObservationRepositoryToken,
+  userRepo: UserRepositoryToken
 }
 
 /**
@@ -36,11 +38,12 @@ const imagePluginHooks: InitPluginHook<typeof InjectedServices> = {
   inject: {
     eventRepo: MageEventRepositoryToken,
     obsRepoForEvent: ObservationRepositoryToken,
+    userRepo: UserRepositoryToken
   },
   init: async (services): Promise<WebRoutesHooks> => {
     console.info('Intializing ArcGIS plugin...')
-    const { eventRepo, obsRepoForEvent } = services
-    const processor = new ObservationProcessor(defaultArcGISPluginConfig, eventRepo, obsRepoForEvent, console);
+    const { eventRepo, obsRepoForEvent, userRepo } = services
+    const processor = new ObservationProcessor(defaultArcGISPluginConfig, eventRepo, obsRepoForEvent, userRepo, console);
     processor.start();
     return {
       webRoutes(requestContext: GetAppRequestContext): express.Router {

@@ -1,8 +1,8 @@
 import { PagingParameters } from '@ngageoint/mage.service/lib/entities/entities.global';
 import { MageEventRepository } from '@ngageoint/mage.service/lib/entities/events/entities.events';
 import { EventScopedObservationRepository, ObservationRepositoryForEvent } from '@ngageoint/mage.service/lib/entities/observations/entities.observations';
+import { UserRepository } from '@ngageoint/mage.service/lib/entities/users/entities.users';
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
-import { Point } from 'geojson'
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ObservationsSender } from './ObservationsSender';
 
@@ -48,6 +48,11 @@ export class ObservationProcessor {
     _obsRepos: ObservationRepositoryForEvent;
 
     /**
+     * Used to get user information.
+     */
+    _userRepo: UserRepository;
+
+    /**
      * Used to log to the console.
      */
     _console: Console;
@@ -67,13 +72,15 @@ export class ObservationProcessor {
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
      * @param obsRepo Used to get new observations.
+     * @param userRepo Used to get user information.
      * @param console Used to log to the console.
      */
-    constructor(config: ArcGISPluginConfig, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, console: Console) {
+    constructor(config: ArcGISPluginConfig, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, userRepo: UserRepository, console: Console) {
         this._intervalSeconds = config.intervalSeconds;
         this._batchSize = config.batchSize;
         this._eventRepo = eventRepo;
         this._obsRepos = obsRepos;
+        this._userRepo = userRepo;
         this._lastTimeStamp = Date.now();
         this._console = console;
         this._transformer = new ObservationsTransformer(this._console);
@@ -141,11 +148,21 @@ export class ObservationProcessor {
             if (pagingSettings.pageIndex == 0) {
                 this._console.info('ArcGIS newest observation count ' + latestObs.totalCount);
             }
-            const mageEvent = await this._eventRepo.findById(obsRepo.eventScope);
-            const jsonObservations = this._transformer.transform(latestObs.items, mageEvent);
-            this._console.info('ArcGIS json ' + jsonObservations);
-            this._sender.send(jsonObservations);
-            totalProcessed += latestObs.items.length;
+            const observations = latestObs.items
+            const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
+            const arcObjects = []
+            for (let i = 0; i < observations.length; i++) {
+                const observation = observations[i]
+                let user = null
+                if (observation.userId != null) {
+                    user = await this._userRepo.findById(observation.userId)
+                }
+                const arcObject = this._transformer.transform(observation, mageEvent, user)
+                arcObjects.push(arcObject)
+            }
+            this._console.info('ArcGIS json ' + arcObjects);
+            this._sender.send(arcObjects);
+            totalProcessed += observations.length;
             pagingSettings.pageIndex++;
             if (totalProcessed < latestObs.totalCount) {
                 morePages = true;

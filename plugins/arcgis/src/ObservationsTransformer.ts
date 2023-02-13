@@ -1,5 +1,6 @@
 import { ObservationAttrs } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.events'
+import { User } from '@ngageoint/mage.service/lib/entities/users/entities.users'
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { Geometry, Point, LineString, Polygon } from 'geojson'
 import { ArcGeometry, ArcObject, ArcPoint, ArcPolyline, ArcPolygon } from './ArcObject'
@@ -23,33 +24,16 @@ export class ObservationsTransformer {
     }
 
     /**
-     * Converts the specified observations into a json string that can be sent to an arcgis server.
-     * @param observations The observations to convert.
-     * @param mageEvent The MAGE event.
-     * @returns The json string of the observations.
-     */
-    transform(observations: ObservationAttrs[], mageEvent: MageEvent | null): ArcObject[] {
-
-        const arcObjects: ArcObject[] = []
-
-        for (let i = 0; i < observations.length; i++) {
-            const arcObject = this.observationToArcGIS(observations[i], mageEvent)
-            arcObjects.push(arcObject)
-        }
-
-        return arcObjects
-    }
-
-    /**
-     * Converts an observation to an ArcObject.
+     * Converts the specified observation into an ArcObject that can be sent to an arcgis server.
      * @param observation The observation to convert.
      * @param mageEvent The MAGE event.
-     * @returns The converted ArcObject.
+     * @param user The MAGE user.
+     * @returns The ArcObject of the observation.
      */
-    private observationToArcGIS(observation: ObservationAttrs, mageEvent: MageEvent | null): ArcObject {
-        const arcObject: ArcObject = {} as ArcObject
+    transform(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null): ArcObject {
+        const arcObject = {} as ArcObject
 
-        this.observationToAttributes(observation, mageEvent, arcObject)
+        this.observationToAttributes(observation, mageEvent, user, arcObject)
 
         if (observation.geometry != null) {
             this.geometryToArcGeometry(observation.geometry, observation.id, arcObject)
@@ -66,9 +50,10 @@ export class ObservationsTransformer {
      * Converts and adds observation values to ArcObject attributes.
      * @param observation The observation to convert.
      * @param mageEvent The MAGE event.
+     * @param user The MAGE user.
      * @param arcObject The converted ArcObject.
      */
-    private observationToAttributes(observation: ObservationAttrs, mageEvent: MageEvent | null, arcObject: ArcObject) {
+    private observationToAttributes(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null, arcObject: ArcObject) {
         this.addAttribute('id', observation.id, arcObject)
         this.addAttribute('eventId', observation.eventId, arcObject)
         if (mageEvent != null) {
@@ -76,6 +61,10 @@ export class ObservationsTransformer {
         }
         if (observation.userId != null) {
             this.addAttribute('userId', observation.userId, arcObject)
+        }
+        if (user != null) {
+            this.addAttribute('username', user.username, arcObject)
+            this.addAttribute('userDisplayName', user.displayName, arcObject)
         }
         if (observation.deviceId != null) {
             this.addAttribute('deviceId', observation.deviceId, arcObject)
@@ -92,7 +81,7 @@ export class ObservationsTransformer {
      */
     private geometryToArcGeometry(geometry: Geometry, observationId: string, arcObject: ArcObject) {
 
-        var arcGeometry: ArcGeometry = {} as ArcGeometry
+        var arcGeometry = {} as ArcGeometry
 
         switch (geometry.type) {
             case 'Point':
@@ -121,7 +110,7 @@ export class ObservationsTransformer {
      */
     private pointToArcPoint(point: Point, observationId: string): ArcPoint {
         this._console.info('ArcGIS new point at ' + point.coordinates + ' with id ' + observationId)
-        const arcPoint: ArcPoint = {} as ArcPoint
+        const arcPoint = {} as ArcPoint
         arcPoint.x = point.coordinates[0]
         arcPoint.y = point.coordinates[1]
         return arcPoint
@@ -135,7 +124,7 @@ export class ObservationsTransformer {
      */
     private lineStringToArcPolyline(lineString: LineString, observationId: string): ArcPolyline {
         this._console.info('ArcGIS new linestring at ' + lineString.coordinates + ' with id ' + observationId)
-        const arcPolyline: ArcPolyline = {} as ArcPolyline
+        const arcPolyline = {} as ArcPolyline
         arcPolyline.paths = [lineString.coordinates]
         return arcPolyline
     }
@@ -148,7 +137,7 @@ export class ObservationsTransformer {
      */
     private polygonToArcPolygon(polygon: Polygon, observationId: string): ArcPolygon {
         this._console.info('ArcGIS new polygon at ' + polygon.coordinates + ' with id ' + observationId)
-        const arcPolygon: ArcPolygon = {} as ArcPolygon
+        const arcPolygon = {} as ArcPolygon
         arcPolygon.rings = polygon.coordinates
         return arcPolygon
     }

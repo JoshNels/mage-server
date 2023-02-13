@@ -1,10 +1,10 @@
-import { PagingParameters } from "@ngageoint/mage.service/lib/entities/entities.global";
-import { MageEventRepository } from "@ngageoint/mage.service/lib/entities/events/entities.events";
-import { EventScopedObservationRepository, ObservationRepositoryForEvent } from "@ngageoint/mage.service/lib/entities/observations/entities.observations";
-import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
+import { PagingParameters } from '@ngageoint/mage.service/lib/entities/entities.global';
+import { MageEventRepository } from '@ngageoint/mage.service/lib/entities/events/entities.events';
+import { EventScopedObservationRepository, ObservationRepositoryForEvent } from '@ngageoint/mage.service/lib/entities/observations/entities.observations';
+import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { Point } from 'geojson'
 import { ObservationsTransformer } from './ObservationsTransformer'
-import { ObservationsSender } from "./ObservationsSender";
+import { ObservationsSender } from './ObservationsSender';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be

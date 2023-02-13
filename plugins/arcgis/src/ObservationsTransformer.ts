@@ -36,7 +36,10 @@ export class ObservationsTransformer {
         this.observationToAttributes(observation, mageEvent, user, arcObject)
 
         if (observation.geometry != null) {
-            this.geometryToArcGeometry(observation.geometry, observation.id, arcObject)
+            let geometry = observation.geometry
+            const arcGeometry = this.geometryToArcGeometry(geometry)
+            this._console.info('ArcGIS new ' + geometry.type + ' at ' + JSON.stringify(arcGeometry) + ' with id ' + observation.id)
+            arcObject.geometry = arcGeometry
         }
 
         if (observation.properties != null) {
@@ -77,42 +80,39 @@ export class ObservationsTransformer {
     }
 
     /**
-     * Converts and sets an observation geometry to an ArcObject geometry.
+     * Converts an observation geometry to an ArcGeometry.
      * @param geometry The observation geometry to convert.
-     * @param observationId The observation id.
-     * @param arcObject The converted ArcObject.
+     * @returns The converted ArcGeometry.
      */
-    private geometryToArcGeometry(geometry: Geometry, observationId: string, arcObject: ArcObject) {
+    private geometryToArcGeometry(geometry: Geometry): ArcGeometry {
 
         var arcGeometry = {} as ArcGeometry
 
         switch (geometry.type) {
             case 'Point':
-                arcGeometry = this.pointToArcPoint(geometry as Point, observationId)
+                arcGeometry = this.pointToArcPoint(geometry as Point)
                 break;
             case 'LineString':
-                arcGeometry = this.lineStringToArcPolyline(geometry as LineString, observationId)
+                arcGeometry = this.lineStringToArcPolyline(geometry as LineString)
                 break;
             case 'Polygon':
-                arcGeometry = this.polygonToArcPolygon(geometry as Polygon, observationId)
+                arcGeometry = this.polygonToArcPolygon(geometry as Polygon)
                 break;
             default:
                 break;
         }
 
         arcGeometry.spatialReference = { wkid: 4326 }
-        arcObject.geometry = arcGeometry
 
+        return arcGeometry
     }
 
     /**
      * Converts an observation Point to an ArcPoint.
      * @param point The observation Point to convert.
-     * @param observationId The observation id.
      * @returns The converted ArcPoint.
      */
-    private pointToArcPoint(point: Point, observationId: string): ArcPoint {
-        this._console.info('ArcGIS new point at ' + point.coordinates + ' with id ' + observationId)
+    private pointToArcPoint(point: Point): ArcPoint {
         const arcPoint = {} as ArcPoint
         arcPoint.x = point.coordinates[0]
         arcPoint.y = point.coordinates[1]
@@ -122,11 +122,9 @@ export class ObservationsTransformer {
     /**
      * Converts an observation LineString to an ArcPolyline.
      * @param lineString The observation LineString to convert.
-     * @param observationId The observation id.
      * @returns The converted ArcPolyline.
      */
-    private lineStringToArcPolyline(lineString: LineString, observationId: string): ArcPolyline {
-        this._console.info('ArcGIS new linestring at ' + lineString.coordinates + ' with id ' + observationId)
+    private lineStringToArcPolyline(lineString: LineString): ArcPolyline {
         const arcPolyline = {} as ArcPolyline
         arcPolyline.paths = [lineString.coordinates]
         return arcPolyline
@@ -135,11 +133,9 @@ export class ObservationsTransformer {
     /**
      * Converts an observation Polygon to an ArcPolygon.
      * @param polygon The observation Polygon to convert.
-     * @param observationId The observation id.
      * @returns The converted ArcPolygon.
      */
-    private polygonToArcPolygon(polygon: Polygon, observationId: string): ArcPolygon {
-        this._console.info('ArcGIS new polygon at ' + polygon.coordinates + ' with id ' + observationId)
+    private polygonToArcPolygon(polygon: Polygon): ArcPolygon {
         const arcPolygon = {} as ArcPolygon
         arcPolygon.rings = polygon.coordinates
         return arcPolygon
@@ -174,11 +170,14 @@ export class ObservationsTransformer {
             const form = forms[i]
             const formId = form['formId']
             for (const formProperty in form) {
-                const value = form[formProperty]
+                let value = form[formProperty]
                 if (value != null) {
                     if (mageEvent != null && formId != null) {
                         const field = mageEvent.formFieldFor(formProperty, formId)
                         if (field != null && field.type !== FormFieldType.Attachment) {
+                            if (field.type == FormFieldType.Geometry) {
+                                value = this.geometryToArcGeometry(value)
+                            }
                             this.addAttribute(field.title, value, arcObject)
                         }
                     } else {

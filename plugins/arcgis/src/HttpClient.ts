@@ -24,6 +24,18 @@ export class HttpClient {
      * @param formData The data to put in the post.
      */
     sendPost(url: string, formData: string) {
+        this.sendPostHandleResponse(url, formData, function (chunk) {
+            console.log('Response: ' + chunk);
+        })
+    }
+
+    /**
+     * Sends a post request to the specified url with the specified data.
+     * @param url The url to send a post request to.
+     * @param formData The data to put in the post.
+     * @param response The post response handler function.
+     */
+    sendPostHandleResponse(url: string, formData: string, response: (chunk: any) => void) {
         const aUrl = new URL(url);
         var post_options = {
             host: aUrl.host,
@@ -40,9 +52,7 @@ export class HttpClient {
         // Set up the request
         var post_req = https.request(post_options, function (res) {
             res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
-            });
+            res.on('data', response);
         });
 
         // post the data

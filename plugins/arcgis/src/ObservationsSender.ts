@@ -57,7 +57,7 @@ export class ObservationsSender {
 
     /**
      * Converts the specified observations into a json string that can be sent to an arcgis server and
-     * sends thme to an arc server for updating.
+     * sends them to an arc server for updating.
      * @param observations The observations to convert.
      * @returns The json string of the observations.
      */
@@ -70,6 +70,11 @@ export class ObservationsSender {
         this._httpClient.sendPost(this._urlUpdate, contentString);
     }
 
+    /**
+     * Creates an observation response handler.
+     * @param observations The observations sent.
+     * @returns The response handler.
+     */
     responseHandler(observations: ArcObjects): (chunk: any) => void {
         return (chunk: any) => {
             console.log('Response: ' + chunk);
@@ -91,6 +96,11 @@ export class ObservationsSender {
         }
     }
 
+    /**
+     * Send an observation attachment.
+     * @param observation The observation.
+     * @param objectId The arc object id of the observation.
+     */
     sendAttachment(observation: ArcObservation, objectId: number) {
         console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
         // TODO send attachments

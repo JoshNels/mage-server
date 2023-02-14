@@ -6,6 +6,8 @@ import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ObservationsSender } from './ObservationsSender';
 import { ArcObjects } from './ArcObjects'
+import { ObservationBins } from './ObservationBins';
+import { ObservationBinner } from './ObservationBinner';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -69,6 +71,11 @@ export class ObservationProcessor {
     _sender: ObservationsSender;
 
     /**
+     * Seperates the adds from the updates regarding observations.
+     */
+    _binner: ObservationBinner;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -86,6 +93,7 @@ export class ObservationProcessor {
         this._console = console;
         this._transformer = new ObservationsTransformer(this._console);
         this._sender = new ObservationsSender(config, console);
+        this._binner = new ObservationBinner(config, console);
     }
 
     /**
@@ -109,6 +117,9 @@ export class ObservationProcessor {
      */
     private async processAndScheduleNext() {
         if (this._isRunning) {
+            this._console.info('ArcGIS plugin checking for any pending updates or adds');
+            const bins = this._binner.pendingUpdates();
+            this.send(bins);
             this._console.info('ArcGIS plugin processing new observations...');
             const queryTime = this._lastTimeStamp;
             this._lastTimeStamp = Date.now();
@@ -165,7 +176,8 @@ export class ObservationProcessor {
                 arcObjects.objects.push(arcObservation.object)
             }
             this._console.info('ArcGIS json ' + arcObjects.objects);
-            this._sender.sendAdds(arcObjects);
+            const bins = this._binner.sortEmOut(arcObjects);
+            this.send(bins);
             newNumberLeft -= latestObs.items.length;
             pagingSettings.pageIndex++;
         } else {
@@ -174,5 +186,18 @@ export class ObservationProcessor {
 
         return newNumberLeft;
     }
-    
+
+    /**
+     * Sends either the updates to observations or new observations to the arc server.
+     * @param bins Contains both new and updated observations.
+     */
+    private send(bins: ObservationBins) {
+        if (bins.adds.objects.length > 0) {
+            this._sender.sendAdds(bins.adds);
+        }
+        if (bins.updates.objects.length > 0) {
+            this._sender.sendUpdates(bins.updates);
+        }
+    }
+
 }

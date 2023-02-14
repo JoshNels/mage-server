@@ -65,6 +65,17 @@ export class HttpClient {
      * @param url The url of the get request.
      */
     sendGet(url: string) {
+        this.sendGetHandleResponse(url, function (chunk) {
+            console.log('Response: ' + chunk);
+        })
+    }
+
+    /**
+     * Sends a get request to the specified url.
+     * @param url The url of the get request.
+     * @param response The get response handler function.
+     */
+    sendGetHandleResponse(url: string, response: (chunk: any) => void) {
         const aUrl = new URL(url);
         var post_options = {
             host: aUrl.host,
@@ -80,9 +91,7 @@ export class HttpClient {
         // Set up the request
         var get_req = https.request(post_options, function (res) {
             res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
-            });
+            res.on('data', response);
         });
 
         // post the data

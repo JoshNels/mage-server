@@ -5,6 +5,7 @@ import { UserRepository } from '@ngageoint/mage.service/lib/entities/users/entit
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ObservationsSender } from './ObservationsSender';
+import { ArcObjects } from './ArcObjects'
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -152,17 +153,18 @@ export class ObservationProcessor {
             }
             const observations = latestObs.items
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
-            const arcObjects = []
+            const arcObjects = { objects: [], observations: [] } as ArcObjects
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
                 let user = null
                 if (observation.userId != null) {
                     user = await this._userRepo.findById(observation.userId)
                 }
-                const arcObject = this._transformer.transform(observation, mageEvent, user)
-                arcObjects.push(arcObject)
+                const arcObservation = this._transformer.transform(observation, mageEvent, user)
+                arcObjects.observations.push(arcObservation)
+                arcObjects.objects.push(arcObservation.object)
             }
-            this._console.info('ArcGIS json ' + arcObjects);
+            this._console.info('ArcGIS json ' + arcObjects.objects);
             this._sender.sendAdds(arcObjects);
             newNumberLeft -= latestObs.items.length;
             pagingSettings.pageIndex++;
@@ -172,4 +174,5 @@ export class ObservationProcessor {
 
         return newNumberLeft;
     }
+    
 }

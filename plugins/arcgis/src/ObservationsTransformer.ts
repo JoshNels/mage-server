@@ -3,6 +3,7 @@ import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.
 import { User } from '@ngageoint/mage.service/lib/entities/users/entities.users'
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { Geometry, Point, LineString, Polygon } from 'geojson'
+import { ArcObservation } from './ArcObservation'
 import { ArcGeometry, ArcObject, ArcPoint, ArcPolyline, ArcPolygon } from './ArcObject'
 
 /**
@@ -24,13 +25,13 @@ export class ObservationsTransformer {
     }
 
     /**
-     * Converts the specified observation into an ArcObject that can be sent to an arcgis server.
+     * Converts the specified observation into an ArcObservation that can be sent to an arcgis server.
      * @param observation The observation to convert.
      * @param mageEvent The MAGE event.
      * @param user The MAGE user.
-     * @returns The ArcObject of the observation.
+     * @returns The ArcObservation of the observation.
      */
-    transform(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null): ArcObject {
+    transform(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null): ArcObservation {
         const arcObject = {} as ArcObject
 
         this.observationToAttributes(observation, mageEvent, user, arcObject)
@@ -49,7 +50,13 @@ export class ObservationsTransformer {
         // TODO DELETE THE FOLLOWING LINE (Temporary observation id as description value override)
         this.addAttribute('description', observation.id, arcObject)
 
-        return arcObject
+        const arcObservation = {} as ArcObservation
+
+        arcObservation.id = observation.id
+        arcObservation.object = arcObject
+        arcObservation.attachments = observation.attachments
+
+        return arcObservation
     }
 
     /**

@@ -1,5 +1,5 @@
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
-import { ArcObject } from './ArcObject';
+import { ArcObjects } from './ArcObjects';
 import { HttpClient } from './HttpClient';
 
 /**
@@ -44,8 +44,8 @@ export class ObservationsSender {
      * sends them to an arc server for adding.
      * @param observations The observations to convert.
      */
-    sendAdds(observations: ArcObject[]) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations);
+    sendAdds(observations: ArcObjects) {
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
         this._console.info('ArcGIS addFeatures content ' + contentString);
@@ -55,14 +55,15 @@ export class ObservationsSender {
             const response = JSON.parse(chunk)
             const results = response.addResults
             if (results != null) {
-                for (let i = 0; i < observations.length && i < results.length; i++) {
-                    const observation = observations[i]
+                const obs = observations.observations
+                for (let i = 0; i < obs.length && i < results.length; i++) {
+                    const observation = obs[i]
                     const result = results[i]
                     if (result.success != null && result.success) {
                         const objectId = result.objectId
                         if (objectId != null) {
-                            // TODO
-                            console.log('Observation id: ' + observation.attributes.id + ', Object id: ' + objectId)
+                            console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
+                            // TODO send attachments
                         }
                     }
                 }
@@ -76,8 +77,8 @@ export class ObservationsSender {
      * @param observations The observations to convert.
      * @returns The json string of the observations.
      */
-    sendUpdates(observations: ArcObject[]) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations);
+    sendUpdates(observations: ArcObjects) {
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS updateFeatures url ' + this._urlUpdate);
         this._console.info('ArcGIS updateFeatures content ' + contentString);

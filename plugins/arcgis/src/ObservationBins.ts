@@ -1,4 +1,4 @@
-import { ArcObject } from "./ArcObject";
+import { ArcObjects } from "./ArcObjects";
 
 /**
  * Contains the arc objects that either need to be added or updated to the arc server.
@@ -8,18 +8,18 @@ export class ObservationBins {
     /**
      * The arc objects to add to the server.
      */
-    adds: ArcObject[];
+    adds: ArcObjects;
 
     /**
      * The arc objects to update on the server.
      */
-    updates: ArcObject[];
+    updates: ArcObjects;
 
     /**
      * Constructor.
      */
     constructor() {
-        this.adds = [];
-        this.updates = [];
+        this.adds = new ArcObjects();
+        this.updates = new ArcObjects();
     }
 }

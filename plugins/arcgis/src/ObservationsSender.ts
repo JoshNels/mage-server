@@ -1,5 +1,6 @@
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ArcObjects } from './ArcObjects';
+import { ArcObservation } from './ArcObservation';
 import { HttpClient } from './HttpClient';
 
 /**
@@ -50,25 +51,8 @@ export class ObservationsSender {
         this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
         this._console.info('ArcGIS addFeatures content ' + contentString);
 
-        this._httpClient.sendPostHandleResponse(this._urlAdd, contentString, function (chunk) {
-            console.log('Response: ' + chunk);
-            const response = JSON.parse(chunk)
-            const results = response.addResults
-            if (results != null) {
-                const obs = observations.observations
-                for (let i = 0; i < obs.length && i < results.length; i++) {
-                    const observation = obs[i]
-                    const result = results[i]
-                    if (result.success != null && result.success) {
-                        const objectId = result.objectId
-                        if (objectId != null) {
-                            console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
-                            // TODO send attachments
-                        }
-                    }
-                }
-            }
-        });
+        let responseHandler = this.responseHandler(observations)
+        this._httpClient.sendPostHandleResponse(this._urlAdd, contentString, responseHandler);
     }
 
     /**
@@ -85,4 +69,31 @@ export class ObservationsSender {
 
         this._httpClient.sendPost(this._urlUpdate, contentString);
     }
+
+    responseHandler(observations: ArcObjects): (chunk: any) => void {
+        return (chunk: any) => {
+            console.log('Response: ' + chunk);
+            const response = JSON.parse(chunk)
+            const results = response.addResults
+            if (results != null) {
+                const obs = observations.observations
+                for (let i = 0; i < obs.length && i < results.length; i++) {
+                    const observation = obs[i]
+                    const result = results[i]
+                    if (result.success != null && result.success) {
+                        const objectId = result.objectId
+                        if (objectId != null) {
+                            this.sendAttachment(observation, objectId)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sendAttachment(observation: ArcObservation, objectId: number) {
+        console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
+        // TODO send attachments
+    }
+
 }

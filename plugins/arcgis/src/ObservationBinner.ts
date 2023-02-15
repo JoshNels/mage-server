@@ -38,7 +38,7 @@ export class ObservationBinner {
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = config.featureLayers[0] + '/query?returnsIdsOnly=true&f=json&where=description=\'';
+        this._url = config.featureLayers[0] + '/query?returnIdsOnly=true&f=json&where=description=\'';
         this._pendingNewAndUpdates = new ObservationBins;
         this._console = console;
     }
@@ -87,7 +87,7 @@ export class ObservationBinner {
      * @returns True if it exists, false if it does not.
      */
     checkForExistence(arcObservation: ArcObservation) {
-        const queryUrl = this._url + arcObservation.object.attributes['description'] + '\'';
+        const queryUrl = this._url + arcObservation.id + '\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryResults;

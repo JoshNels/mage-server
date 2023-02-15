@@ -51,10 +51,7 @@ export class ObservationBinner {
         const newAndUpdates = new ObservationBins();
         newAndUpdates.adds = this._pendingNewAndUpdates.adds;
         newAndUpdates.updates = this._pendingNewAndUpdates.updates;
-        this._pendingNewAndUpdates.updates.objects = [];
-        this._pendingNewAndUpdates.updates.observations = [];
-        this._pendingNewAndUpdates.adds.objects = [];
-        this._pendingNewAndUpdates.adds.observations = [];
+        this._pendingNewAndUpdates.clear();
 
         return newAndUpdates;
     }
@@ -67,20 +64,17 @@ export class ObservationBinner {
     sortEmOut(observations: ArcObjects): ObservationBins {
         const bins = new ObservationBins();
 
-        for (let i = 0; i < observations.objects.length; i++) {
-            const arcObject = observations.objects[i];
-            const arcObservation = observations.observations[i]
+        for (const arcObservation of observations.observations) {
+            const arcObject = arcObservation.object
             if (arcObject.attributes['lastModified'] != arcObject.attributes['createdAt']) {
-                bins.updates.objects.push(arcObject);
-                bins.updates.observations.push(arcObservation);
+                bins.updates.add(arcObservation);
             } else {
-                bins.adds.objects.push(arcObject);
-                bins.adds.observations.push(arcObservation);
+                bins.adds.add(arcObservation);
             }
         }
 
-        for (let i = 0; i < bins.updates.objects.length; i++) {
-            this.checkForExistence(bins.updates.objects[i], bins.updates.observations[i]);
+        for (const arcObservation of bins.updates.observations) {
+            this.checkForExistence(arcObservation);
         }
         bins.updates = this._pendingNewAndUpdates.updates;
 
@@ -89,20 +83,18 @@ export class ObservationBinner {
 
     /**
      * Checks to see if the observation truly does exist on the server.
-     * @param observation The observation to check.
+     * @param arcObservation The observation to check.
      * @returns True if it exists, false if it does not.
      */
-    checkForExistence(arcObject: ArcObject, arcObservation: ArcObservation) {
-        const queryUrl = this._url + arcObject.attributes['description'] + '\'';
+    checkForExistence(arcObservation: ArcObservation) {
+        const queryUrl = this._url + arcObservation.object.attributes['description'] + '\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryResults;
             if (result.objectIds !== undefined && result.objectIds.length > 0) {
-                this._pendingNewAndUpdates.updates.objects.push(arcObject);
-                this._pendingNewAndUpdates.updates.observations.push(arcObservation);
+                this._pendingNewAndUpdates.updates.add(arcObservation);
             } else {
-                this._pendingNewAndUpdates.adds.objects.push(arcObject);
-                this._pendingNewAndUpdates.adds.observations.push(arcObservation);
+                this._pendingNewAndUpdates.adds.add(arcObservation);
             }
         });
     }

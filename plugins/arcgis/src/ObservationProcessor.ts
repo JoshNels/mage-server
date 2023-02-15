@@ -164,7 +164,7 @@ export class ObservationProcessor {
             }
             const observations = latestObs.items
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
-            const arcObjects = { objects: [], observations: [] } as ArcObjects
+            const arcObjects = new ArcObjects()
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
                 let user = null
@@ -172,8 +172,7 @@ export class ObservationProcessor {
                     user = await this._userRepo.findById(observation.userId)
                 }
                 const arcObservation = this._transformer.transform(observation, mageEvent, user)
-                arcObjects.observations.push(arcObservation)
-                arcObjects.objects.push(arcObservation.object)
+                arcObjects.add(arcObservation)
             }
             this._console.info('ArcGIS json ' + arcObjects.objects);
             const bins = this._binner.sortEmOut(arcObjects);
@@ -192,10 +191,10 @@ export class ObservationProcessor {
      * @param bins Contains both new and updated observations.
      */
     private send(bins: ObservationBins) {
-        if (bins.adds.objects.length > 0) {
+        if (!bins.adds.isEmpty()) {
             this._sender.sendAdds(bins.adds);
         }
-        if (bins.updates.objects.length > 0) {
+        if (!bins.updates.isEmpty()) {
             this._sender.sendUpdates(bins.updates);
         }
     }

@@ -22,4 +22,13 @@ export class ObservationBins {
         this.adds = new ArcObjects();
         this.updates = new ArcObjects();
     }
+
+    /**
+     * Clear the observations.
+     */
+    clear() {
+        this.adds.clear()
+        this.updates.clear()
+    }
+
 }

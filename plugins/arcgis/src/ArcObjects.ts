@@ -9,18 +9,52 @@ export class ArcObjects {
     /**
      * The features to send to the arc server.
      */
-    objects: ArcObject[];
+    objects: ArcObject[]
 
     /**
      * The attachments to send to the arc server.
      */
-    observations: ArcObservation[];
+    observations: ArcObservation[]
 
     /**
      * Constructor.
      */
     constructor() {
-        this.objects = [];
-        this.observations = [];
+        this.objects = []
+        this.observations = []
     }
+
+    /**
+     * Add an observation.
+     * @param observation The observation to add.
+     */
+    add(observation: ArcObservation) {
+        this.observations.push(observation)
+        this.objects.push(observation.object)
+    }
+
+    /**
+     * Count of observations.
+     * @return observation count.
+     */
+    count(): number {
+        return this.objects.length
+    }
+
+    /**
+     * Is observations empty.
+     * @return true if empty.
+     */
+    isEmpty(): boolean {
+        return this.count() == 0
+    }
+
+    /**
+     * Clear the observations.
+     */
+    clear() {
+        this.objects = []
+        this.observations = []
+    }
+
 }

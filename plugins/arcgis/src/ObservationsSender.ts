@@ -46,7 +46,7 @@ export class ObservationsSender {
      * @param observations The observations to convert.
      */
     sendAdds(observations: ArcObjects) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations.objects);
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=json&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
         this._console.info('ArcGIS addFeatures content ' + contentString);
@@ -62,7 +62,7 @@ export class ObservationsSender {
      * @returns The json string of the observations.
      */
     sendUpdates(observations: ArcObjects) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=pjson&features=' + JSON.stringify(observations.objects);
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=json&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS updateFeatures url ' + this._urlUpdate);
         this._console.info('ArcGIS updateFeatures content ' + contentString);

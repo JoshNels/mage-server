@@ -89,7 +89,7 @@ export class ObservationProcessor {
         this._eventRepo = eventRepo;
         this._obsRepos = obsRepos;
         this._userRepo = userRepo;
-        this._lastTimeStamp = Date.now();
+        this._lastTimeStamp = 0;
         this._console = console;
         this._transformer = new ObservationsTransformer(this._console);
         this._sender = new ObservationsSender(config, console);

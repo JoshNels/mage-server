@@ -3,11 +3,14 @@ import { ObservationId } from '@ngageoint/mage.service/lib/entities/observations
 
 export interface ArcObservation {
     id: ObservationId,
+    createdAt: number,
+    lastModified: number,
     object: ArcObject,
     attachments: ArcAttachment[]
 }
 
 export interface ArcAttachment {
     field: string,
+    lastModified: number
     contentLocator: string
 }

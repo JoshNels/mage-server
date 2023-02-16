@@ -54,6 +54,8 @@ export class ObservationsTransformer {
         const arcObservation = {} as ArcObservation
 
         arcObservation.id = observation.id
+        arcObservation.createdAt = arcObject.attributes['createdAt']
+        arcObservation.lastModified = arcObject.attributes['lastModified']
         arcObservation.object = arcObject
         arcObservation.attachments = this.attachments(observation.attachments, formIds, mageEvent)
 
@@ -254,6 +256,9 @@ export class ObservationsTransformer {
 
                 const arcAttachment = {} as ArcAttachment
                 arcAttachment.field = fieldName
+                if (attachment.lastModified != null) {
+                    arcAttachment.lastModified = new Date(attachment.lastModified).getTime()
+                }
                 arcAttachment.contentLocator = attachment.contentLocator
 
                 arcAttachments.push(arcAttachment)

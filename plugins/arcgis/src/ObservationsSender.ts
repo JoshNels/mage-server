@@ -67,7 +67,7 @@ export class ObservationsSender {
         this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
         this._console.info('ArcGIS addFeatures content ' + contentString);
 
-        let responseHandler = this.responseHandler(observations)
+        let responseHandler = this.addResponseHandler(observations)
         this._httpClient.sendPostHandleResponse(this._urlAdd, contentString, responseHandler);
     }
 
@@ -83,19 +83,39 @@ export class ObservationsSender {
         this._console.info('ArcGIS updateFeatures url ' + this._urlUpdate);
         this._console.info('ArcGIS updateFeatures content ' + contentString);
 
-        this._httpClient.sendPost(this._urlUpdate, contentString);
+        let responseHandler = this.updateResponseHandler(observations)
+        this._httpClient.sendPostHandleResponse(this._urlUpdate, contentString, responseHandler);
+    }
+
+    /**
+     * Creates an add observation response handler.
+     * @param observations The observations sent.
+     * @returns The response handler.
+     */
+    private addResponseHandler(observations: ArcObjects): (chunk: any) => void {
+        return this.responseHandler(observations, false)
+    }
+
+    /**
+     * Creates an update observation response handler.
+     * @param observations The observations sent.
+     * @returns The response handler.
+     */
+    private updateResponseHandler(observations: ArcObjects): (chunk: any) => void {
+        return this.responseHandler(observations, true)
     }
 
     /**
      * Creates an observation response handler.
      * @param observations The observations sent.
+     * @param update The update or add flag value.
      * @returns The response handler.
      */
-    private responseHandler(observations: ArcObjects): (chunk: any) => void {
+    private responseHandler(observations: ArcObjects, update: boolean): (chunk: any) => void {
         return (chunk: any) => {
-            console.log('Response: ' + chunk);
+            console.log((update ? 'Update' : 'Add') + ' Response: ' + chunk);
             const response = JSON.parse(chunk)
-            const results = response.addResults
+            const results = response[update ? 'updateResults' : 'addResults']
             if (results != null) {
                 const obs = observations.observations
                 for (let i = 0; i < obs.length && i < results.length; i++) {
@@ -104,8 +124,12 @@ export class ObservationsSender {
                     if (result.success != null && result.success) {
                         const objectId = result.objectId
                         if (objectId != null) {
-                            console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
-                            this.sendAttachments(observation, objectId)
+                            console.log((update ? 'Update' : 'Add') + ' Features Observation id: ' + observation.id + ', Object id: ' + objectId)
+                            if (update) {
+                                this.updateAttachments(observation, objectId)
+                            } else{
+                                this.sendAttachments(observation, objectId)
+                            }
                         }
                     }
                 }
@@ -129,13 +153,55 @@ export class ObservationsSender {
     }
 
     /**
+     * Update observation attachments.
+     * @param observation The observation.
+     * @param objectId The arc object id of the observation.
+     */
+    private updateAttachments(observation: ArcObservation, objectId: number) {
+        // TODO query for attachments to find needed deletions
+        if (observation.attachments != null) {
+            for (const attachment of observation.attachments) {
+                if (attachment.lastModified != null && attachment.lastModified >= observation.lastModified) {
+                    // TODO Determine if new or udpate
+                }
+            }
+        }
+    }
+
+    /**
      * Send an observation attachment.
      * @param attachment The observation attachment.
      * @param objectId The arc object id of the observation.
      */
-     private sendAttachment(attachment: ArcAttachment, objectId: number) {
+    private sendAttachment(attachment: ArcAttachment, objectId: number) {
+        this.sendAttachmentPost(attachment, objectId, 'addAttachment', new FormData())
+    }
 
-        const url = this._url + '/' + objectId + '/addAttachment'
+    /**
+     * Update an observation attachment.
+     * @param attachment The observation attachment.
+     * @param objectId The arc object id of the observation.
+     * @param attachmentId The observation arc attachment id.
+     */
+    private updateAttachment(attachment: ArcAttachment, objectId: number, attachmentId: number) {
+
+        const form = new FormData()
+        form.append('attachmentId', attachmentId)
+
+        this.sendAttachmentPost(attachment, objectId, 'updateAttachment', form)
+
+    }
+
+    /**
+     * Send an observation attachment post request.
+     * @param attachment The observation attachment.
+     * @param objectId The arc object id of the observation.
+     * @param request The attachment request type
+     * @param form The request form data
+     */
+    private sendAttachmentPost(attachment: ArcAttachment, objectId: number, request: string, form: FormData) {
+
+        const url = this._url + '/' + objectId + '/' + request
 
         const file = path.join(this._attachmentDirectory, attachment.contentLocator!)
 
@@ -146,12 +212,11 @@ export class ObservationsSender {
             filename += file.substring(extensionIndex)
         }
 
-        this._console.info('ArcGIS addAttachment url ' + url)
-        this._console.info('ArcGIS addAttachment file ' + filename + ' from ' + file)
+        this._console.info('ArcGIS ' + request + ' url ' + url)
+        this._console.info('ArcGIS ' + request + ' file ' + filename + ' from ' + file)
 
         const readStream = fs.createReadStream(file)
 
-        const form = new FormData()
         form.append('attachment', readStream, {
             filename: filename
         })

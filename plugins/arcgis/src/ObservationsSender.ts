@@ -147,6 +147,7 @@ export class ObservationsSender {
 
         const form = new FormData()
         form.append('attachment', readStream)
+        form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
 

@@ -1,8 +1,7 @@
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ArcObjects } from './ArcObjects';
-import { ArcObservation } from './ArcObservation';
+import { ArcObservation, ArcAttachment } from './ArcObservation';
 import { HttpClient } from './HttpClient';
-import { Attachment } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 import environment from '@ngageoint/mage.service/lib/environment/env'
 import fs from 'fs'
 import path from 'path'
@@ -134,19 +133,28 @@ export class ObservationsSender {
      * @param attachment The observation attachment.
      * @param objectId The arc object id of the observation.
      */
-     private sendAttachment(attachment: Attachment, objectId: number) {
+     private sendAttachment(attachment: ArcAttachment, objectId: number) {
 
-        const url = this._url + '/' + objectId + '/addAttachment?f=json'
+        const url = this._url + '/' + objectId + '/addAttachment'
 
         const file = path.join(this._attachmentDirectory, attachment.contentLocator!)
 
+        let filename = attachment.field
+
+        const extensionIndex = file.lastIndexOf('.')
+        if (extensionIndex != -1) {
+            filename += file.substring(extensionIndex)
+        }
+
         this._console.info('ArcGIS addAttachment url ' + url)
-        this._console.info('ArcGIS addAttachment file ' + attachment.name + ' at ' + file)
+        this._console.info('ArcGIS addAttachment file ' + filename + ' from ' + file)
 
         const readStream = fs.createReadStream(file)
 
         const form = new FormData()
-        form.append('attachment', readStream)
+        form.append('attachment', readStream, {
+            filename: filename
+        })
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)

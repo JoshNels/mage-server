@@ -1,4 +1,5 @@
 import https from 'https';
+import FormData from 'form-data';
 
 /**
  * Makes Http calls on specified urls.
@@ -36,6 +37,7 @@ export class HttpClient {
      * @param response The post response handler function.
      */
     sendPostHandleResponse(url: string, formData: string, response: (chunk: any) => void) {
+
         const aUrl = new URL(url);
         var post_options = {
             host: aUrl.host,
@@ -58,6 +60,42 @@ export class HttpClient {
         // post the data
         post_req.write(formData);
         post_req.end();
+    }
+
+    /**
+     * Sends a post request to the specified url with the specified data.
+     * @param url The url to send a post request to.
+     * @param formData The data to put in the post.
+     */
+    sendPostForm(url: string, form: FormData) {
+        this.sendPostFormHandleResponse(url, form, function (chunk) {
+            console.log('Response: ' + chunk);
+        })
+    }
+
+    /**
+     * Sends a post request to the specified url with the specified data.
+     * @param url The url to send a post request to.
+     * @param form The data to put in the post.
+     * @param response The post response handler function.
+     */
+    sendPostFormHandleResponse(url: string, form: FormData, response: (chunk: any) => void) {
+        const aUrl = new URL(url);
+        var post_options = {
+            host: aUrl.host,
+            port: aUrl.port,
+            path: aUrl.pathname,
+            method: 'POST',
+            headers: form.getHeaders()
+        };
+
+        // Set up the request
+        var post_req = https.request(post_options, function (res) {
+            res.on('data', response);
+        });
+
+        // post the data
+        form.pipe(post_req)
     }
 
     /**
@@ -94,7 +132,8 @@ export class HttpClient {
             res.on('data', response);
         });
 
-        // post the data
+        // get the data
         get_req.end();
     }
+
 }

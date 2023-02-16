@@ -2,11 +2,21 @@ import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ArcObjects } from './ArcObjects';
 import { ArcObservation } from './ArcObservation';
 import { HttpClient } from './HttpClient';
+import { Attachment } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
+import environment from '@ngageoint/mage.service/lib/environment/env'
+import fs from 'fs'
+import path from 'path'
+import FormData from 'form-data';
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
  */
 export class ObservationsSender {
+
+    /**
+     * The base url to the feature layer.
+     */
+    _url: string;
 
     /**
      * The full url to the feature layer receiving observations.
@@ -29,15 +39,22 @@ export class ObservationsSender {
     _httpClient: HttpClient;
 
     /**
+     * The attachment base directory
+     */
+    _attachmentDirectory: string;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
-        this._urlAdd = config.featureLayers[0] + '/addFeatures';
-        this._urlUpdate = config.featureLayers[0] + '/updateFeatures';
+        this._url = config.featureLayers[0];
+        this._urlAdd = this._url + '/addFeatures';
+        this._urlUpdate = this._url + '/updateFeatures';
         this._console = console;
         this._httpClient = new HttpClient(console);
+        this._attachmentDirectory = environment.attachmentBaseDirectory;
     }
 
     /**
@@ -75,7 +92,7 @@ export class ObservationsSender {
      * @param observations The observations sent.
      * @returns The response handler.
      */
-    responseHandler(observations: ArcObjects): (chunk: any) => void {
+    private responseHandler(observations: ArcObjects): (chunk: any) => void {
         return (chunk: any) => {
             console.log('Response: ' + chunk);
             const response = JSON.parse(chunk)
@@ -88,7 +105,8 @@ export class ObservationsSender {
                     if (result.success != null && result.success) {
                         const objectId = result.objectId
                         if (objectId != null) {
-                            this.sendAttachment(observation, objectId)
+                            console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
+                            this.sendAttachments(observation, objectId)
                         }
                     }
                 }
@@ -97,13 +115,41 @@ export class ObservationsSender {
     }
 
     /**
-     * Send an observation attachment.
+     * Send observation attachments.
      * @param observation The observation.
      * @param objectId The arc object id of the observation.
      */
-    sendAttachment(observation: ArcObservation, objectId: number) {
-        console.log('Observation id: ' + observation.id + ', Object id: ' + objectId)
-        // TODO send attachments
+    private sendAttachments(observation: ArcObservation, objectId: number) {
+        if (observation.attachments != null) {
+            for (const attachment of observation.attachments) {
+                if (attachment.contentLocator != null) {
+                    this.sendAttachment(attachment, objectId)
+                }
+            }
+        }
+    }
+
+    /**
+     * Send an observation attachment.
+     * @param attachment The observation attachment.
+     * @param objectId The arc object id of the observation.
+     */
+     private sendAttachment(attachment: Attachment, objectId: number) {
+
+        const url = this._url + '/' + objectId + '/addAttachment?f=json'
+
+        const file = path.join(this._attachmentDirectory, attachment.contentLocator!)
+
+        this._console.info('ArcGIS addAttachment url ' + url)
+        this._console.info('ArcGIS addAttachment file ' + attachment.name + ' at ' + file)
+
+        const readStream = fs.createReadStream(file)
+
+        const form = new FormData()
+        form.append('attachment', readStream)
+
+        this._httpClient.sendPostForm(url, form)
+
     }
 
 }

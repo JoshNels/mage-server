@@ -49,8 +49,12 @@ export class ObservationBinner {
      */
     pendingUpdates(): ObservationBins {
         const newAndUpdates = new ObservationBins();
-        newAndUpdates.adds = this._pendingNewAndUpdates.adds;
-        newAndUpdates.updates = this._pendingNewAndUpdates.updates;
+        for (let i = 0; i < this._pendingNewAndUpdates.adds.count(); i++) {
+            newAndUpdates.adds.add(this._pendingNewAndUpdates.adds.observations[i]);
+        }
+        for (let i = 0; i < this._pendingNewAndUpdates.updates.count(); i++) {
+            newAndUpdates.updates.add(this._pendingNewAndUpdates.updates.observations[i]);
+        }
         this._pendingNewAndUpdates.clear();
 
         return newAndUpdates;
@@ -91,7 +95,8 @@ export class ObservationBinner {
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryResults;
-            if (result.objectIds !== undefined && result.objectIds.length > 0) {
+            if (result.objectIds !== undefined && result.objectIds != null && result.objectIds.length > 0) {
+                arcObservation.object.attributes['OBJECTID'] = result.objectIds[0];
                 this._pendingNewAndUpdates.updates.add(arcObservation);
             } else {
                 this._pendingNewAndUpdates.adds.add(arcObservation);

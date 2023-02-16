@@ -115,19 +115,18 @@ export class HttpClient {
      */
     sendGetHandleResponse(url: string, response: (chunk: any) => void) {
         const aUrl = new URL(url);
-        var post_options = {
+        var options = {
             host: aUrl.host,
             port: aUrl.port,
-            path: aUrl.pathname,
+            path: aUrl.pathname + '?' + aUrl.searchParams,
             method: 'GET',
             headers: {
-                'content-type': 'application/x-www-form-urlencoded',
                 'accept': 'application/json'
             }
         };
 
         // Set up the request
-        var get_req = https.request(post_options, function (res) {
+        var get_req = https.request(options, function (res) {
             res.setEncoding('utf8');
             res.on('data', response);
         });

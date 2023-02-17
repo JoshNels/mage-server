@@ -43,6 +43,11 @@ export class ObservationsSender {
     _attachmentDirectory: string;
 
     /**
+     * The attachment last modified time tolerance
+     */
+    _attachmentModifiedTolerance: number;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
@@ -54,6 +59,7 @@ export class ObservationsSender {
         this._console = console;
         this._httpClient = new HttpClient(console);
         this._attachmentDirectory = environment.attachmentBaseDirectory;
+        this._attachmentModifiedTolerance = config.attachmentModifiedTolerance;
     }
 
     /**
@@ -126,7 +132,7 @@ export class ObservationsSender {
                         if (objectId != null) {
                             console.log((update ? 'Update' : 'Add') + ' Features Observation id: ' + observation.id + ', Object id: ' + objectId)
                             if (update) {
-                                this.updateAttachments(observation, objectId)
+                                this.queryAndUpdateAttachments(observation, objectId)
                             } else{
                                 this.sendAttachments(observation, objectId)
                             }
@@ -145,27 +151,71 @@ export class ObservationsSender {
     private sendAttachments(observation: ArcObservation, objectId: number) {
         if (observation.attachments != null) {
             for (const attachment of observation.attachments) {
-                if (attachment.contentLocator != null) {
-                    this.sendAttachment(attachment, objectId)
-                }
+                this.sendAttachment(attachment, objectId)
             }
         }
+    }
+
+    /**
+     * Query for and update observation attachments.
+     * @param observation The observation.
+     * @param objectId The arc object id of the observation.
+     */
+    private queryAndUpdateAttachments(observation: ArcObservation, objectId: number) {
+
+        // Query for existing attachments
+        const queryUrl = this._url + '/' + objectId + '/attachments?f=json'
+        this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
+            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
+            const result = JSON.parse(chunk)
+            this.updateAttachments(observation, objectId, result.attachmentInfos)
+        })
+
     }
 
     /**
      * Update observation attachments.
      * @param observation The observation.
      * @param objectId The arc object id of the observation.
+     * @param attachmentInfos The arc attachment infos.
      */
-    private updateAttachments(observation: ArcObservation, objectId: number) {
-        // TODO query for attachments to find needed deletions
-        if (observation.attachments != null) {
-            for (const attachment of observation.attachments) {
-                if (attachment.lastModified != null && attachment.lastModified >= observation.lastModified) {
-                    // TODO Determine if new or udpate
-                }
+    private updateAttachments(observation: ArcObservation, objectId: number, attachmentInfos: any[]) {
+
+        // Build a mapping between existing arc attachment names and the attachment infos
+        let nameAttachments: { [name: string]: any } = {}
+        if (attachmentInfos != null) {
+            for (const attachmentInfo of attachmentInfos) {
+                nameAttachments[attachmentInfo.name] = attachmentInfo
             }
         }
+
+        // Update existing attachments as needed and add new updated observation attachments
+        if (observation.attachments != null) {
+            for (const attachment of observation.attachments) {
+
+                const fileName = this.attachmentFileName(attachment)
+
+                const existingAttachment = nameAttachments[fileName]
+                if (existingAttachment != null) {
+                    delete nameAttachments[fileName]
+                    // Update the existing attachment if the file sizes do not match or last modified date updated
+                    if (attachment.size != existingAttachment.size
+                        || attachment.lastModified + this._attachmentModifiedTolerance >= observation.lastModified) {
+                        this.updateAttachment(attachment, objectId, existingAttachment.id)
+                    }
+                } else {
+                    // Add the new attachment on the updated observation
+                    this.sendAttachment(attachment, objectId)
+                }
+
+            }
+        }
+
+        // Delete arc attachments that are no longer on the observation
+        if (Object.keys(nameAttachments).length > 0) {
+            this.deleteAttachments(objectId, Object.values(nameAttachments))
+        }
+
     }
 
     /**
@@ -196,34 +246,93 @@ export class ObservationsSender {
      * Send an observation attachment post request.
      * @param attachment The observation attachment.
      * @param objectId The arc object id of the observation.
-     * @param request The attachment request type
+     * @param request The attachment request type.
      * @param form The request form data
      */
     private sendAttachmentPost(attachment: ArcAttachment, objectId: number, request: string, form: FormData) {
 
-        const url = this._url + '/' + objectId + '/' + request
+        if (attachment.contentLocator != null) {
 
-        const file = path.join(this._attachmentDirectory, attachment.contentLocator!)
+            const url = this._url + '/' + objectId + '/' + request
 
-        let filename = attachment.field
+            const file = path.join(this._attachmentDirectory, attachment.contentLocator!)
 
-        const extensionIndex = file.lastIndexOf('.')
-        if (extensionIndex != -1) {
-            filename += file.substring(extensionIndex)
+            const fileName = this.attachmentFileName(attachment)
+
+            this._console.info('ArcGIS ' + request + ' url ' + url)
+            this._console.info('ArcGIS ' + request + ' file ' + fileName + ' from ' + file)
+
+            const readStream = fs.createReadStream(file)
+
+            form.append('attachment', readStream, {
+                filename: fileName
+            })
+            form.append('f', 'json')
+
+            this._httpClient.sendPostForm(url, form)
+
         }
 
-        this._console.info('ArcGIS ' + request + ' url ' + url)
-        this._console.info('ArcGIS ' + request + ' file ' + filename + ' from ' + file)
+    }
 
-        const readStream = fs.createReadStream(file)
+    /**
+     * Delete observation attachments.
+     * @param objectId The arc object id of the observation.
+     * @param attachmentInfos The arc attachment infos.
+     */
+    private deleteAttachments(objectId: number, attachmentInfos: any[]){
 
-        form.append('attachment', readStream, {
-            filename: filename
-        })
+        const attachmentIds: number[] = []
+
+        for (const attachmentInfo of attachmentInfos) {
+            attachmentIds.push(attachmentInfo.id)
+        }
+
+        this.deleteAttachmentIds(objectId, attachmentIds)
+    }
+
+    /**
+     * Delete observation attachments by ids.
+     * @param objectId The arc object id of the observation.
+     * @param attachmentIds The arc attachment ids.
+     */
+    private deleteAttachmentIds(objectId: number, attachmentIds: number[]){
+
+        const url = this._url + '/' + objectId + '/deleteAttachments'
+
+        let ids = ''
+        for (const id of attachmentIds) {
+            if (ids.length > 0) {
+                ids += ', '
+            }
+            ids += id
+        }
+
+        this._console.info('ArcGIS deleteAttachments url ' + url + ', ids: ' + ids)
+
+        const form = new FormData()
+        form.append('attachmentIds', ids)
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
 
+    }
+
+    /**
+     * Determine the attachment file name.
+     * @param attachment The observation attachment.
+     * @return attachment file name.
+     */
+    private attachmentFileName(attachment: ArcAttachment): string {
+
+        let fileName = attachment.field + "_" + attachment.name
+
+        const extensionIndex = attachment.contentLocator.lastIndexOf('.')
+        if (extensionIndex != -1) {
+            fileName += attachment.contentLocator.substring(extensionIndex)
+        }
+
+        return fileName
     }
 
 }

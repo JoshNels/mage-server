@@ -259,6 +259,19 @@ export class ObservationsTransformer {
                 if (attachment.lastModified != null) {
                     arcAttachment.lastModified = new Date(attachment.lastModified).getTime()
                 }
+                if (attachment.size != null) {
+                    arcAttachment.size = attachment.size
+                }
+                if (attachment.name != null) {
+                    const extensionIndex = attachment.name.lastIndexOf('.')
+                    if (extensionIndex != -1) {
+                        arcAttachment.name = attachment.name.substring(0, extensionIndex)
+                    } else {
+                        arcAttachment.name = attachment.name
+                    }
+                } else {
+                    arcAttachment.name = attachment.id
+                }
                 arcAttachment.contentLocator = attachment.contentLocator
 
                 arcAttachments.push(arcAttachment)

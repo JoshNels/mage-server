@@ -11,6 +11,8 @@ export interface ArcObservation {
 
 export interface ArcAttachment {
     field: string,
-    lastModified: number
+    lastModified: number,
+    size: number,
+    name: string,
     contentLocator: string
 }

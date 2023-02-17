@@ -24,5 +24,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   enabled: true,
   intervalSeconds: 60,
   batchSize: 100,
-  featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0']
+  featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
+  'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
+  'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2']
 })

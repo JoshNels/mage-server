@@ -1,5 +1,4 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
-import { ArcObject } from "./ArcObject";
 import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { HttpClient } from "./HttpClient";
@@ -38,7 +37,7 @@ export class ObservationBinner {
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = config.featureLayers[0] + '/query?returnIdsOnly=true&f=json&where=description=\'';
+        this._url = config.featureLayers[0] + '/query?returnIdsOnly=true&f=json&where=' + config.observationIdField + '=\'';
         this._pendingNewAndUpdates = new ObservationBins;
         this._console = console;
     }

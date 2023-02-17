@@ -1,3 +1,4 @@
+import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ObservationAttrs, Attachment } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.events'
 import { User } from '@ngageoint/mage.service/lib/entities/users/entities.users'
@@ -17,10 +18,17 @@ export class ObservationsTransformer {
     _console: Console
 
     /**
+     * The observation id field
+     */
+    _observationIdField: string;
+
+    /**
      * Constructor.
+     * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
-    constructor(console: Console) {
+    constructor(config: ArcGISPluginConfig, console: Console) {
+        this._observationIdField = config.observationIdField
         this._console = console
     }
 
@@ -48,9 +56,6 @@ export class ObservationsTransformer {
             formIds = this.propertiesToAttributes(observation.properties, mageEvent, arcObject)
         }
 
-        // TODO DELETE THE FOLLOWING LINE (Temporary observation id as description value override)
-        this.addAttribute('description', observation.id, arcObject)
-
         const arcObservation = {} as ArcObservation
 
         arcObservation.id = observation.id
@@ -70,7 +75,7 @@ export class ObservationsTransformer {
      * @param arcObject The converted ArcObject.
      */
     private observationToAttributes(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null, arcObject: ArcObject) {
-        this.addAttribute('id', observation.id, arcObject)
+        this.addAttribute(this._observationIdField, observation.id, arcObject)
         this.addAttribute('eventId', observation.eventId, arcObject)
         if (mageEvent != null) {
             this.addAttribute('eventName', mageEvent.name, arcObject)

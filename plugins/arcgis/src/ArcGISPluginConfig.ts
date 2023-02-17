@@ -23,6 +23,11 @@ export interface ArcGISPluginConfig {
   featureLayers: string[]
 
   /**
+   * The field name to save and query the observation id to and from the ArcGIS server.
+   */
+  observationIdField: string
+
+  /**
    * The time tolerance in miliseconds to consider an attachment last modified time equal
    * to or after an observation last modified time.
    */
@@ -37,5 +42,6 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
+  observationIdField: 'description', // TODO temporary default to use editable 'description' field on arcgis test servers
   attachmentModifiedTolerance: 5000
 })

@@ -91,7 +91,7 @@ export class ObservationProcessor {
         this._userRepo = userRepo;
         this._lastTimeStamp = 0;
         this._console = console;
-        this._transformer = new ObservationsTransformer(this._console);
+        this._transformer = new ObservationsTransformer(config, console);
         this._sender = new ObservationsSender(config, console);
         this._binner = new ObservationBinner(config, console);
     }

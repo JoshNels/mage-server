@@ -185,14 +185,22 @@ export class ObservationsTransformer {
      */
      private formsToAttributes(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject): { [name: string]: number } {
 
-        const formIds: { [name: string]: number } = {}
+        const formIds: { [id: string]: number } = {}
+        const formIdCount: { [id: number]: number } = {}
 
         for (let i = 0; i < forms.length; i++) {
             const form = forms[i]
             const formId = form['formId']
             const id = form['id']
+            let formCount = 1
             if (formId != null && id != null) {
                 formIds[id] = formId
+                let count = formIdCount[formId]
+                if (count == null) {
+                    count = 0
+                }
+                formCount = count + 1
+                formIdCount[formId] = formCount
             }
             for (const formProperty in form) {
                 let value = form[formProperty]
@@ -200,13 +208,15 @@ export class ObservationsTransformer {
                     if (mageEvent != null && formId != null) {
                         const field = mageEvent.formFieldFor(formProperty, formId)
                         if (field != null && field.type !== FormFieldType.Attachment) {
+                            let title = this.appendCount(field.title, formCount)
                             if (field.type == FormFieldType.Geometry) {
                                 value = this.geometryToArcGeometry(value)
                             }
-                            this.addAttribute(field.title, value, arcObject)
+                            this.addAttribute(title, value, arcObject)
                         }
                     } else {
-                        this.addAttribute(formProperty, value, arcObject)
+                        let title = this.appendCount(formProperty, formCount)
+                        this.addAttribute(title, value, arcObject)
                     }
                 }
             }
@@ -226,6 +236,7 @@ export class ObservationsTransformer {
             if (arcObject.attributes == null) {
                 arcObject.attributes = {}
             }
+            key = this.replaceSpaces(key)
             if (Object.prototype.toString.call(value) === '[object Date]') {
                 value = new Date(value).getTime()
             }
@@ -260,7 +271,7 @@ export class ObservationsTransformer {
                 }
 
                 const arcAttachment = {} as ArcAttachment
-                arcAttachment.field = fieldName
+                arcAttachment.field = this.replaceSpaces(fieldName)
                 if (attachment.lastModified != null) {
                     arcAttachment.lastModified = new Date(attachment.lastModified).getTime()
                 }
@@ -285,5 +296,28 @@ export class ObservationsTransformer {
 
         return arcAttachments
      }
+
+    /**
+     * Replace spaces in the name with underscores.
+     * @param name The name.
+     * @return name with replaced spaces.
+     */
+    private replaceSpaces(name: string): string {
+        return name.replace(/ /g, '_')
+    }
+
+    /**
+     * Append a count to a name for additional duplicate field names.
+     * @param name The name.
+     * @param count The count.
+     * @return name with count.
+     */
+    private appendCount(name: string, count: number): string {
+        let value = name
+        if (count > 1) {
+            value += '_' + count
+        }
+        return value
+    }
 
 }

@@ -7,21 +7,47 @@ export interface ArcObject {
     }
 }
 
-export interface ArcGeometry {
+export class ArcGeometry {
     spatialReference: {
         wkid: number
+    };
+    esriGeometryType: string;
+
+    constructor() {
+        this.spatialReference = {
+            wkid: 4326
+        };
+        this.esriGeometryType = 'esriGeometryPoint';
     }
 }
 
-export interface ArcPoint extends ArcGeometry {
-    x: number
-    y: number
+export class ArcPoint extends ArcGeometry {
+    x: number;
+    y: number;
+
+    constructor() {
+        super();
+        this.x = 0;
+        this.y = 0;
+    }
 }
 
-export interface ArcPolyline extends ArcGeometry {
-    paths: number[][][]
+export class ArcPolyline extends ArcGeometry {
+    paths: number[][][];
+
+    constructor() {
+        super();
+        this.paths = [];
+        super.esriGeometryType = 'esriGeometryPolyline'
+    }
 }
 
-export interface ArcPolygon extends ArcGeometry {
-    rings: number[][][]
+export class ArcPolygon extends ArcGeometry {
+    rings: number[][][];
+
+    constructor() {
+        super();
+        this.rings = [];
+        super.esriGeometryType = 'esriGeometryPolygon';
+    }
 }

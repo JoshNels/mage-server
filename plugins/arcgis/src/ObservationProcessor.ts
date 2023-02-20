@@ -110,8 +110,8 @@ export class ObservationProcessor {
         this._lastTimeStamp = 0;
         this._console = console;
         this._transformer = new ObservationsTransformer(config, console);
-        this._sender = new ObservationsSender(config, console);
-        this._binner = new ObservationBinner(config, console);
+        this._sender = new ObservationsSender(config.featureLayers[0], config.attachmentModifiedTolerance, console);
+        this._binner = new ObservationBinner(config.featureLayers[0], config.observationIdField, console);
         this._layerInfos = [];
         this._layerQuerier = new LayerQuerier(console);
     }
@@ -156,26 +156,28 @@ export class ObservationProcessor {
      */
     private async processAndScheduleNext() {
         if (this._isRunning) {
-            this._console.info('ArcGIS plugin checking for any pending updates or adds');
-            const bins = this._binner.pendingUpdates();
-            this.send(bins);
-            this._console.info('ArcGIS plugin processing new observations...');
-            const queryTime = this._lastTimeStamp;
-            this._lastTimeStamp = Date.now();
-            const activeEvents = await this._eventRepo.findActiveEvents();
-            for (const activeEvent of activeEvents) {
-                this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
-                const obsRepo = await this._obsRepos(activeEvent.id);
-                const pagingSettings = {
-                    pageSize: this._batchSize,
-                    pageIndex: 0,
-                    includeTotalCount: true
-                }
-                let morePages = true;
-                let numberLeft = 0;
-                while (morePages) {
-                    numberLeft = await this.queryAndSend(obsRepo, pagingSettings, queryTime, numberLeft);
-                    morePages = numberLeft > 0;
+            if (this._layerInfos.length > 0) {
+                this._console.info('ArcGIS plugin checking for any pending updates or adds');
+                const bins = this._binner.pendingUpdates();
+                this.send(bins);
+                this._console.info('ArcGIS plugin processing new observations...');
+                const queryTime = this._lastTimeStamp;
+                this._lastTimeStamp = Date.now();
+                const activeEvents = await this._eventRepo.findActiveEvents();
+                for (const activeEvent of activeEvents) {
+                    this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
+                    const obsRepo = await this._obsRepos(activeEvent.id);
+                    const pagingSettings = {
+                        pageSize: this._batchSize,
+                        pageIndex: 0,
+                        includeTotalCount: true
+                    }
+                    let morePages = true;
+                    let numberLeft = 0;
+                    while (morePages) {
+                        numberLeft = await this.queryAndSend(obsRepo, pagingSettings, queryTime, numberLeft);
+                        morePages = numberLeft > 0;
+                    }
                 }
             }
             if (this._isRunning) {

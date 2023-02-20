@@ -49,17 +49,18 @@ export class ObservationsSender {
 
     /**
      * Constructor.
-     * @param config The plugins configuration.
+     * @param url The url to the feature layer.
+     * @param attachmentModifiedTolerance The attachment last modified time tolerance.
      * @param console Used to log to the console.
      */
-    constructor(config: ArcGISPluginConfig, console: Console) {
-        this._url = config.featureLayers[0];
+    constructor(url: string, attachmentModifiedTolerance: number, console: Console) {
+        this._url = url;
         this._urlAdd = this._url + '/addFeatures';
         this._urlUpdate = this._url + '/updateFeatures';
         this._console = console;
         this._httpClient = new HttpClient(console);
         this._attachmentDirectory = environment.attachmentBaseDirectory;
-        this._attachmentModifiedTolerance = config.attachmentModifiedTolerance;
+        this._attachmentModifiedTolerance = attachmentModifiedTolerance;
     }
 
     /**

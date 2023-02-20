@@ -32,12 +32,13 @@ export class ObservationBinner {
 
     /**
      * Constructor.
-     * @param config The plugins configuration.
+     * @param url The url to the feature layer.
+     * @param obsFieldId The field that stores the observation id.
      * @param console Used to log to the console.
      */
-    constructor(config: ArcGISPluginConfig, console: Console) {
+    constructor(url: string, obsFieldId: string, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = config.featureLayers[0] + '/query?returnIdsOnly=true&f=json&where=' + config.observationIdField + '=\'';
+        this._url = url + '/query?returnIdsOnly=true&f=json&where=' + obsFieldId + '=\'';
         this._pendingNewAndUpdates = new ObservationBins;
         this._console = console;
     }

@@ -325,7 +325,7 @@ export class ObservationsSender {
      */
     private attachmentFileName(attachment: ArcAttachment): string {
 
-        let fileName = attachment.field + "_" + attachment.name
+        let fileName = attachment.field.replace(/ /g, '_') + "_" + attachment.name
 
         const extensionIndex = attachment.contentLocator.lastIndexOf('.')
         if (extensionIndex != -1) {

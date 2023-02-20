@@ -184,7 +184,7 @@ export class ObservationsTransformer {
      * @return form ids map
      */
      private formsToAttributes(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject): { [name: string]: number } {
-        
+
         const formIds: { [name: string]: number } = {}
 
         for (let i = 0; i < forms.length; i++) {
@@ -241,7 +241,7 @@ export class ObservationsTransformer {
      * @return  The converted ArcAttachments.
      */
     private attachments(attachments: readonly Attachment[], formIds: { [name: string]: number }, mageEvent: MageEvent | null): ArcAttachment[] {
-        
+
         const arcAttachments: ArcAttachment[] = []
 
         for (const attachment of attachments) {

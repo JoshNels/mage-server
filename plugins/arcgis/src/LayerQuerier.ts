@@ -9,12 +9,12 @@ export class LayerQuerier {
     /**
      * Used to make the get request about the feature layer.
      */
-    _httpClient: HttpClient;
+    private _httpClient: HttpClient;
 
     /**
      * Used to log messages.
      */
-    _console: Console;
+    private _console: Console;
 
     /**
      * Constructor.
@@ -31,7 +31,7 @@ export class LayerQuerier {
      * @param infoCallback Function to call once response has been received and parsed.
      */
     queryLayerInfo(url: string, infoCallback: (layerInfo: LayerInfo) => void) {
-        this._httpClient.sendGetHandleResponse(url + '?f=pson', this.parseLayerInfo(url, infoCallback));
+        this._httpClient.sendGetHandleResponse(url + '?f=pjson', this.parseLayerInfo(url, infoCallback));
     }
 
     /**
@@ -41,9 +41,9 @@ export class LayerQuerier {
      */
     private parseLayerInfo(url: string, infoCallback: (LayerInfo: LayerInfo) => void) {
         return (chunk: any) => {
-            this._console.log('Query layer response for ' + url + ' ' + chunk);
             let info = JSON.parse(chunk) as LayerInfo;
             info.url = url;
+            this._console.log('Query layer response for ' + url + ' geometryType: ' + info.geometryType);
             infoCallback(info);
         }
     }

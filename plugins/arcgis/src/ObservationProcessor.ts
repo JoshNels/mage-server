@@ -8,6 +8,8 @@ import { ObservationsSender } from './ObservationsSender';
 import { ArcObjects } from './ArcObjects'
 import { ObservationBins } from './ObservationBins';
 import { ObservationBinner } from './ObservationBinner';
+import { LayerQuerier } from './LayerQuerier';
+import { LayerInfo } from './LayerInfo';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -76,6 +78,21 @@ export class ObservationProcessor {
     _binner: ObservationBinner;
 
     /**
+     * Gets info about certain feature layers.
+     */
+    _layerQuerier: LayerQuerier;
+
+    /**
+     * Contains the different feature layers to send observations too.
+     */
+    _config: ArcGISPluginConfig;
+
+    /**
+     * Contains information about all layers we are sending observations to.
+     */
+    _layerInfos: LayerInfo[];
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -84,6 +101,7 @@ export class ObservationProcessor {
      * @param console Used to log to the console.
      */
     constructor(config: ArcGISPluginConfig, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, userRepo: UserRepository, console: Console) {
+        this._config = config;
         this._intervalSeconds = config.intervalSeconds;
         this._batchSize = config.batchSize;
         this._eventRepo = eventRepo;
@@ -94,6 +112,8 @@ export class ObservationProcessor {
         this._transformer = new ObservationsTransformer(config, console);
         this._sender = new ObservationsSender(config, console);
         this._binner = new ObservationBinner(config, console);
+        this._layerInfos = [];
+        this._layerQuerier = new LayerQuerier(console);
     }
 
     /**
@@ -101,6 +121,7 @@ export class ObservationProcessor {
      */
     start() {
         this._isRunning = true;
+        this.getLayerInfos();
         this.processAndScheduleNext();
     }
 
@@ -110,6 +131,24 @@ export class ObservationProcessor {
     stop() {
         this._isRunning = false;
         clearTimeout(this._nextTimeout);
+    }
+
+    /**
+     * Gets information on all the configured features layers.
+     */
+    private getLayerInfos() {
+        for (let i = 0; i < this._config.featureLayers.length; i++) {
+            const url = this._config.featureLayers[i];
+            this._layerQuerier.queryLayerInfo(url, (info: LayerInfo) => this.handleLayerInfo(info));
+        }
+    }
+
+    /**
+     * Called when information on a feature layer is returned from an arc server.
+     * @param info The information on a layer.
+     */
+    private handleLayerInfo(info: LayerInfo) {
+        this._layerInfos.push(info);
     }
 
     /**

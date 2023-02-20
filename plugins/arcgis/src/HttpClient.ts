@@ -129,8 +129,10 @@ export class HttpClient {
 
         // Set up the request
         var get_req = https.request(options, function (res) {
+            let data = '';
             res.setEncoding('utf8');
-            res.on('data', response);
+            res.on('data', (chunk: string): void => {data += chunk;});
+            res.on('end', (): void =>{response(data);});
         });
 
         // get the data

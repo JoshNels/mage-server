@@ -1,7 +1,7 @@
 /**
  * Contains information about a specific arc feature layer.
  */
-export class FeatureServerMetadata {
+export class LayerInfo {
 
     /**
      * The url to the feature layer.

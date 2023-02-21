@@ -50,6 +50,7 @@ export class FeatureLayerProcessor {
      */
     processArcObjects(observations: ArcObjects) {
         const arcObjectsForLayer = new ArcObjects();
+        arcObjectsForLayer.firstRun = observations.firstRun;
         for (const arcObservation of observations.observations) {
             if (this._layerInfo.geometryType == 'esriGeometryPoint' && arcObservation.object.geometry instanceof ArcPoint
                 || this._layerInfo.geometryType == 'esriGeometryPolyline' && arcObservation.object.geometry instanceof ArcPolyline

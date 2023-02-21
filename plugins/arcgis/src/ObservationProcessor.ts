@@ -94,6 +94,12 @@ export class ObservationProcessor {
     _layerProcessors: FeatureLayerProcessor[];
 
     /**
+     * True if this is a first run at updating arc feature layers.  If so we need to make sure the layers are
+     * all up to date.
+     */
+    _firstRun: boolean;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -115,6 +121,7 @@ export class ObservationProcessor {
         this._binner = new ObservationBinner(config.featureLayers[0], config, console);
         this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
+        this._firstRun = true;
     }
 
     /**
@@ -122,6 +129,7 @@ export class ObservationProcessor {
      */
     start() {
         this._isRunning = true;
+        this._firstRun = true;
         this.getLayerInfos();
         this.processAndScheduleNext();
     }
@@ -230,6 +238,8 @@ export class ObservationProcessor {
                     arcObjects.add(arcObservation)
                 }
             }
+            arcObjects.firstRun = this._firstRun;
+            this._firstRun = false;
             for(const layerProcessor of this._layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }

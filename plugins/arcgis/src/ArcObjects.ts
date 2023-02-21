@@ -17,11 +17,19 @@ export class ArcObjects {
     observations: ArcObservation[]
 
     /**
+     * Indicates if these arc objects have been created from observations in the database and this
+     * is the server's first run at it.  If its the servers first run we will need to ensure
+     * the arc feature layers are all up to date.
+     */
+    firstRun: boolean;
+
+    /**
      * Constructor.
      */
     constructor() {
         this.objects = []
         this.observations = []
+        this.firstRun = false;
     }
 
     /**

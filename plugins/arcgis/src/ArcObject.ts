@@ -11,13 +11,11 @@ export class ArcGeometry {
     spatialReference: {
         wkid: number
     };
-    esriGeometryType: string;
 
     constructor() {
         this.spatialReference = {
             wkid: 4326
         };
-        this.esriGeometryType = 'esriGeometryPoint';
     }
 }
 
@@ -38,7 +36,6 @@ export class ArcPolyline extends ArcGeometry {
     constructor() {
         super();
         this.paths = [];
-        super.esriGeometryType = 'esriGeometryPolyline'
     }
 }
 
@@ -48,6 +45,5 @@ export class ArcPolygon extends ArcGeometry {
     constructor() {
         super();
         this.rings = [];
-        super.esriGeometryType = 'esriGeometryPolygon';
     }
 }

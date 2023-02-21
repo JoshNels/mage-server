@@ -1,4 +1,5 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
+import { ArcPoint, ArcPolygon, ArcPolyline } from "./ArcObject";
 import { ArcObjects } from "./ArcObjects";
 import { LayerInfo } from "./LayerInfo";
 import { ObservationBinner } from "./ObservationBinner";
@@ -50,7 +51,9 @@ export class FeatureLayerProcessor {
     processArcObjects(observations: ArcObjects) {
         const arcObjectsForLayer = new ArcObjects();
         for (const arcObservation of observations.observations) {
-            if (this._layerInfo.geometryType == arcObservation.object.geometry.esriGeometryType) {
+            if (this._layerInfo.geometryType == 'esriGeometryPoint' && arcObservation.object.geometry instanceof ArcPoint
+                || this._layerInfo.geometryType == 'esriGeometryPolyline' && arcObservation.object.geometry instanceof ArcPolyline
+                || this._layerInfo.geometryType == 'esriGeometryPolygon' && arcObservation.object.geometry instanceof ArcPolygon) {
                 arcObjectsForLayer.add(arcObservation);
             }
         }

@@ -10,6 +10,7 @@ import { ObservationBins } from './ObservationBins';
 import { ObservationBinner } from './ObservationBinner';
 import { LayerQuerier } from './LayerQuerier';
 import { LayerInfo } from './LayerInfo';
+import { EventTransform } from './EventTransform';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -205,6 +206,7 @@ export class ObservationProcessor {
             }
             const observations = latestObs.items
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
+            const eventTransform = new EventTransform(this._config, mageEvent)
             const arcObjects = new ArcObjects()
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
@@ -212,10 +214,9 @@ export class ObservationProcessor {
                 if (observation.userId != null) {
                     user = await this._userRepo.findById(observation.userId)
                 }
-                const arcObservation = this._transformer.transform(observation, mageEvent, user)
+                const arcObservation = this._transformer.transform(observation, eventTransform, user)
                 arcObjects.add(arcObservation)
             }
-            this._console.info('ArcGIS json ' + arcObjects.objects);
             const bins = this._binner.sortEmOut(arcObjects);
             this.send(bins);
             newNumberLeft -= latestObs.items.length;

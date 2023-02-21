@@ -28,6 +28,46 @@ export interface ArcGISPluginConfig {
   observationIdField: string
 
   /**
+   * The event id field attribute name.
+   */
+  eventIdField: string
+
+  /**
+   * The event name field attribute name.
+   */
+  eventNameField: string
+
+  /**
+   * The user id field attribute name.
+   */
+  userIdField: string
+
+  /**
+   * The username field attribute name.
+   */
+  usernameField: string
+
+  /**
+   * The user display name field attribute name.
+   */
+  userDisplayNameField: string
+
+  /**
+   * The device id field attribute name.
+   */
+  deviceIdField: string
+
+  /**
+   * The created at field attribute name.
+   */
+  createdAtField: string
+
+  /**
+   * The last modified field attribute name.
+   */
+  lastModifiedField: string
+
+  /**
    * The time tolerance in miliseconds to consider an attachment last modified time equal
    * to or after an observation last modified time.
    */
@@ -43,5 +83,13 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
   observationIdField: 'description', // TODO temporary default to use editable 'description' field on arcgis test servers
+  eventIdField: 'event_id',
+  eventNameField: 'event_name',
+  userIdField: 'user_id',
+  usernameField: 'username',
+  userDisplayNameField: 'user_display_name',
+  deviceIdField: 'device_id',
+  createdAtField: 'created_at',
+  lastModifiedField: 'last_modified',
   attachmentModifiedTolerance: 5000
 })

@@ -128,7 +128,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPoint.
      */
     private pointToArcPoint(point: Point): ArcPoint {
-        const arcPoint = {} as ArcPoint
+        const arcPoint = new ArcPoint();
         arcPoint.x = point.coordinates[0]
         arcPoint.y = point.coordinates[1]
         return arcPoint
@@ -140,7 +140,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPolyline.
      */
     private lineStringToArcPolyline(lineString: LineString): ArcPolyline {
-        const arcPolyline = {} as ArcPolyline
+        const arcPolyline = new ArcPolyline();
         arcPolyline.paths = [lineString.coordinates]
         return arcPolyline
     }
@@ -151,7 +151,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPolygon.
      */
     private polygonToArcPolygon(polygon: Polygon): ArcPolygon {
-        const arcPolygon = {} as ArcPolygon
+        const arcPolygon = new ArcPolygon();
         arcPolygon.rings = polygon.coordinates
         return arcPolygon
     }

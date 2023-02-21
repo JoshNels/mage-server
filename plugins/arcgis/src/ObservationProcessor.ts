@@ -10,6 +10,7 @@ import { ObservationBins } from './ObservationBins';
 import { ObservationBinner } from './ObservationBinner';
 import { LayerQuerier } from './LayerQuerier';
 import { LayerInfo } from './LayerInfo';
+import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -88,9 +89,9 @@ export class ObservationProcessor {
     _config: ArcGISPluginConfig;
 
     /**
-     * Contains information about all layers we are sending observations to.
+     * Sends observations to a single feature layer.
      */
-    _layerInfos: LayerInfo[];
+    _layerProcessors: FeatureLayerProcessor[];
 
     /**
      * Constructor.
@@ -112,7 +113,7 @@ export class ObservationProcessor {
         this._transformer = new ObservationsTransformer(config, console);
         this._sender = new ObservationsSender(config.featureLayers[0], config.attachmentModifiedTolerance, console);
         this._binner = new ObservationBinner(config.featureLayers[0], config.observationIdField, console);
-        this._layerInfos = [];
+        this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
     }
 
@@ -148,7 +149,8 @@ export class ObservationProcessor {
      * @param info The information on a layer.
      */
     private handleLayerInfo(info: LayerInfo) {
-        this._layerInfos.push(info);
+        const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
+        this._layerProcessors.push(layerProcessor);
     }
 
     /**
@@ -156,10 +158,11 @@ export class ObservationProcessor {
      */
     private async processAndScheduleNext() {
         if (this._isRunning) {
-            if (this._layerInfos.length > 0) {
+            if (this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');
-                const bins = this._binner.pendingUpdates();
-                this.send(bins);
+                for(const layerProcessor of this._layerProcessors) {
+                    layerProcessor.processPendingUpdates();
+                }
                 this._console.info('ArcGIS plugin processing new observations...');
                 const queryTime = this._lastTimeStamp;
                 this._lastTimeStamp = Date.now();
@@ -216,8 +219,9 @@ export class ObservationProcessor {
                 arcObjects.add(arcObservation)
             }
             this._console.info('ArcGIS json ' + arcObjects.objects);
-            const bins = this._binner.sortEmOut(arcObjects);
-            this.send(bins);
+            for(const layerProcessor of this._layerProcessors) {
+                layerProcessor.processArcObjects(arcObjects);
+            }
             newNumberLeft -= latestObs.items.length;
             pagingSettings.pageIndex++;
         } else {
@@ -226,18 +230,4 @@ export class ObservationProcessor {
 
         return newNumberLeft;
     }
-
-    /**
-     * Sends either the updates to observations or new observations to the arc server.
-     * @param bins Contains both new and updated observations.
-     */
-    private send(bins: ObservationBins) {
-        if (!bins.adds.isEmpty()) {
-            this._sender.sendAdds(bins.adds);
-        }
-        if (!bins.updates.isEmpty()) {
-            this._sender.sendUpdates(bins.updates);
-        }
-    }
-
 }

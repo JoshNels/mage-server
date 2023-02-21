@@ -1,4 +1,3 @@
-import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { HttpClient } from "./HttpClient";

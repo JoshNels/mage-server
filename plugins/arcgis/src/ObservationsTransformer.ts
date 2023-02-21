@@ -1,11 +1,11 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ObservationAttrs, Attachment } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
-import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.events'
 import { User } from '@ngageoint/mage.service/lib/entities/users/entities.users'
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { Geometry, Point, LineString, Polygon } from 'geojson'
 import { ArcObservation, ArcAttachment } from './ArcObservation'
 import { ArcGeometry, ArcObject, ArcPoint, ArcPolyline, ArcPolygon } from './ArcObject'
+import { EventTransform } from './EventTransform'
 
 /**
  * Class that transforms observations into a json string that can then be sent to an arcgis server.
@@ -13,14 +13,14 @@ import { ArcGeometry, ArcObject, ArcPoint, ArcPolyline, ArcPolygon } from './Arc
 export class ObservationsTransformer {
 
     /**
+     * ArcGIS configuration.
+     */
+    _config: ArcGISPluginConfig
+
+    /**
      * Used to log to the console.
      */
     _console: Console
-
-    /**
-     * The observation id field
-     */
-    _observationIdField: string;
 
     /**
      * Constructor.
@@ -28,21 +28,21 @@ export class ObservationsTransformer {
      * @param console Used to log to the console.
      */
     constructor(config: ArcGISPluginConfig, console: Console) {
-        this._observationIdField = config.observationIdField
+        this._config = config
         this._console = console
     }
 
     /**
      * Converts the specified observation into an ArcObservation that can be sent to an arcgis server.
      * @param observation The observation to convert.
-     * @param mageEvent The MAGE event.
+     * @param transform The Event transform.
      * @param user The MAGE user.
      * @returns The ArcObservation of the observation.
      */
-    transform(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null): ArcObservation {
+    transform(observation: ObservationAttrs, transform: EventTransform, user: User | null): ArcObservation {
         const arcObject = {} as ArcObject
 
-        this.observationToAttributes(observation, mageEvent, user, arcObject)
+        this.observationToAttributes(observation, transform, user, arcObject)
 
         if (observation.geometry != null) {
             let geometry = observation.geometry
@@ -53,7 +53,7 @@ export class ObservationsTransformer {
 
         let formIds: { [name: string]: number } = {}
         if (observation.properties != null) {
-            formIds = this.propertiesToAttributes(observation.properties, mageEvent, arcObject)
+            formIds = this.propertiesToAttributes(observation.properties, transform, arcObject)
         }
 
         const arcObservation = {} as ArcObservation
@@ -62,7 +62,7 @@ export class ObservationsTransformer {
         arcObservation.createdAt = arcObject.attributes['createdAt']
         arcObservation.lastModified = arcObject.attributes['lastModified']
         arcObservation.object = arcObject
-        arcObservation.attachments = this.attachments(observation.attachments, formIds, mageEvent)
+        arcObservation.attachments = this.attachments(observation.attachments, formIds, transform)
 
         return arcObservation
     }
@@ -70,28 +70,29 @@ export class ObservationsTransformer {
     /**
      * Converts and adds observation values to ArcObject attributes.
      * @param observation The observation to convert.
-     * @param mageEvent The MAGE event.
+     * @param transform The Event transform.
      * @param user The MAGE user.
      * @param arcObject The converted ArcObject.
      */
-    private observationToAttributes(observation: ObservationAttrs, mageEvent: MageEvent | null, user: User | null, arcObject: ArcObject) {
-        this.addAttribute(this._observationIdField, observation.id, arcObject)
-        this.addAttribute('eventId', observation.eventId, arcObject)
+    private observationToAttributes(observation: ObservationAttrs, transform: EventTransform, user: User | null, arcObject: ArcObject) {
+        this.addAttribute(this._config.observationIdField, observation.id, arcObject)
+        this.addAttribute(this._config.eventIdField, observation.eventId, arcObject)
+        let mageEvent = transform.mageEvent
         if (mageEvent != null) {
-            this.addAttribute('eventName', mageEvent.name, arcObject)
+            this.addAttribute(this._config.eventNameField, mageEvent.name, arcObject)
         }
         if (observation.userId != null) {
-            this.addAttribute('userId', observation.userId, arcObject)
+            this.addAttribute(this._config.userIdField, observation.userId, arcObject)
         }
         if (user != null) {
-            this.addAttribute('username', user.username, arcObject)
-            this.addAttribute('userDisplayName', user.displayName, arcObject)
+            this.addAttribute(this._config.usernameField, user.username, arcObject)
+            this.addAttribute(this._config.userDisplayNameField, user.displayName, arcObject)
         }
         if (observation.deviceId != null) {
-            this.addAttribute('deviceId', observation.deviceId, arcObject)
+            this.addAttribute(this._config.deviceIdField, observation.deviceId, arcObject)
         }
-        this.addAttribute('createdAt', observation.createdAt, arcObject)
-        this.addAttribute('lastModified', observation.lastModified, arcObject)
+        this.addAttribute(this._config.createdAtField, observation.createdAt, arcObject)
+        this.addAttribute(this._config.lastModifiedField, observation.lastModified, arcObject)
     }
 
     /**
@@ -159,16 +160,16 @@ export class ObservationsTransformer {
     /**
      * Converts and adds observation properties to ArcObject attributes.
      * @param properties The observation properties to convert.
-     * @param mageEvent The MAGE event.
+     * @param transform The Event transform.
      * @param arcObject The converted ArcObject.
      * @return form ids map
      */
-    private propertiesToAttributes(properties: { [name: string]: any }, mageEvent: MageEvent | null, arcObject: ArcObject): { [name: string]: number } {
+    private propertiesToAttributes(properties: { [name: string]: any }, transform: EventTransform, arcObject: ArcObject): { [name: string]: number } {
         let formIds: { [name: string]: number } = {}
         for (const property in properties) {
             const value = properties[property]
             if (property == 'forms') {
-                formIds = this.formsToAttributes(value, mageEvent, arcObject)
+                formIds = this.formsToAttributes(value, transform, arcObject)
             } else {
                 this.addAttribute(property, value, arcObject)
             }
@@ -179,19 +180,22 @@ export class ObservationsTransformer {
     /**
      * Converts and adds observation property forms data to ArcObject attributes.
      * @param forms The observation property forms to convert.
-     * @param mageEvent The MAGE event.
+     * @param transform The Event transform.
      * @param arcObject The converted ArcObject.
      * @return form ids map
      */
-     private formsToAttributes(forms: [{ [name: string]: any }], mageEvent: MageEvent | null, arcObject: ArcObject): { [name: string]: number } {
+    private formsToAttributes(forms: [{ [name: string]: any }], transform: EventTransform, arcObject: ArcObject): { [name: string]: number } {
 
         const formIds: { [id: string]: number } = {}
         const formIdCount: { [id: number]: number } = {}
+
+        let mageEvent = transform.mageEvent
 
         for (let i = 0; i < forms.length; i++) {
             const form = forms[i]
             const formId = form['formId']
             const id = form['id']
+            let fields = null
             let formCount = 1
             if (formId != null && id != null) {
                 formIds[id] = formId
@@ -201,6 +205,7 @@ export class ObservationsTransformer {
                 }
                 formCount = count + 1
                 formIdCount[formId] = formCount
+                fields = transform.get(formId)
             }
             for (const formProperty in form) {
                 let value = form[formProperty]
@@ -208,7 +213,14 @@ export class ObservationsTransformer {
                     if (mageEvent != null && formId != null) {
                         const field = mageEvent.formFieldFor(formProperty, formId)
                         if (field != null && field.type !== FormFieldType.Attachment) {
-                            let title = this.appendCount(field.title, formCount)
+                            let title = field.title
+                            if (fields != undefined) {
+                                const fieldTitle = fields.get(title)
+                                if (fieldTitle != undefined) {
+                                    title = fieldTitle
+                                }
+                            }
+                            title = this.appendCount(title, formCount)
                             if (field.type == FormFieldType.Geometry) {
                                 value = this.geometryToArcGeometry(value)
                             }
@@ -223,7 +235,7 @@ export class ObservationsTransformer {
         }
 
         return formIds
-     }
+    }
 
     /**
      * Add an ArcObject attribute.
@@ -248,12 +260,14 @@ export class ObservationsTransformer {
      * Transform observation attachments.
      * @param attachments The observation attachments.
      * @param formIds Form ids map.
-     * @param mageEvent The MAGE event.
+     * @param transform The Event transform.
      * @return  The converted ArcAttachments.
      */
-    private attachments(attachments: readonly Attachment[], formIds: { [name: string]: number }, mageEvent: MageEvent | null): ArcAttachment[] {
+    private attachments(attachments: readonly Attachment[], formIds: { [name: string]: number }, transform: EventTransform): ArcAttachment[] {
 
         const arcAttachments: ArcAttachment[] = []
+
+        let mageEvent = transform.mageEvent
 
         for (const attachment of attachments) {
 
@@ -295,7 +309,7 @@ export class ObservationsTransformer {
         }
 
         return arcAttachments
-     }
+    }
 
     /**
      * Replace spaces in the name with underscores.

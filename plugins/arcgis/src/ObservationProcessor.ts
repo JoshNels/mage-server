@@ -6,7 +6,6 @@ import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ObservationsSender } from './ObservationsSender';
 import { ArcObjects } from './ArcObjects'
-import { ObservationBins } from './ObservationBins';
 import { ObservationBinner } from './ObservationBinner';
 import { LayerQuerier } from './LayerQuerier';
 import { LayerInfo } from './LayerInfo';
@@ -112,8 +111,8 @@ export class ObservationProcessor {
         this._lastTimeStamp = 0;
         this._console = console;
         this._transformer = new ObservationsTransformer(config, console);
-        this._sender = new ObservationsSender(config.featureLayers[0], config.attachmentModifiedTolerance, console);
-        this._binner = new ObservationBinner(config.featureLayers[0], config.observationIdField, console);
+        this._sender = new ObservationsSender(config.featureLayers[0], config, console);
+        this._binner = new ObservationBinner(config.featureLayers[0], config, console);
         this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
     }
@@ -213,14 +212,24 @@ export class ObservationProcessor {
             const arcObjects = new ArcObjects()
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
-                let user = null
-                if (observation.userId != null) {
-                    user = await this._userRepo.findById(observation.userId)
+                let deletion = false
+                if (observation.states.length > 0) {
+                    deletion = observation.states[0].name.startsWith('archive')
                 }
-                const arcObservation = this._transformer.transform(observation, eventTransform, user)
-                arcObjects.add(arcObservation)
+                if (deletion) {
+                    // TODO select the appropriate layer processor by geometry
+                    for (const layerProcessor of this._layerProcessors) {
+                        layerProcessor.deleteObservation(observation.id)
+                    }
+                } else {
+                    let user = null
+                    if (observation.userId != null) {
+                        user = await this._userRepo.findById(observation.userId)
+                    }
+                    const arcObservation = this._transformer.transform(observation, eventTransform, user)
+                    arcObjects.add(arcObservation)
+                }
             }
-            this._console.info('ArcGIS json ' + arcObjects.objects);
             for(const layerProcessor of this._layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }

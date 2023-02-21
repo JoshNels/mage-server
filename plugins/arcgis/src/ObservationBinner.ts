@@ -1,3 +1,4 @@
+import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { HttpClient } from "./HttpClient";
@@ -35,9 +36,9 @@ export class ObservationBinner {
      * @param obsFieldId The field that stores the observation id.
      * @param console Used to log to the console.
      */
-    constructor(url: string, obsFieldId: string, console: Console) {
+    constructor(url: string, config: ArcGISPluginConfig, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = url + '/query?returnIdsOnly=true&f=json&where=' + obsFieldId + '=\'';
+        this._url = url + '/query?returnIdsOnly=true&f=json&where=' + config.observationIdField + '=\'';
         this._pendingNewAndUpdates = new ObservationBins;
         this._console = console;
     }

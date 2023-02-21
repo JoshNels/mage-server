@@ -30,8 +30,8 @@ export class FeatureLayerProcessor {
      */
     constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
         this._layerInfo = layerInfo;
-        this._binner = new ObservationBinner(layerInfo.url, config.observationIdField, console);
-        this._sender = new ObservationsSender(layerInfo.url, config.attachmentModifiedTolerance, console);
+        this._binner = new ObservationBinner(layerInfo.url, config, console);
+        this._sender = new ObservationsSender(layerInfo.url, config, console);
     }
 
     /**
@@ -57,6 +57,14 @@ export class FeatureLayerProcessor {
 
         const bins = this._binner.sortEmOut(arcObjectsForLayer);
         this.send(bins);
+    }
+
+    /**
+     * Delete an observation.
+     * @param id The observation id.
+     */
+    deleteObservation(id: string) {
+        this._sender.sendDelete(id)
     }
 
     /**

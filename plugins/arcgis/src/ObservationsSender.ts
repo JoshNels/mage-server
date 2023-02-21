@@ -1,3 +1,4 @@
+import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from './ArcObjects';
 import { ArcObservation, ArcAttachment } from './ArcObservation';
 import { HttpClient } from './HttpClient';
@@ -37,6 +38,11 @@ export class ObservationsSender {
     _httpClient: HttpClient;
 
     /**
+     * The field that stores the observation id
+     */
+    _observationIdField: string;
+
+    /**
      * The attachment base directory
      */
     _attachmentDirectory: string;
@@ -49,17 +55,18 @@ export class ObservationsSender {
     /**
      * Constructor.
      * @param url The url to the feature layer.
-     * @param attachmentModifiedTolerance The attachment last modified time tolerance.
+     * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
-    constructor(url: string, attachmentModifiedTolerance: number, console: Console) {
+    constructor(url: string, config: ArcGISPluginConfig, console: Console) {
         this._url = url;
         this._urlAdd = this._url + '/addFeatures';
         this._urlUpdate = this._url + '/updateFeatures';
         this._console = console;
         this._httpClient = new HttpClient(console);
+        this._observationIdField = config.observationIdField;
         this._attachmentDirectory = environment.attachmentBaseDirectory;
-        this._attachmentModifiedTolerance = attachmentModifiedTolerance;
+        this._attachmentModifiedTolerance = config.attachmentModifiedTolerance;
     }
 
     /**
@@ -91,6 +98,24 @@ export class ObservationsSender {
 
         let responseHandler = this.updateResponseHandler(observations)
         this._httpClient.sendPostHandleResponse(this._urlUpdate, contentString, responseHandler);
+    }
+
+    /**
+     * Delete an observation.
+     * @param id The observation id.
+     */
+    sendDelete(id: string) {
+
+        const url = this._url + '/deleteFeatures'
+
+        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._observationIdField + ': ' + id)
+
+        const form = new FormData()
+        form.append('where', this._observationIdField + '=\'' + id + "\'")
+        form.append('f', 'json')
+
+        this._httpClient.sendPostForm(url, form)
+
     }
 
     /**

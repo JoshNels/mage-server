@@ -11,7 +11,7 @@ export class FeatureLayerProcessor {
     /**
      * Information about the arc feature layer this class sends observations to.
      */
-    private _layerInfo: LayerInfo;
+    layerInfo: LayerInfo;
 
     /**
      * Bins the observations into updates and adds.
@@ -30,7 +30,7 @@ export class FeatureLayerProcessor {
      * @param console Used to log messages to the console.
      */
     constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
-        this._layerInfo = layerInfo;
+        this.layerInfo = layerInfo;
         this._binner = new ObservationBinner(layerInfo.url, config, console);
         this._sender = new ObservationsSender(layerInfo.url, config, console);
     }
@@ -52,7 +52,7 @@ export class FeatureLayerProcessor {
         const arcObjectsForLayer = new ArcObjects();
         arcObjectsForLayer.firstRun = observations.firstRun;
         for (const arcObservation of observations.observations) {
-            if (this._layerInfo.geometryType == arcObservation.esriGeometryType) {
+            if (this.layerInfo.geometryType == arcObservation.esriGeometryType) {
                 arcObjectsForLayer.add(arcObservation);
             }
         }
@@ -61,7 +61,7 @@ export class FeatureLayerProcessor {
         this.send(bins);
 
         for (const arcObservation of observations.deletions) {
-            if (this._layerInfo.geometryType == arcObservation.esriGeometryType) {
+            if (this.layerInfo.geometryType == arcObservation.esriGeometryType) {
                 this._sender.sendDelete(arcObservation.id)
             }
         }

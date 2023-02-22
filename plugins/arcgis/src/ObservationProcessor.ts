@@ -11,6 +11,7 @@ import { LayerQuerier } from './LayerQuerier';
 import { LayerInfo } from './LayerInfo';
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
+import { GeometryChangedHandler } from './GeometryChangedHandler';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -100,6 +101,11 @@ export class ObservationProcessor {
     _firstRun: boolean;
 
     /**
+     * Handles removing observation from previous layers when an observation geometry changes.
+     */
+    private _geometryChangeHandler: GeometryChangedHandler;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -122,6 +128,7 @@ export class ObservationProcessor {
         this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
         this._firstRun = true;
+        this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
     }
 
     /**
@@ -218,6 +225,7 @@ export class ObservationProcessor {
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
             const eventTransform = new EventTransform(this._config, mageEvent)
             const arcObjects = new ArcObjects()
+            this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, this._layerProcessors, this._firstRun);
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
                 let deletion = false

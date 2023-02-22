@@ -12,9 +12,14 @@ export class ArcObjects {
     objects: ArcObject[]
 
     /**
-     * The attachments to send to the arc server.
+     * The observations to send to the arc server.
      */
     observations: ArcObservation[]
+
+    /**
+     * The observations to delete from the arc server.
+     */
+    deletions: ArcObservation[]
 
     /**
      * Indicates if these arc objects have been created from observations in the database and this
@@ -29,6 +34,7 @@ export class ArcObjects {
     constructor() {
         this.objects = []
         this.observations = []
+        this.deletions = []
         this.firstRun = false;
     }
 

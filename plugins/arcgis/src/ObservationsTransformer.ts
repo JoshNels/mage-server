@@ -56,15 +56,25 @@ export class ObservationsTransformer {
             formIds = this.propertiesToAttributes(observation.properties, transform, arcObject)
         }
 
-        const arcObservation = {} as ArcObservation
+        const arcObservation = this.createObservation(observation)
 
-        arcObservation.id = observation.id
         arcObservation.createdAt = arcObject.attributes['createdAt']
         arcObservation.lastModified = arcObject.attributes['lastModified']
         arcObservation.object = arcObject
-        arcObservation.esriGeometryType = this.esriGeometryType(observation)
         arcObservation.attachments = this.attachments(observation.attachments, formIds, transform)
 
+        return arcObservation
+    }
+
+    /**
+     * Creates a base ArcObservation with id and geometry type.
+     * @param observation The observation to convert.
+     * @returns The ArcObservation of the observation.
+     */
+    createObservation(observation: ObservationAttrs): ArcObservation {
+        const arcObservation = {} as ArcObservation
+        arcObservation.id = observation.id
+        arcObservation.esriGeometryType = this.esriGeometryType(observation)
         return arcObservation
     }
 
@@ -73,7 +83,7 @@ export class ObservationsTransformer {
      * @param observation The observation.
      * @returns The Esri geometry type.
      */
-    esriGeometryType(observation: ObservationAttrs): string {
+    private esriGeometryType(observation: ObservationAttrs): string {
 
         let esriGeometryType = ''
 

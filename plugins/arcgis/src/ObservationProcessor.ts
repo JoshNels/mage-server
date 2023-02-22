@@ -225,10 +225,8 @@ export class ObservationProcessor {
                     deletion = observation.states[0].name.startsWith('archive')
                 }
                 if (deletion) {
-                    const esriGeometryType = this._transformer.esriGeometryType(observation)
-                    for (const layerProcessor of this._layerProcessors) {
-                        layerProcessor.deleteObservation(observation.id, esriGeometryType)
-                    }
+                    const arcObservation = this._transformer.createObservation(observation)
+                    arcObjects.deletions.push(arcObservation)
                 } else {
                     let user = null
                     if (observation.userId != null) {

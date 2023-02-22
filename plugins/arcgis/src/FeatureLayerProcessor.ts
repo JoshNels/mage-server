@@ -6,6 +6,9 @@ import { ObservationBinner } from "./ObservationBinner";
 import { ObservationBins } from "./ObservationBins";
 import { ObservationsSender } from "./ObservationsSender";
 
+/**
+ * Processes new, updated, and deleted observations and sends the changes to a specific arc feature layer.
+ */
 export class FeatureLayerProcessor {
 
     /**

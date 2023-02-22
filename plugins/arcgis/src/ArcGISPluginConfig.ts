@@ -1,3 +1,6 @@
+/**
+ * Contains various configuration values used by the plugin.
+ */
 export interface ArcGISPluginConfig {
 
   /**

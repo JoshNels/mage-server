@@ -34,7 +34,7 @@ const InjectedServices = {
  * to an ArcGIS server, it will then transform the observation to an ArcGIS feature and
  * send them to the configured ArcGIS feature layer.
  */
-const imagePluginHooks: InitPluginHook<typeof InjectedServices> = {
+const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
   inject: {
     eventRepo: MageEventRepositoryToken,
     obsRepoForEvent: ObservationRepositoryToken,
@@ -83,4 +83,4 @@ const imagePluginHooks: InitPluginHook<typeof InjectedServices> = {
   }
 }
 
-export = imagePluginHooks
+export = arcgisPluginHooks

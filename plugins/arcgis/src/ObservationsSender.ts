@@ -15,42 +15,42 @@ export class ObservationsSender {
     /**
      * The base url to the feature layer.
      */
-    _url: string;
+    private _url: string;
 
     /**
      * The full url to the feature layer receiving observations.
      */
-    _urlAdd: string;
+    private _urlAdd: string;
 
     /**
      * The full url to the feature layer receiving updates.
      */
-    _urlUpdate: string;
+    private _urlUpdate: string;
 
     /**
      * Used to log to the console.
      */
-    _console: Console;
+    private _console: Console;
 
     /**
      * Used to send the observations to an arc server.
      */
-    _httpClient: HttpClient;
+    private _httpClient: HttpClient;
 
     /**
      * The field that stores the observation id
      */
-    _observationIdField: string;
+    private _observationIdField: string;
 
     /**
      * The attachment base directory
      */
-    _attachmentDirectory: string;
+    private _attachmentDirectory: string;
 
     /**
      * The attachment last modified time tolerance
      */
-    _attachmentModifiedTolerance: number;
+    private _attachmentModifiedTolerance: number;
 
     /**
      * Constructor.

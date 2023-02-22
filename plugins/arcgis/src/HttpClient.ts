@@ -9,7 +9,7 @@ export class HttpClient {
     /**
      * Used to log to the console.
      */
-    _console: Console;
+    private _console: Console;
 
     /**
      * Constructor.

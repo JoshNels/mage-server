@@ -15,12 +15,12 @@ export class ObservationsTransformer {
     /**
      * ArcGIS configuration.
      */
-    _config: ArcGISPluginConfig
+    private _config: ArcGISPluginConfig
 
     /**
      * Used to log to the console.
      */
-    _console: Console
+    private _console: Console
 
     /**
      * Constructor.

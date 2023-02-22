@@ -13,22 +13,22 @@ export class ObservationBinner {
     /**
      * Used to query the arc server to figure out if an observation exists.
      */
-    _httpClient: HttpClient;
+    private _httpClient: HttpClient;
 
     /**
      * The query url to find out if an observations exists on the server.
      */
-    _url: string;
+    private _url: string;
 
     /**
      * Contains the results from checking if an observation exists on the server.
      */
-    _pendingNewAndUpdates: ObservationBins;
+    private _pendingNewAndUpdates: ObservationBins;
 
     /**
      * Used to log to console.
      */
-    _console: Console;
+    private _console: Console;
 
     /**
      * Constructor.

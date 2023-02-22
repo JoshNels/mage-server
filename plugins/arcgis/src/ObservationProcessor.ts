@@ -22,83 +22,83 @@ export class ObservationProcessor {
     /**
      * The number of seconds to sleep before checking for new observations.
      */
-    _intervalSeconds: number;
+    private _intervalSeconds: number;
 
     /**
      * The max number of records to send to arc per request.
      */
-    _batchSize: number;
+    private _batchSize: number;
 
     /**
      * True if the processor is currently active, false otherwise.
      */
-    _isRunning = false;
+    private _isRunning = false;
 
     /**
      * The next timeout, use this to cancel the next one if the processor is stopped.
      */
-    _nextTimeout: NodeJS.Timeout | undefined;
+    private _nextTimeout: NodeJS.Timeout | undefined;
 
     /**
      * Used to get all the active events.
      */
-    _eventRepo: MageEventRepository;
+    private _eventRepo: MageEventRepository;
 
     /**
      * The last time we checked for new/modified observations.
      */
-    _lastTimeStamp: number;
+    private _lastTimeStamp: number;
 
     /**
      * Used to get new observations.
      */
-    _obsRepos: ObservationRepositoryForEvent;
+    private _obsRepos: ObservationRepositoryForEvent;
 
     /**
      * Used to get user information.
      */
-    _userRepo: UserRepository;
+    private _userRepo: UserRepository;
 
     /**
      * Used to log to the console.
      */
-    _console: Console;
+    private _console: Console;
 
     /**
      * Used to convert observations to json string that can be sent to an arcgis server.
      */
-    _transformer: ObservationsTransformer;
+    private _transformer: ObservationsTransformer;
 
     /**
      * Sends the json string of observations to any configured ArcGIS feature layer.
      */
-    _sender: ObservationsSender;
+    private _sender: ObservationsSender;
 
     /**
      * Seperates the adds from the updates regarding observations.
      */
-    _binner: ObservationBinner;
+    private _binner: ObservationBinner;
 
     /**
      * Gets info about certain feature layers.
      */
-    _layerQuerier: LayerQuerier;
+    private _layerQuerier: LayerQuerier;
 
     /**
      * Contains the different feature layers to send observations too.
      */
-    _config: ArcGISPluginConfig;
+    private _config: ArcGISPluginConfig;
 
     /**
      * Sends observations to a single feature layer.
      */
-    _layerProcessors: FeatureLayerProcessor[];
+    private _layerProcessors: FeatureLayerProcessor[];
 
     /**
      * True if this is a first run at updating arc feature layers.  If so we need to make sure the layers are
      * all up to date.
      */
-    _firstRun: boolean;
+    private _firstRun: boolean;
 
     /**
      * Handles removing observation from previous layers when an observation geometry changes.

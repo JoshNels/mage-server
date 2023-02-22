@@ -64,9 +64,12 @@ export class FeatureLayerProcessor {
     /**
      * Delete an observation.
      * @param id The observation id.
+     * @param esriGeometryType The observation Esri geometry type
      */
-    deleteObservation(id: string) {
-        this._sender.sendDelete(id)
+    deleteObservation(id: string, esriGeometryType: string) {
+        if (this._layerInfo.geometryType == esriGeometryType) {
+            this._sender.sendDelete(id)
+        }
     }
 
     /**

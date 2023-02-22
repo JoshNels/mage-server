@@ -89,9 +89,9 @@ export class ObservationProcessor {
     _config: ArcGISPluginConfig;
 
     /**
-     * Sends observations to a single geometry type feature layer.
+     * Sends observations to a single feature layer.
      */
-    _layerProcessors: Map<string, FeatureLayerProcessor>;
+    _layerProcessors: FeatureLayerProcessor[];
 
     /**
      * True if this is a first run at updating arc feature layers.  If so we need to make sure the layers are
@@ -119,7 +119,7 @@ export class ObservationProcessor {
         this._transformer = new ObservationsTransformer(config, console);
         this._sender = new ObservationsSender(config.featureLayers[0], config, console);
         this._binner = new ObservationBinner(config.featureLayers[0], config, console);
-        this._layerProcessors = new Map();
+        this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
         this._firstRun = true;
     }
@@ -158,7 +158,7 @@ export class ObservationProcessor {
      */
     private handleLayerInfo(info: LayerInfo) {
         const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
-        this._layerProcessors.set(info.geometryType, layerProcessor);
+        this._layerProcessors.push(layerProcessor);
     }
 
     /**
@@ -166,9 +166,9 @@ export class ObservationProcessor {
      */
     private async processAndScheduleNext() {
         if (this._isRunning) {
-            if (this._layerProcessors.size > 0) {
+            if (this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');
-                for(const layerProcessor of this._layerProcessors.values()) {
+                for(const layerProcessor of this._layerProcessors) {
                     layerProcessor.processPendingUpdates();
                 }
                 this._console.info('ArcGIS plugin processing new observations...');
@@ -226,9 +226,8 @@ export class ObservationProcessor {
                 }
                 if (deletion) {
                     const esriGeometryType = this._transformer.esriGeometryType(observation)
-                    const layerProcessor = this._layerProcessors.get(esriGeometryType)
-                    if (layerProcessor != undefined) {
-                        layerProcessor.deleteObservation(observation.id)
+                    for (const layerProcessor of this._layerProcessors) {
+                        layerProcessor.deleteObservation(observation.id, esriGeometryType)
                     }
                 } else {
                     let user = null
@@ -241,7 +240,7 @@ export class ObservationProcessor {
             }
             arcObjects.firstRun = this._firstRun;
             this._firstRun = false;
-            for(const layerProcessor of this._layerProcessors.values()) {
+            for(const layerProcessor of this._layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }
             newNumberLeft -= latestObs.items.length;

@@ -6,6 +6,7 @@ export interface ArcObservation {
     createdAt: number,
     lastModified: number,
     object: ArcObject,
+    esriGeometryType: string,
     attachments: ArcAttachment[]
 }
 

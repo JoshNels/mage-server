@@ -225,6 +225,7 @@ export class ObservationProcessor {
                     deletion = observation.states[0].name.startsWith('archive')
                 }
                 if (deletion) {
+                    const esriGeometryType = this._transformer.esriGeometryType(observation)
                     // TODO select the appropriate layer processor by geometry
                     for (const layerProcessor of this._layerProcessors) {
                         layerProcessor.deleteObservation(observation.id)

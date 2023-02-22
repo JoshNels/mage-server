@@ -52,9 +52,7 @@ export class FeatureLayerProcessor {
         const arcObjectsForLayer = new ArcObjects();
         arcObjectsForLayer.firstRun = observations.firstRun;
         for (const arcObservation of observations.observations) {
-            if (this._layerInfo.geometryType == 'esriGeometryPoint' && arcObservation.object.geometry instanceof ArcPoint
-                || this._layerInfo.geometryType == 'esriGeometryPolyline' && arcObservation.object.geometry instanceof ArcPolyline
-                || this._layerInfo.geometryType == 'esriGeometryPolygon' && arcObservation.object.geometry instanceof ArcPolygon) {
+            if (this._layerInfo.geometryType == arcObservation.esriGeometryType) {
                 arcObjectsForLayer.add(arcObservation);
             }
         }

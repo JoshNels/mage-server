@@ -45,7 +45,7 @@ export class ObservationsTransformer {
         this.observationToAttributes(observation, transform, user, arcObject)
 
         if (observation.geometry != null) {
-            let geometry = observation.geometry
+            const geometry = observation.geometry
             const arcGeometry = this.geometryToArcGeometry(geometry)
             this._console.info('ArcGIS new ' + geometry.type + ' at ' + JSON.stringify(arcGeometry) + ' with id ' + observation.id)
             arcObject.geometry = arcGeometry
@@ -62,9 +62,40 @@ export class ObservationsTransformer {
         arcObservation.createdAt = arcObject.attributes['createdAt']
         arcObservation.lastModified = arcObject.attributes['lastModified']
         arcObservation.object = arcObject
+        arcObservation.esriGeometryType = this.esriGeometryType(observation)
         arcObservation.attachments = this.attachments(observation.attachments, formIds, transform)
 
         return arcObservation
+    }
+
+    /**
+     * Determine the observation Esri geometry type.
+     * @param observation The observation.
+     * @returns The Esri geometry type.
+     */
+    esriGeometryType(observation: ObservationAttrs): string {
+
+        let esriGeometryType = ''
+
+        if (observation.geometry != null) {
+
+            switch (observation.geometry.type) {
+                case 'Point':
+                    esriGeometryType = 'esriGeometryPoint'
+                    break;
+                case 'LineString':
+                    esriGeometryType = 'esriGeometryPolyline'
+                    break;
+                case 'Polygon':
+                    esriGeometryType = 'esriGeometryPolygon'
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        return esriGeometryType
     }
 
     /**
@@ -77,7 +108,7 @@ export class ObservationsTransformer {
     private observationToAttributes(observation: ObservationAttrs, transform: EventTransform, user: User | null, arcObject: ArcObject) {
         this.addAttribute(this._config.observationIdField, observation.id, arcObject)
         this.addAttribute(this._config.eventIdField, observation.eventId, arcObject)
-        let mageEvent = transform.mageEvent
+        const mageEvent = transform.mageEvent
         if (mageEvent != null) {
             this.addAttribute(this._config.eventNameField, mageEvent.name, arcObject)
         }
@@ -129,7 +160,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPoint.
      */
     private pointToArcPoint(point: Point): ArcPoint {
-        const arcPoint = new ArcPoint();
+        const arcPoint = {} as ArcPoint
         arcPoint.x = point.coordinates[0]
         arcPoint.y = point.coordinates[1]
         return arcPoint
@@ -141,7 +172,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPolyline.
      */
     private lineStringToArcPolyline(lineString: LineString): ArcPolyline {
-        const arcPolyline = new ArcPolyline();
+        const arcPolyline = {} as ArcPolyline
         arcPolyline.paths = [lineString.coordinates]
         return arcPolyline
     }
@@ -152,7 +183,7 @@ export class ObservationsTransformer {
      * @returns The converted ArcPolygon.
      */
     private polygonToArcPolygon(polygon: Polygon): ArcPolygon {
-        const arcPolygon = new ArcPolygon();
+        const arcPolygon = {} as ArcPolygon
         arcPolygon.rings = polygon.coordinates
         return arcPolygon
     }
@@ -189,7 +220,7 @@ export class ObservationsTransformer {
         const formIds: { [id: string]: number } = {}
         const formIdCount: { [id: number]: number } = {}
 
-        let mageEvent = transform.mageEvent
+        const mageEvent = transform.mageEvent
 
         for (let i = 0; i < forms.length; i++) {
             const form = forms[i]
@@ -227,7 +258,7 @@ export class ObservationsTransformer {
                             this.addAttribute(title, value, arcObject)
                         }
                     } else {
-                        let title = this.appendCount(formProperty, formCount)
+                        const title = this.appendCount(formProperty, formCount)
                         this.addAttribute(title, value, arcObject)
                     }
                 }
@@ -267,7 +298,7 @@ export class ObservationsTransformer {
 
         const arcAttachments: ArcAttachment[] = []
 
-        let mageEvent = transform.mageEvent
+        const mageEvent = transform.mageEvent
 
         for (const attachment of attachments) {
 

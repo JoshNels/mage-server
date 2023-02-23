@@ -111,7 +111,7 @@ export class ObservationsSender {
         this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._observationIdField + ': ' + id)
 
         const form = new FormData()
-        form.append('where', this._observationIdField + '=\'' + id + "\'")
+        form.append('where', this._observationIdField + ' LIKE\'' + id + "%\'")
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)

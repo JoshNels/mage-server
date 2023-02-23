@@ -70,7 +70,9 @@ export class ObservationBinner {
 
         for (const arcObservation of observations.observations) {
             const arcObject = arcObservation.object
-            if (observations.firstRun || arcObservation.lastModified != arcObservation.createdAt) {
+            if (observations.firstRun
+                || arcObservation.lastModified != arcObservation.createdAt
+                || arcObject.attributes.last_modified != arcObject.attributes.created_at) {
                 bins.updates.add(arcObservation);
             } else {
                 bins.adds.add(arcObservation);

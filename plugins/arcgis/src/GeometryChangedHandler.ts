@@ -38,27 +38,29 @@ export class GeometryChangedHandler {
      */
     checkForGeometryChange(observations: ObservationAttrs[], arcObjects: ArcObjects, layerProcessors: FeatureLayerProcessor[], firstRun: boolean) {
         for (const observation of observations) {
-            if (this._previousGeoms.has(observation.id)) {
-                const previousGeomType = this._previousGeoms.get(observation.id);
-                if (previousGeomType !== undefined && previousGeomType != observation.geometry.type) {
-                    const arcObservation = this._transformer.createObservation(observation);
-                    arcObservation.esriGeometryType = this._transformer.mageTypeToEsriType(previousGeomType);
-                    arcObjects.deletions.push(arcObservation);
-                }
-            }
-
-            if (firstRun) {
-                const observationGeomType = this._transformer.mageTypeToEsriType(observation.geometry.type);
-                for (const layerProcessor of layerProcessors) {
-                    if (layerProcessor.layerInfo.geometryType != observationGeomType) {
+            if (observation.states.length <= 0 || !observation.states[0].name.startsWith('archive')) {
+                if (this._previousGeoms.has(observation.id)) {
+                    const previousGeomType = this._previousGeoms.get(observation.id);
+                    if (previousGeomType !== undefined && previousGeomType != observation.geometry.type) {
                         const arcObservation = this._transformer.createObservation(observation);
-                        arcObservation.esriGeometryType = layerProcessor.layerInfo.geometryType;
+                        arcObservation.esriGeometryType = this._transformer.mageTypeToEsriType(previousGeomType);
                         arcObjects.deletions.push(arcObservation);
                     }
                 }
-            }
 
-            this._previousGeoms.set(observation.id, observation.geometry.type);
+                if (firstRun) {
+                    const observationGeomType = this._transformer.mageTypeToEsriType(observation.geometry.type);
+                    for (const layerProcessor of layerProcessors) {
+                        if (layerProcessor.layerInfo.geometryType != observationGeomType) {
+                            const arcObservation = this._transformer.createObservation(observation);
+                            arcObservation.esriGeometryType = layerProcessor.layerInfo.geometryType;
+                            arcObjects.deletions.push(arcObservation);
+                        }
+                    }
+                }
+
+                this._previousGeoms.set(observation.id, observation.geometry.type);
+            }
         }
     }
 }

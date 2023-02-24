@@ -119,6 +119,24 @@ export class ObservationsSender {
     }
 
     /**
+     * Deletes all observations that are apart of a specified event.
+     * @param id The event id.
+     */
+    sendDeleteEvent(id: string) {
+
+        const url = this._url + '/deleteFeatures'
+
+        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._observationIdField + ': ' + id)
+
+        const form = new FormData()
+        form.append('where', this._observationIdField + ' LIKE\'%mageEventId ' + id + "\'")
+        form.append('f', 'json')
+
+        this._httpClient.sendPostForm(url, form)
+
+    }
+
+    /**
      * Creates an add observation response handler.
      * @param observations The observations sent.
      * @returns The response handler.

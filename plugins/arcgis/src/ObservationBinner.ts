@@ -1,6 +1,7 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
+import { FeatureQuerier } from "./FeatureQuerier";
 import { HttpClient } from "./HttpClient";
 import { ObservationBins } from "./ObservationBins";
 import { QueryObjectIdResults } from "./QueryObjectIdResults";
@@ -11,14 +12,9 @@ import { QueryObjectIdResults } from "./QueryObjectIdResults";
 export class ObservationBinner {
 
     /**
-     * Used to query the arc server to figure out if an observation exists.
-     */
-    private _httpClient: HttpClient;
-
-    /**
      * The query url to find out if an observations exists on the server.
      */
-    private _url: string;
+    private _featureQuerier: FeatureQuerier;
 
     /**
      * Contains the results from checking if an observation exists on the server.
@@ -26,21 +22,14 @@ export class ObservationBinner {
     private _pendingNewAndUpdates: ObservationBins;
 
     /**
-     * Used to log to console.
-     */
-    private _console: Console;
-
-    /**
      * Constructor.
-     * @param url The url to the feature layer.
+     * @param featureQuerier Used to query for observation on the arc feature layer.
      * @param obsFieldId The field that stores the observation id.
      * @param console Used to log to the console.
      */
-    constructor(url: string, config: ArcGISPluginConfig, console: Console) {
-        this._httpClient = new HttpClient(console);
-        this._url = url + '/query?returnIdsOnly=true&f=json&where=' + config.observationIdField + ' LIKE\'';
+    constructor(featureQuerier: FeatureQuerier) {
+        this._featureQuerier = featureQuerier;
         this._pendingNewAndUpdates = new ObservationBins;
-        this._console = console;
     }
 
     /**
@@ -93,10 +82,7 @@ export class ObservationBinner {
      * @returns True if it exists, false if it does not.
      */
     checkForExistence(arcObservation: ArcObservation) {
-        const queryUrl = this._url + arcObservation.id + '%\'';
-        this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
-            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = JSON.parse(chunk) as QueryObjectIdResults;
+        this._featureQuerier.queryObjectId(arcObservation.id, (result) => {
             if (result.objectIds !== undefined && result.objectIds != null && result.objectIds.length > 0) {
                 arcObservation.object.attributes['OBJECTID'] = result.objectIds[0];
                 this._pendingNewAndUpdates.updates.add(arcObservation);

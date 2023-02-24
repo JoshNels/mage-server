@@ -71,16 +71,6 @@ export class ObservationProcessor {
     private _transformer: ObservationsTransformer;
 
     /**
-     * Sends the json string of observations to any configured ArcGIS feature layer.
-     */
-    private _sender: ObservationsSender;
-
-    /**
-     * Seperates the adds from the updates regarding observations.
-     */
-    private _binner: ObservationBinner;
-
-    /**
      * Gets info about certain feature layers.
      */
     private _layerQuerier: LayerQuerier;
@@ -126,8 +116,6 @@ export class ObservationProcessor {
         this._lastTimeStamp = 0;
         this._console = console;
         this._transformer = new ObservationsTransformer(config, console);
-        this._sender = new ObservationsSender(config.featureLayers[0], config, console);
-        this._binner = new ObservationBinner(config.featureLayers[0], config, console);
         this._layerProcessors = [];
         this._layerQuerier = new LayerQuerier(console);
         this._firstRun = true;

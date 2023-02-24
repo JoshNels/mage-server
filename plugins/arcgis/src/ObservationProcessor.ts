@@ -12,6 +12,7 @@ import { LayerInfo } from './LayerInfo';
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
+import { EventDeletionHandler } from './EventDeletionHandler';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -105,6 +106,8 @@ export class ObservationProcessor {
      */
     private _geometryChangeHandler: GeometryChangedHandler;
 
+    private _eventDeletionHandler: EventDeletionHandler;
+
     /**
      * Constructor.
      * @param config The plugins configuration.
@@ -129,6 +132,7 @@ export class ObservationProcessor {
         this._layerQuerier = new LayerQuerier(console);
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
+        this._eventDeletionHandler = new EventDeletionHandler(this._console);
     }
 
     /**
@@ -182,6 +186,7 @@ export class ObservationProcessor {
                 const queryTime = this._lastTimeStamp;
                 this._lastTimeStamp = Date.now();
                 const activeEvents = await this._eventRepo.findActiveEvents();
+                this._eventDeletionHandler.checkForEventDeletion(activeEvents, this._layerProcessors, this._firstRun);
                 for (const activeEvent of activeEvents) {
                     this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
                     const obsRepo = await this._obsRepos(activeEvent.id);

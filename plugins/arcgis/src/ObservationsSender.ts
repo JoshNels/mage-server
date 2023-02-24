@@ -122,7 +122,7 @@ export class ObservationsSender {
      * Deletes all observations that are apart of a specified event.
      * @param id The event id.
      */
-    sendDeleteEvent(id: string) {
+    sendDeleteEvent(id: number) {
 
         const url = this._url + '/deleteFeatures'
 

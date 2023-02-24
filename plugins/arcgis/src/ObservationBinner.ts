@@ -3,7 +3,7 @@ import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { HttpClient } from "./HttpClient";
 import { ObservationBins } from "./ObservationBins";
-import { QueryResults } from "./QueryResults";
+import { QueryObjectIdResults } from "./QueryObjectIdResults";
 
 /**
  * Sorts the observations into a group of new ones and a group of updated ones.
@@ -96,7 +96,7 @@ export class ObservationBinner {
         const queryUrl = this._url + arcObservation.id + '%\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = JSON.parse(chunk) as QueryResults;
+            const result = JSON.parse(chunk) as QueryObjectIdResults;
             if (result.objectIds !== undefined && result.objectIds != null && result.objectIds.length > 0) {
                 arcObservation.object.attributes['OBJECTID'] = result.objectIds[0];
                 this._pendingNewAndUpdates.updates.add(arcObservation);

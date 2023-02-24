@@ -1,7 +1,7 @@
 /**
  * Contains the object id returned from a feature query on an arc server.
  */
-export class QueryResults {
+export class QueryObjectIdResults {
 
     /**
      * Contains the field name of the objectId field.

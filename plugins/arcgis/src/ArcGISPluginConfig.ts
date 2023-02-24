@@ -31,11 +31,6 @@ export interface ArcGISPluginConfig {
   observationIdField: string
 
   /**
-   * The event id field attribute name.
-   */
-  eventIdField: string
-
-  /**
    * The event name field attribute name.
    */
   eventNameField: string
@@ -86,7 +81,6 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
   observationIdField: 'description', // TODO temporary default to use editable 'description' field on arcgis test servers
-  eventIdField: 'event_id',
   eventNameField: 'event_name',
   userIdField: 'user_id',
   usernameField: 'username',

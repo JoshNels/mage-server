@@ -127,8 +127,7 @@ export class ObservationsTransformer {
      * @param arcObject The converted ArcObject.
      */
     private observationToAttributes(observation: ObservationAttrs, transform: EventTransform, user: User | null, arcObject: ArcObject) {
-        this.addAttribute(this._config.observationIdField, observation.id, arcObject)
-        this.addAttribute(this._config.eventIdField, observation.eventId, arcObject)
+        this.addAttribute(this._config.observationIdField, observation.id + ' mageEventId ' + observation.eventId, arcObject)
         const mageEvent = transform.mageEvent
         if (mageEvent != null) {
             this.addAttribute(this._config.eventNameField, mageEvent.name, arcObject)

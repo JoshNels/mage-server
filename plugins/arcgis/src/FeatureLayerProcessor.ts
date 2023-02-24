@@ -1,6 +1,7 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcPoint, ArcPolygon, ArcPolyline } from "./ArcObject";
 import { ArcObjects } from "./ArcObjects";
+import { FeatureQuerier } from "./FeatureQuerier";
 import { LayerInfo } from "./LayerInfo";
 import { ObservationBinner } from "./ObservationBinner";
 import { ObservationBins } from "./ObservationBins";
@@ -27,6 +28,11 @@ export class FeatureLayerProcessor {
     sender: ObservationsSender;
 
     /**
+     * Performs queries for observations on this processor's feature layer.
+     */
+    featureQuerier: FeatureQuerier;
+
+    /**
      * Constructor.
      * @param layerInfo Information about the arc feature layer this class sends observations to.
      * @param config Contains certain parameters that can be configured.
@@ -36,6 +42,7 @@ export class FeatureLayerProcessor {
         this.layerInfo = layerInfo;
         this._binner = new ObservationBinner(layerInfo.url, config, console);
         this.sender = new ObservationsSender(layerInfo.url, config, console);
+        this.featureQuerier = new FeatureQuerier(layerInfo.url, config, console);
     }
 
     /**

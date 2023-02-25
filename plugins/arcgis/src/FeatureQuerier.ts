@@ -1,6 +1,7 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { HttpClient } from "./HttpClient";
 import { QueryObjectIdResults } from "./QueryObjectIdResults";
+import { QueryObjectResult } from "./QueryObjectResult";
 
 /**
  * Performs various queries on observations for a specific arc feature layer.
@@ -44,6 +45,19 @@ export class FeatureQuerier {
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryObjectIdResults;
+            response(result);
+        });
+    }
+
+    /**
+     * Queries a specific arc feature layer and retrieves all observation that have been added to it.
+     * @param response Function called once query is complete.
+     */
+    queryAllObservations(response: (result: QueryObjectResult) => void) {
+        const queryUrl = this._url + '%mageEventId%\'';
+        this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
+            console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
+            const result = JSON.parse(chunk) as QueryObjectResult;
             response(result);
         });
     }

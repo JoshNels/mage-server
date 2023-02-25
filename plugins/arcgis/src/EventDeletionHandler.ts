@@ -2,6 +2,7 @@ import { MageEventAttrs } from "@ngageoint/mage.service/lib/entities/events/enti
 import { ObservationAttrs } from "@ngageoint/mage.service/lib/entities/observations/entities.observations";
 import { ArcObjects } from "./ArcObjects";
 import { FeatureLayerProcessor } from "./FeatureLayerProcessor";
+import { QueryObjectResult } from "./QueryObjectResult";
 
 /**
  * Class that handles deleting observations from an arc server for any deleted events.
@@ -38,6 +39,10 @@ export class EventDeletionHandler {
             for (const activeEvent of activeEvents) {
                 this._currentEventIds.set(activeEvent.id, activeEvent.name);
             }
+
+            for (const layerProcesor of layerProcessors) {
+                layerProcesor.featureQuerier.queryAllObservations((result) => { this.figureOutAllEventsOnArc(layerProcesor.layerInfo.url, result); });
+            }
         } else {
             let deletedEvents = new Map<number, string>();
             this._currentEventIds.forEach((eventName: string, eventId: number) => {
@@ -48,7 +53,7 @@ export class EventDeletionHandler {
                 deletedEvents.delete(activeEvent.id);
             }
 
-            deletedEvents.forEach((eventName: string, eventId: number) =>  {
+            deletedEvents.forEach((eventName: string, eventId: number) => {
                 this._console.log('Event named ' + eventName + ' was deleted removing observations from arc layers');
                 for (const layerProcessor of layerProcessors) {
                     layerProcessor.sender.sendDeleteEvent(eventId);
@@ -56,5 +61,9 @@ export class EventDeletionHandler {
                 this._currentEventIds.delete(eventId);
             });
         }
+    }
+
+    figureOutAllEventsOnArc(layerUrl: string, result: QueryObjectResult) {
+        this._console.log('ArcGIS investigating all events for feature layer ' + layerUrl);
     }
 }

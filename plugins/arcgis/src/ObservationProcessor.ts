@@ -120,7 +120,7 @@ export class ObservationProcessor {
         this._layerQuerier = new LayerQuerier(console);
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
-        this._eventDeletionHandler = new EventDeletionHandler(this._console);
+        this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
     }
 
     /**

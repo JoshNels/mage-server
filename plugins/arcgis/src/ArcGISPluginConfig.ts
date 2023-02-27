@@ -71,6 +71,11 @@ export interface ArcGISPluginConfig {
    */
   attachmentModifiedTolerance: number
 
+  /**
+   * The keyword used to seperate the observation id and the event id when combined into one field.
+   */
+  idSeperator: string;
+
 }
 
 export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConfig>>({
@@ -88,5 +93,6 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   deviceIdField: 'device_id',
   createdAtField: 'created_at',
   lastModifiedField: 'last_modified',
-  attachmentModifiedTolerance: 5000
+  attachmentModifiedTolerance: 5000,
+  idSeperator: ' mageEventId '
 })

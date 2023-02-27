@@ -80,7 +80,7 @@ export class EventDeletionHandler {
         let arcEventIds = new Set<number>();
         for (const feature of result.features) {
             const obsAndEventId = feature.attributes[this._config.observationIdField] as string;
-            const splitIds = obsAndEventId.split(' mageEventId ');
+            const splitIds = obsAndEventId.split(this._config.idSeperator);
             arcEventIds.add(parseInt(splitIds[1]));
         }
 

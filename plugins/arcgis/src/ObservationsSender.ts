@@ -38,19 +38,14 @@ export class ObservationsSender {
     private _httpClient: HttpClient;
 
     /**
-     * The field that stores the observation id
-     */
-    private _observationIdField: string;
-
-    /**
      * The attachment base directory
      */
     private _attachmentDirectory: string;
 
     /**
-     * The attachment last modified time tolerance
+     * The plugins configuration.
      */
-    private _attachmentModifiedTolerance: number;
+    private _config: ArcGISPluginConfig;
 
     /**
      * Constructor.
@@ -64,9 +59,8 @@ export class ObservationsSender {
         this._urlUpdate = this._url + '/updateFeatures';
         this._console = console;
         this._httpClient = new HttpClient(console);
-        this._observationIdField = config.observationIdField;
         this._attachmentDirectory = environment.attachmentBaseDirectory;
-        this._attachmentModifiedTolerance = config.attachmentModifiedTolerance;
+        this._config = config;
     }
 
     /**
@@ -108,10 +102,10 @@ export class ObservationsSender {
 
         const url = this._url + '/deleteFeatures'
 
-        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._observationIdField + ': ' + id)
+        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._config.observationIdField + ': ' + id)
 
         const form = new FormData()
-        form.append('where', this._observationIdField + ' LIKE\'' + id + "%\'")
+        form.append('where', this._config.observationIdField + ' LIKE\'' + id + "%\'")
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
@@ -126,10 +120,10 @@ export class ObservationsSender {
 
         const url = this._url + '/deleteFeatures'
 
-        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._observationIdField + ': ' + id)
+        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._config.observationIdField + ': ' + id)
 
         const form = new FormData()
-        form.append('where', this._observationIdField + ' LIKE\'%mageEventId ' + id + "\'")
+        form.append('where', this._config.observationIdField + ' LIKE\'%' + this._config.idSeperator + id + "\'")
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
@@ -243,7 +237,7 @@ export class ObservationsSender {
                     delete nameAttachments[fileName]
                     // Update the existing attachment if the file sizes do not match or last modified date updated
                     if (attachment.size != existingAttachment.size
-                        || attachment.lastModified + this._attachmentModifiedTolerance >= observation.lastModified) {
+                        || attachment.lastModified + this._config.attachmentModifiedTolerance >= observation.lastModified) {
                         this.updateAttachment(attachment, objectId, existingAttachment.id)
                     }
                 } else {

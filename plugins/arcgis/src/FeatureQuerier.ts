@@ -24,6 +24,11 @@ export class FeatureQuerier {
     private _console: Console;
 
     /**
+     * The configuration for this plugin.
+     */
+    private _config: ArcGISPluginConfig;
+
+    /**
      * Constructor.
      * @param url The url to the feature layer.
      * @param config The plugins configuration.
@@ -33,6 +38,7 @@ export class FeatureQuerier {
         this._httpClient = new HttpClient(console);
         this._url = url + '/query?f=json&where=' + config.observationIdField + ' LIKE\'';
         this._console = console;
+        this._config = config;
     }
 
     /**
@@ -54,7 +60,7 @@ export class FeatureQuerier {
      * @param response Function called once query is complete.
      */
     queryAllObservations(response: (result: QueryObjectResult) => void) {
-        const queryUrl = this._url + '%mageEventId%\'';
+        const queryUrl = this._url + '%' + this._config.idSeperator + '%\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryObjectResult;

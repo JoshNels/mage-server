@@ -50,12 +50,16 @@ export class EventDeletionHandler {
                 layerProcesor.featureQuerier.queryAllObservations((result) => { this.figureOutAllEventsOnArc(layerProcesor, result); });
             }
         } else {
+            this._console.log('Checking for event deletions the previous known events are:');
             let deletedEvents = new Map<number, string>();
             this._currentEventIds.forEach((eventName: string, eventId: number) => {
+                this._console.log(eventName + ' with id ' + eventId);
                 deletedEvents.set(eventId, eventName);
             });
 
+            this._console.log('Active events are:')
             for (const activeEvent of activeEvents) {
+                this._console.log(activeEvent.name + ' with id ' + activeEvent.id);
                 deletedEvents.delete(activeEvent.id);
             }
 
@@ -66,6 +70,10 @@ export class EventDeletionHandler {
                 }
                 this._currentEventIds.delete(eventId);
             });
+
+            for (const activeEvent of activeEvents) {
+                this._currentEventIds.set(activeEvent.id, activeEvent.name);
+            }
         }
     }
 

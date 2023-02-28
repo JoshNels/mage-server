@@ -190,6 +190,7 @@ export class ObservationProcessor {
                         morePages = numberLeft > 0;
                     }
                 }
+                this._firstRun = false;
             }
             if (this._isRunning) {
                 this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, this._intervalSeconds * 1000);
@@ -238,7 +239,6 @@ export class ObservationProcessor {
                 }
             }
             arcObjects.firstRun = this._firstRun;
-            this._firstRun = false;
             for(const layerProcessor of this._layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }

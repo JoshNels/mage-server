@@ -21,11 +21,6 @@ import { EventDeletionHandler } from './EventDeletionHandler';
 export class ObservationProcessor {
 
     /**
-     * The number of seconds to sleep before checking for new observations.
-     */
-    private _intervalSeconds: number;
-
-    /**
      * The max number of records to send to arc per request.
      */
     private _batchSize: number;
@@ -96,6 +91,9 @@ export class ObservationProcessor {
      */
     private _geometryChangeHandler: GeometryChangedHandler;
 
+    /**
+     * Handles removing observations when an event is deleted.
+     */
     private _eventDeletionHandler: EventDeletionHandler;
 
     /**
@@ -108,7 +106,6 @@ export class ObservationProcessor {
      */
     constructor(config: ArcGISPluginConfig, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, userRepo: UserRepository, console: Console) {
         this._config = config;
-        this._intervalSeconds = config.intervalSeconds;
         this._batchSize = config.batchSize;
         this._eventRepo = eventRepo;
         this._obsRepos = obsRepos;
@@ -193,7 +190,11 @@ export class ObservationProcessor {
                 this._firstRun = false;
             }
             if (this._isRunning) {
-                this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, this._intervalSeconds * 1000);
+                let interval = this._config.intervalSeconds;
+                if(this._firstRun) {
+                    interval = this._config.startupIntervalSeconds;
+                }
+                this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, interval * 1000);
             }
         }
     }

@@ -15,6 +15,12 @@ export interface ArcGISPluginConfig {
   intervalSeconds: number
 
   /**
+   * The interval in seconds to wait before trying to see if we have FeatureLayerProcessors ready
+   * to be used.
+   */
+  startupIntervalSeconds: number
+
+  /**
    * Limit processing to the given number of observations during one
    * interval.  This may be necessary so we do not overload an ArcGIS feature layer.
    */
@@ -81,6 +87,7 @@ export interface ArcGISPluginConfig {
 export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConfig>>({
   enabled: true,
   intervalSeconds: 60,
+  startupIntervalSeconds: 1,
   batchSize: 100,
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',

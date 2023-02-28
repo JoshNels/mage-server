@@ -46,6 +46,14 @@ export class FeatureLayerProcessor {
     }
 
     /**
+     * Indicates if this processor has pending updates still waiting to be processed.
+     * @returns True if it is still waiting for updates to be processed, false otherwise.
+     */
+    hasPendingUpdates(): boolean {
+        return this._binner.hasPendingUpdates();
+    }
+
+    /**
      * Checks to see if there are any updates that need to be sent to the feature layer.
      */
     processPendingUpdates() {

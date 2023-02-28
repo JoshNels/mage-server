@@ -164,7 +164,7 @@ export class ObservationProcessor {
         if (this._isRunning) {
             if (this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');
-                for(const layerProcessor of this._layerProcessors) {
+                for (const layerProcessor of this._layerProcessors) {
                     layerProcessor.processPendingUpdates();
                 }
                 this._console.info('ArcGIS plugin processing new observations...');
@@ -191,8 +191,15 @@ export class ObservationProcessor {
             }
             if (this._isRunning) {
                 let interval = this._config.intervalSeconds;
-                if(this._firstRun) {
+                if (this._firstRun) {
                     interval = this._config.startupIntervalSeconds;
+                } else {
+                    for (const layerProcessor of this._layerProcessors) {
+                        if (layerProcessor.hasPendingUpdates()) {
+                            interval = this._config.updateIntervalSeconds;
+                            break;
+                        }
+                    }
                 }
                 this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, interval * 1000);
             }
@@ -240,7 +247,7 @@ export class ObservationProcessor {
                 }
             }
             arcObjects.firstRun = this._firstRun;
-            for(const layerProcessor of this._layerProcessors) {
+            for (const layerProcessor of this._layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }
             newNumberLeft -= latestObs.items.length;

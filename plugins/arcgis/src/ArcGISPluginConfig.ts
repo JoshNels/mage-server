@@ -21,6 +21,12 @@ export interface ArcGISPluginConfig {
   startupIntervalSeconds: number
 
   /**
+   * If there are pending updates to observation this is the interval in seconds the processor will wait
+   * before running again.
+   */
+  updateIntervalSeconds: number
+
+  /**
    * Limit processing to the given number of observations during one
    * interval.  This may be necessary so we do not overload an ArcGIS feature layer.
    */
@@ -88,6 +94,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   enabled: true,
   intervalSeconds: 60,
   startupIntervalSeconds: 1,
+  updateIntervalSeconds: 1,
   batchSize: 100,
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',

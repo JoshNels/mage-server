@@ -98,7 +98,7 @@ export interface ArcGISPluginConfig {
 export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConfig>>({
   enabled: true,
   intervalSeconds: 60,
-  startupIntervalSeconds: 10,
+  startupIntervalSeconds: 1,
   updateIntervalSeconds: 1,
   batchSize: 100,
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',

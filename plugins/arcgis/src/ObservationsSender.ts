@@ -120,10 +120,15 @@ export class ObservationsSender {
 
         const url = this._url + '/deleteFeatures'
 
-        this._console.info('ArcGIS deleteFeatures url ' + url + ', ' + this._config.observationIdField + ': ' + id)
+        this._console.info('ArcGIS deleteFeatures by event url ' + url + ', ' + this._config.observationIdField + ': ' + id)
 
         const form = new FormData()
-        form.append('where', this._config.observationIdField + ' LIKE\'%' + this._config.idSeperator + id + "\'")
+
+        if (this._config.observationIdField == this._config.eventIdField) {
+            form.append('where', this._config.observationIdField + ' LIKE\'%' + this._config.idSeperator + id + '\'')
+        } else {
+            form.append('where', this._config.eventIdField + '=' + id)
+        }
         form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
@@ -170,7 +175,7 @@ export class ObservationsSender {
                             console.log((update ? 'Update' : 'Add') + ' Features Observation id: ' + observation.id + ', Object id: ' + objectId)
                             if (update) {
                                 this.queryAndUpdateAttachments(observation, objectId)
-                            } else{
+                            } else {
                                 this.sendAttachments(observation, objectId)
                             }
                         }
@@ -317,7 +322,7 @@ export class ObservationsSender {
      * @param objectId The arc object id of the observation.
      * @param attachmentInfos The arc attachment infos.
      */
-    private deleteAttachments(objectId: number, attachmentInfos: any[]){
+    private deleteAttachments(objectId: number, attachmentInfos: any[]) {
 
         const attachmentIds: number[] = []
 
@@ -333,7 +338,7 @@ export class ObservationsSender {
      * @param objectId The arc object id of the observation.
      * @param attachmentIds The arc attachment ids.
      */
-    private deleteAttachmentIds(objectId: number, attachmentIds: number[]){
+    private deleteAttachmentIds(objectId: number, attachmentIds: number[]) {
 
         const url = this._url + '/' + objectId + '/deleteAttachments'
 

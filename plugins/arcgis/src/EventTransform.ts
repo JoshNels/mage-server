@@ -44,19 +44,47 @@ export class EventTransform {
         allFields.add(config.lastModifiedField)
 
         if (this.mageEvent != null) {
+
+            const formAttributes = config.fieldAttributes[this.mageEvent.name]
+
             for (const form of this.mageEvent.activeForms) {
+
+                const formName = form.name
+
+                let fieldAttributes = null
+                if (formAttributes != null) {
+                    fieldAttributes = formAttributes[formName]
+                }
+
                 const fields = new FormFields()
+                
                 for (const field of form.fields) {
+
                     const archived = field.archived
                     if (archived == null || !archived) {
-                        let title = field.title
-                        if (allFields.has(title)) {
-                            title = form.name + '_' + title
+
+                        let title = null
+
+                        if (fieldAttributes != null) {
+                            title = fieldAttributes[field.title]
                         }
+
+                        if (title == null) {
+
+                            title = field.title
+
+                            if (allFields.has(title)) {
+                                title = formName + '_' + title
+                            }
+
+                        }
+
                         allFields.add(title)
                         fields.set(field.title, title)
                     }
+
                 }
+
                 this.formFields.set(form.id, fields)
             }
         }

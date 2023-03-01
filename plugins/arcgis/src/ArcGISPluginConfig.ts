@@ -38,6 +38,11 @@ export interface ArcGISPluginConfig {
   featureLayers: string[]
 
   /**
+   * Override mappings between event form fields and arc attributes.
+   */
+  fieldAttributes: any
+
+  /**
    * The field name to save and query the observation id to and from the ArcGIS server.
    */
   observationIdField: string
@@ -99,6 +104,22 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
   'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
+  fieldAttributes: {
+    // event names
+    'test': {
+      // form names
+      'test': {
+        // field attribute names
+        'rotation': 'rotation',
+        'description': 'desc'
+      },
+      'attachment': {
+        // field attribute names
+        'rotation': 'rotation',
+        'Space Field Test': 'space'
+      }
+    }
+  },
   observationIdField: 'description', // TODO temporary default to use editable 'description' field on arcgis test servers
   eventNameField: 'event_name',
   userIdField: 'user_id',

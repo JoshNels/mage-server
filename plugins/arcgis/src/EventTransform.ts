@@ -48,7 +48,10 @@ export class EventTransform {
 
         if (this.mageEvent != null) {
 
-            const formAttributes = config.fieldAttributes[this.mageEvent.name]
+            let formAttributes = null
+            if (config.fieldAttributes != null) {
+                formAttributes = config.fieldAttributes[this.mageEvent.name]
+            }
 
             for (const form of this.mageEvent.activeForms) {
 

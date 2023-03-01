@@ -35,6 +35,9 @@ export class EventTransform {
         const allFields = new Set<string>()
 
         allFields.add(config.observationIdField)
+        if (config.observationIdField != config.eventIdField) {
+            allFields.add(config.eventIdField);
+        }
         allFields.add(config.eventNameField)
         allFields.add(config.userIdField)
         allFields.add(config.usernameField)

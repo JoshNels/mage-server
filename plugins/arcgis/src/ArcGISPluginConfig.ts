@@ -43,6 +43,11 @@ export interface ArcGISPluginConfig {
   observationIdField: string
 
   /**
+  * The event id field attribute name.
+  */
+  eventIdField: string
+
+  /**
    * The event name field attribute name.
    */
   eventNameField: string
@@ -93,13 +98,14 @@ export interface ArcGISPluginConfig {
 export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConfig>>({
   enabled: true,
   intervalSeconds: 60,
-  startupIntervalSeconds: 1,
+  startupIntervalSeconds: 10,
   updateIntervalSeconds: 1,
   batchSize: 100,
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
-  'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
-  'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
+    'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
+    'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
   observationIdField: 'description', // TODO temporary default to use editable 'description' field on arcgis test servers
+  eventIdField: 'description',
   eventNameField: 'event_name',
   userIdField: 'user_id',
   usernameField: 'username',

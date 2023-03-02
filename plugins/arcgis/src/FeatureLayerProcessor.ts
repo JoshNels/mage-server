@@ -1,5 +1,4 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
-import { ArcPoint, ArcPolygon, ArcPolyline } from "./ArcObject";
 import { ArcObjects } from "./ArcObjects";
 import { FeatureQuerier } from "./FeatureQuerier";
 import { LayerInfo } from "./LayerInfo";

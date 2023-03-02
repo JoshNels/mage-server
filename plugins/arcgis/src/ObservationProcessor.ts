@@ -4,9 +4,7 @@ import { EventScopedObservationRepository, ObservationRepositoryForEvent } from 
 import { UserRepository } from '@ngageoint/mage.service/lib/entities/users/entities.users';
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
-import { ObservationsSender } from './ObservationsSender';
 import { ArcObjects } from './ArcObjects'
-import { ObservationBinner } from './ObservationBinner';
 import { LayerQuerier } from './LayerQuerier';
 import { LayerInfo } from './LayerInfo';
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';

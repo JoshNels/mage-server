@@ -1,10 +1,14 @@
-import { QueryResultsBase } from "./QueryResultBase";
 import { ArcObject } from "./ArcObject"
 
 /**
  * Contains the result from a query on an arc feature layer.
  */
-export class QueryObjectResult extends QueryResultsBase {
+export class QueryObjectResult {
+
+    /**
+     * Contains the field name of the objectId field.
+     */
+    objectIdFieldName: string;
 
     /**
      * The features matching the query and their attributes.
@@ -15,7 +19,7 @@ export class QueryObjectResult extends QueryResultsBase {
      * Constructor.
      */
     constructor() {
-        super();
+        this.objectIdFieldName = 'objectid';
         this.features = [];
     }
 }

@@ -94,11 +94,28 @@ export class ObservationBinner {
      */
     checkForExistence(arcObservation: ArcObservation) {
         this._existenceQueryCount++;
-        this._featureQuerier.queryObjectId(arcObservation.id, (result) => {
+        this._featureQuerier.queryObject(arcObservation.id, (result) => {
             this._existenceQueryCount--;
-            if (result.objectIds !== undefined && result.objectIds != null && result.objectIds.length > 0) {
-                arcObservation.object.attributes['OBJECTID'] = result.objectIds[0];
-                this._pendingNewAndUpdates.updates.add(arcObservation);
+            if (result.features != null && result.features.length > 0) {
+
+                const objectIdField = result.objectIdFieldName
+                const arcAttributes = result.features[0].attributes
+
+                const updateAttributes = arcObservation.object.attributes
+
+                updateAttributes[objectIdField] = arcAttributes[objectIdField]
+
+                // Determine if any attribute values should be deleted
+                const lowerCaseUpdateAttributes = Object.fromEntries(
+                    Object.entries(updateAttributes).map(([k, v]) => [k.toLowerCase(), v])
+                )
+                for (const arcAttribute of Object.keys(arcAttributes)) {
+                    if (lowerCaseUpdateAttributes[arcAttribute.toLowerCase()] == null) {
+                        updateAttributes[arcAttribute] = null
+                    }
+                }
+
+                this._pendingNewAndUpdates.updates.add(arcObservation)
             } else {
                 this._pendingNewAndUpdates.adds.add(arcObservation);
             }

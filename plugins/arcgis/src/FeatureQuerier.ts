@@ -1,6 +1,5 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { HttpClient } from "./HttpClient";
-import { QueryObjectIdResults } from "./QueryObjectIdResults";
 import { QueryObjectResult } from "./QueryObjectResult";
 
 /**
@@ -36,7 +35,7 @@ export class FeatureQuerier {
      */
     constructor(url: string, config: ArcGISPluginConfig, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = url + '/query?f=json&where=' + config.observationIdField + ' LIKE\'';
+        this._url = url + '/query?f=json&where=' + config.observationIdField + ' LIKE \'';
         this._console = console;
         this._config = config;
     }
@@ -46,11 +45,11 @@ export class FeatureQuerier {
      * @param observationId The id of the observation to query for on the arc feature layer.
      * @param response The function called once the response is received.
      */
-    queryObjectId(observationId: string, response: (result: QueryObjectIdResults) => void) {
-        const queryUrl = this._url + observationId + '%\'&returnIdsOnly=true';
+    queryObject(observationId: string, response: (result: QueryObjectResult) => void) {
+        const queryUrl = this._url + observationId + '%\'&outFields=*';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = JSON.parse(chunk) as QueryObjectIdResults;
+            const result = JSON.parse(chunk) as QueryObjectResult;
             response(result);
         });
     }

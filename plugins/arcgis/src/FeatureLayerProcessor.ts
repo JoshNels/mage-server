@@ -40,7 +40,7 @@ export class FeatureLayerProcessor {
     constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
         this.layerInfo = layerInfo;
         this.featureQuerier = new FeatureQuerier(layerInfo.url, config, console);
-        this._binner = new ObservationBinner(this.featureQuerier);
+        this._binner = new ObservationBinner(layerInfo, this.featureQuerier);
         this.sender = new ObservationsSender(layerInfo.url, config, console);
     }
 

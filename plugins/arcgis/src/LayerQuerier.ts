@@ -31,7 +31,7 @@ export class LayerQuerier {
      * @param infoCallback Function to call once response has been received and parsed.
      */
     queryLayerInfo(url: string, infoCallback: (layerInfo: LayerInfo) => void) {
-        this._httpClient.sendGetHandleResponse(url + '?f=pjson', this.parseLayerInfo(url, infoCallback));
+        this._httpClient.sendGetHandleResponse(url + '?f=json', this.parseLayerInfo(url, infoCallback));
     }
 
     /**
@@ -41,8 +41,8 @@ export class LayerQuerier {
      */
     private parseLayerInfo(url: string, infoCallback: (LayerInfo: LayerInfo) => void) {
         return (chunk: any) => {
-            let info = JSON.parse(chunk) as LayerInfo;
-            info.url = url;
+            const info = Object.assign(new LayerInfo(), JSON.parse(chunk));
+            info.initialize(url);
             this._console.log('Query layer response for ' + url + ' geometryType: ' + info.geometryType);
             infoCallback(info);
         }

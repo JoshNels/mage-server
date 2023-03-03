@@ -2,6 +2,8 @@ import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from './ArcObjects';
 import { ArcObservation, ArcAttachment } from './ArcObservation';
 import { HttpClient } from './HttpClient';
+import { EditResult } from './EditResult';
+import { AttachmentInfosResult, AttachmentInfo } from './AttachmentInfosResult';
 import environment from '@ngageoint/mage.service/lib/environment/env'
 import fs from 'fs'
 import path from 'path'
@@ -163,7 +165,7 @@ export class ObservationsSender {
         return (chunk: any) => {
             console.log((update ? 'Update' : 'Add') + ' Response: ' + chunk);
             const response = JSON.parse(chunk)
-            const results = response[update ? 'updateResults' : 'addResults']
+            const results = response[update ? 'updateResults' : 'addResults'] as EditResult[]
             if (results != null) {
                 const obs = observations.observations
                 for (let i = 0; i < obs.length && i < results.length; i++) {
@@ -209,7 +211,7 @@ export class ObservationsSender {
         const queryUrl = this._url + '/' + objectId + '/attachments?f=json'
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
-            const result = JSON.parse(chunk)
+            const result = JSON.parse(chunk) as AttachmentInfosResult
             this.updateAttachments(observation, objectId, result.attachmentInfos)
         })
 
@@ -221,13 +223,13 @@ export class ObservationsSender {
      * @param objectId The arc object id of the observation.
      * @param attachmentInfos The arc attachment infos.
      */
-    private updateAttachments(observation: ArcObservation, objectId: number, attachmentInfos: any[]) {
+    private updateAttachments(observation: ArcObservation, objectId: number, attachmentInfos: AttachmentInfo[]) {
 
         // Build a mapping between existing arc attachment names and the attachment infos
-        let nameAttachments: { [name: string]: any } = {}
+        let nameAttachments = new Map<string, AttachmentInfo>()
         if (attachmentInfos != null) {
             for (const attachmentInfo of attachmentInfos) {
-                nameAttachments[attachmentInfo.name] = attachmentInfo
+                nameAttachments.set(attachmentInfo.name, attachmentInfo)
             }
         }
 
@@ -237,9 +239,9 @@ export class ObservationsSender {
 
                 const fileName = this.attachmentFileName(attachment)
 
-                const existingAttachment = nameAttachments[fileName]
+                const existingAttachment = nameAttachments.get(fileName)
                 if (existingAttachment != null) {
-                    delete nameAttachments[fileName]
+                    nameAttachments.delete(fileName)
                     // Update the existing attachment if the file sizes do not match or last modified date updated
                     if (attachment.size != existingAttachment.size
                         || attachment.lastModified + this._config.attachmentModifiedTolerance >= observation.lastModified) {
@@ -254,8 +256,8 @@ export class ObservationsSender {
         }
 
         // Delete arc attachments that are no longer on the observation
-        if (Object.keys(nameAttachments).length > 0) {
-            this.deleteAttachments(objectId, Object.values(nameAttachments))
+        if (nameAttachments.size > 0) {
+            this.deleteAttachments(objectId, Array.from(nameAttachments.values()))
         }
 
     }
@@ -322,7 +324,7 @@ export class ObservationsSender {
      * @param objectId The arc object id of the observation.
      * @param attachmentInfos The arc attachment infos.
      */
-    private deleteAttachments(objectId: number, attachmentInfos: any[]) {
+    private deleteAttachments(objectId: number, attachmentInfos: AttachmentInfo[]) {
 
         const attachmentIds: number[] = []
 

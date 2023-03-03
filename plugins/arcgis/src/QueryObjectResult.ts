@@ -1,9 +1,10 @@
 import { ArcObject } from "./ArcObject"
 
 /**
- * Contains the result from a query on an arc feature layer.
+ * ArcGIS feature layer query result.
+ * https://developers.arcgis.com/rest/services-reference/enterprise/query-feature-service-layer-.htm
  */
-export class QueryObjectResult {
+export interface QueryObjectResult {
 
     /**
      * Contains the field name of the objectId field.
@@ -15,11 +16,4 @@ export class QueryObjectResult {
      */
     features: ArcObject[];
 
-    /**
-     * Constructor.
-     */
-    constructor() {
-        this.objectIdFieldName = 'objectid';
-        this.features = [];
-    }
 }

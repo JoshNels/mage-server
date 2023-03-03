@@ -49,7 +49,7 @@ export class FeatureQuerier {
         const queryUrl = this._url + observationId + '%\'&outFields=*';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = Object.assign(new QueryObjectResult(), JSON.parse(chunk));
+            const result = JSON.parse(chunk) as QueryObjectResult;
             response(result);
         });
     }
@@ -62,7 +62,7 @@ export class FeatureQuerier {
         const queryUrl = this._url + '%' + this._config.idSeperator + '%\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = Object.assign(new QueryObjectResult(), JSON.parse(chunk));
+            const result = JSON.parse(chunk) as QueryObjectResult;
             response(result);
         });
     }

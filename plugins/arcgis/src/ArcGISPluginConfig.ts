@@ -38,9 +38,14 @@ export interface ArcGISPluginConfig {
   featureLayers: string[]
 
   /**
-   * Override mappings between event form fields and arc attributes.
+   * Override mappings between event form fields and arc attributes as: { event: { form: { field: attribute } } }
    */
   fieldAttributes: any
+
+  /**
+   * Allowable concatenations with delimiters for multiple same string field values.
+   */
+  fieldConcatenations: { [field: string]: FieldConcatenation }
 
   /**
    * The field name to save and query the observation id to and from the ArcGIS server.
@@ -110,6 +115,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
   fieldAttributes: {},
+  fieldConcatenations: {},
   observationIdField: 'description',
   eventIdField: 'description',
   eventNameField: 'event_name',
@@ -122,3 +128,25 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   attachmentModifiedTolerance: 5000,
   idSeperator: ' mageEventId '
 })
+
+/**
+ * Same string field concatenation configuration.
+ */
+export interface FieldConcatenation {
+
+  /**
+   * Delimiter used to combine two string values.
+   */
+  delimiter: string
+
+  /**
+   * Combine field values from multiple same forms.
+   */
+  sameForms: boolean
+
+  /**
+   * Combine field values form different forms.
+   */
+  differentForms: boolean
+
+}

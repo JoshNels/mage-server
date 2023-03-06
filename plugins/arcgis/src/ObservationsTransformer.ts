@@ -277,15 +277,13 @@ export class ObservationsTransformer {
                                     title = fieldTitle
                                 }
                             }
-                            title = this.appendCount(title, formCount)
                             if (field.type == FormFieldType.Geometry) {
                                 value = this.geometryToArcGeometry(value)
                             }
-                            this.addAttribute(title, value, arcObject)
+                            this.addFormAttribute(title, formCount, value, arcObject)
                         }
                     } else {
-                        const title = this.appendCount(formProperty, formCount)
-                        this.addAttribute(title, value, arcObject)
+                        this.addFormAttribute(formProperty, formCount, value, arcObject)
                     }
                 }
             }
@@ -295,22 +293,84 @@ export class ObservationsTransformer {
     }
 
     /**
-     * Add an ArcObject attribute.
-     * @param key The attribute key.
+     * Add an ArcObject attribute for a form field.
+     * @param name The attribute name.
+     * @param count The form count.
      * @param value The attribute value.
      * @param arcObject The converted ArcObject.
      */
-    private addAttribute(key: string, value: any, arcObject: ArcObject) {
+    private addFormAttribute(name: string, count: number, value: any, arcObject: ArcObject) {
+
+        if (count > 1) {
+            const concat = this._config.fieldConcatenations[name]
+            if (concat != null && (concat.sameForms == null || concat.sameForms)) {
+                count = 1
+            }
+        }
+
+        const attribute = this.appendCount(name, count)
+        this.addAttribute(attribute, value, arcObject)
+    }
+
+    /**
+     * Add an ArcObject attribute.
+     * @param name The attribute name.
+     * @param value The attribute value.
+     * @param arcObject The converted ArcObject.
+     */
+    private addAttribute(name: string, value: any, arcObject: ArcObject) {
+
         if (value != null) {
+
             if (arcObject.attributes == null) {
                 arcObject.attributes = {}
             }
-            key = this.replaceSpaces(key)
+
+            let attribute = this.replaceSpaces(name)
+
             if (Object.prototype.toString.call(value) === '[object Date]') {
                 value = new Date(value).getTime()
             }
-            arcObject.attributes[key] = value
+
+            let existingValue = arcObject.attributes[attribute]
+            if (existingValue !== undefined) {
+
+                const concat = this._config.fieldConcatenations[name]
+                if (concat != null && (concat.differentForms == null || concat.differentForms)) {
+                    
+                    let delimiter = concat.delimiter
+                    if (delimiter == null) {
+                        delimiter = ', '
+                    }
+                    value = existingValue + delimiter + value
+
+                } else {
+
+                    let baseKey = attribute
+                    let count = 1
+                    const countIndex = attribute.lastIndexOf('_')
+                    if (countIndex != -1) {
+                        const countString = attribute.substring(countIndex + 1)
+                        if (countString != null && countString !== '') {
+                            const countNumber = Number(countString)
+                            if (!isNaN(countNumber)) {
+                                baseKey = attribute.substring(0, countIndex)
+                                count = countNumber
+                            }
+                        }
+                    }
+                    do {
+                        count += 1
+                        attribute = this.appendCount(baseKey, count)
+                    } while (arcObject.attributes[attribute] !== undefined)
+
+                }
+
+            }
+
+            arcObject.attributes[attribute] = value
         }
+
     }
 
     /**

@@ -109,7 +109,16 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
-  fieldAttributes: {},
+  fieldAttributes: {
+    'Wood': {
+      'Polyline': {
+        'symbolid': 'symbolid'
+      },
+      'Polygon': {
+        'symbolid': 'symbolid'
+      }
+    }
+  },
   observationIdField: 'description',
   eventIdField: 'description',
   eventNameField: 'event_name',
@@ -120,5 +129,5 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   createdAtField: 'created_at',
   lastModifiedField: 'last_modified',
   attachmentModifiedTolerance: 5000,
-  idSeperator: ' mageEventId '
+  idSeperator: '-mageEventId-'
 })

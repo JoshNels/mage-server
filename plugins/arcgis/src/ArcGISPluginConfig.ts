@@ -1,3 +1,5 @@
+import { FeatureLayerConfig } from "./FeatureLayerConfig"
+
 /**
  * Contains various configuration values used by the plugin.
  */
@@ -35,7 +37,7 @@ export interface ArcGISPluginConfig {
   /**
    * The feature layers to send new observations to.
    */
-  featureLayers: string[]
+  featureLayers: FeatureLayerConfig[]
 
   /**
    * Override mappings between event form fields and arc attributes.
@@ -106,9 +108,9 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   startupIntervalSeconds: 1,
   updateIntervalSeconds: 1,
   batchSize: 100,
-  featureLayers: ['https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0',
-    'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1',
-    'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2'],
+  featureLayers: [new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', [45]),
+    new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', [45]),
+    new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', [45])],
   fieldAttributes: {},
   observationIdField: 'description',
   eventIdField: 'description',

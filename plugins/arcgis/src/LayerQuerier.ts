@@ -44,7 +44,7 @@ export class LayerQuerier {
     private parseLayerInfo(url: string, eventIds: number[], infoCallback: (LayerInfo: LayerInfo) => void) {
         return (chunk: any) => {
             const info: LayerInfo = Object.assign(new LayerInfo(), JSON.parse(chunk));
-            info.initialize(url);
+            info.initialize(url, eventIds);
             this._console.log('Query layer response for ' + url + ' geometryType: ' + info.geometryType);
             infoCallback(info);
         }

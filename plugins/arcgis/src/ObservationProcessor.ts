@@ -181,7 +181,7 @@ export class ObservationProcessor {
                     let morePages = true;
                     let numberLeft = 0;
                     while (morePages) {
-                        numberLeft = await this.queryAndSend(obsRepo, pagingSettings, queryTime, numberLeft);
+                        numberLeft = await this.queryAndSend(this._layerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
                         morePages = numberLeft > 0;
                     }
                 }
@@ -206,13 +206,14 @@ export class ObservationProcessor {
 
     /**
      * Queries for new observations and sends them to any configured arc servers.
+     * @param layerProcessors The layer processors to use when processing arc objects.
      * @param obsRepo The observation repo for an event.
      * @param pagingSettings Current paging settings.
      * @param queryTime The time to query for.
      * @param numberLeft The number of observations left to query and send to arc.
      * @returns The number of observations still needing to be queried and sent to arc.
      */
-    private async queryAndSend(obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
+    private async queryAndSend(layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
         let newNumberLeft = numberLeft;
 
         let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
@@ -225,7 +226,7 @@ export class ObservationProcessor {
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
             const eventTransform = new EventTransform(this._config, mageEvent)
             const arcObjects = new ArcObjects()
-            this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, this._layerProcessors, this._firstRun);
+            this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, layerProcessors, this._firstRun);
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
                 let deletion = false
@@ -245,7 +246,7 @@ export class ObservationProcessor {
                 }
             }
             arcObjects.firstRun = this._firstRun;
-            for (const layerProcessor of this._layerProcessors) {
+            for (const layerProcessor of layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }
             newNumberLeft -= latestObs.items.length;

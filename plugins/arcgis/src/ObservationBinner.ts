@@ -2,11 +2,17 @@ import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { FeatureQuerier } from "./FeatureQuerier";
 import { ObservationBins } from "./ObservationBins";
+import { LayerInfo } from "./LayerInfo";
 
 /**
  * Sorts the observations into a group of new ones and a group of updated ones.
  */
 export class ObservationBinner {
+
+    /**
+     * Information about the arc feature layer this class sends observations to.
+     */
+    layerInfo: LayerInfo;
 
     /**
      * The number of existence queries we are still waiting for.
@@ -25,11 +31,11 @@ export class ObservationBinner {
 
     /**
      * Constructor.
+     * @param layerInfo Information about the arc feature layer this class sends observations to.
      * @param featureQuerier Used to query for observation on the arc feature layer.
-     * @param obsFieldId The field that stores the observation id.
-     * @param console Used to log to the console.
      */
-    constructor(featureQuerier: FeatureQuerier) {
+    constructor(layerInfo: LayerInfo, featureQuerier: FeatureQuerier) {
+        this.layerInfo = layerInfo;
         this._featureQuerier = featureQuerier;
         this._pendingNewAndUpdates = new ObservationBins;
         this._existenceQueryCount = 0;
@@ -105,12 +111,14 @@ export class ObservationBinner {
 
                 updateAttributes[objectIdField] = arcAttributes[objectIdField]
 
-                // Determine if any attribute values should be deleted
+                // Determine if any editable attribute values should be deleted
                 const lowerCaseUpdateAttributes = Object.fromEntries(
                     Object.entries(updateAttributes).map(([k, v]) => [k.toLowerCase(), v])
                 )
                 for (const arcAttribute of Object.keys(arcAttributes)) {
-                    if (lowerCaseUpdateAttributes[arcAttribute.toLowerCase()] == null) {
+                    if (this.layerInfo.isEditable(arcAttribute)
+                        && arcAttributes[arcAttribute] != null
+                        && lowerCaseUpdateAttributes[arcAttribute.toLowerCase()] == null) {
                         updateAttributes[arcAttribute] = null
                     }
                 }

@@ -1,6 +1,9 @@
 import { ArcObject } from './ArcObject'
 import { ObservationId } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 
+/**
+ * The ArcGIS Observation wraps the raw ArcObject and combines Arc & MAGE metadata.
+ */
 export interface ArcObservation {
     id: ObservationId,
     createdAt: number,
@@ -10,6 +13,9 @@ export interface ArcObservation {
     attachments: ArcAttachment[]
 }
 
+/**
+ * Observation Attachment metadata.
+ */
 export interface ArcAttachment {
     field: string,
     lastModified: number,

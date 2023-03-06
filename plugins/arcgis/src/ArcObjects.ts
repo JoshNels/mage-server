@@ -2,7 +2,7 @@ import { ArcObject } from './ArcObject'
 import { ArcObservation } from './ArcObservation'
 
 /**
- * Contains both the features to send to arc and their attachments.
+ * Observation Features Objects to send, update, or delete in ArcGIS.
  */
 export class ArcObjects {
 

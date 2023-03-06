@@ -28,21 +28,23 @@ export class LayerQuerier {
     /**
      * Queries an arc feature layer to get info on the layer.
      * @param url The url to the arc feature layer.
+     * @param eventIds The event ids configured to sync to the specified arc feature layer.
      * @param infoCallback Function to call once response has been received and parsed.
      */
-    queryLayerInfo(url: string, infoCallback: (layerInfo: LayerInfo) => void) {
-        this._httpClient.sendGetHandleResponse(url + '?f=json', this.parseLayerInfo(url, infoCallback));
+    queryLayerInfo(url: string, eventIds: number[], infoCallback: (layerInfo: LayerInfo) => void) {
+        this._httpClient.sendGetHandleResponse(url + '?f=json', this.parseLayerInfo(url, eventIds, infoCallback));
     }
 
     /**
      * Parses the response from the request and sends the layer info to the callback.
      * @param url The url to the feature layer.
+     * @param eventIds The event ids configured to sync to the specified arc feature layer.
      * @param infoCallback The callback to call and send the layer info too.
      */
-    private parseLayerInfo(url: string, infoCallback: (LayerInfo: LayerInfo) => void) {
+    private parseLayerInfo(url: string, eventIds: number[], infoCallback: (LayerInfo: LayerInfo) => void) {
         return (chunk: any) => {
             const info: LayerInfo = Object.assign(new LayerInfo(), JSON.parse(chunk));
-            info.initialize(url);
+            info.initialize(url, eventIds);
             this._console.log('Query layer response for ' + url + ' geometryType: ' + info.geometryType);
             infoCallback(info);
         }

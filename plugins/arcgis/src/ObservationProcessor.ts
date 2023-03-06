@@ -11,6 +11,7 @@ import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
 import { EventDeletionHandler } from './EventDeletionHandler';
+import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -95,6 +96,11 @@ export class ObservationProcessor {
     private _eventDeletionHandler: EventDeletionHandler;
 
     /**
+     * Maps the events to the processor they are synching data for.
+     */
+    private _organizer: EventLayerProcessorOrganizer;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -116,6 +122,7 @@ export class ObservationProcessor {
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
         this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
+        this._organizer = new EventLayerProcessorOrganizer();
     }
 
     /**
@@ -141,8 +148,9 @@ export class ObservationProcessor {
      */
     private getLayerInfos() {
         for (let i = 0; i < this._config.featureLayers.length; i++) {
-            const url = this._config.featureLayers[i];
-            this._layerQuerier.queryLayerInfo(url, (info: LayerInfo) => this.handleLayerInfo(info));
+            const url = this._config.featureLayers[i].url;
+            const eventIds = this._config.featureLayers[i].events;
+            this._layerQuerier.queryLayerInfo(url, eventIds, (info: LayerInfo) => this.handleLayerInfo(info));
         }
     }
 
@@ -170,9 +178,10 @@ export class ObservationProcessor {
                 this._lastTimeStamp = Date.now();
                 const activeEvents = await this._eventRepo.findActiveEvents();
                 this._eventDeletionHandler.checkForEventDeletion(activeEvents, this._layerProcessors, this._firstRun);
-                for (const activeEvent of activeEvents) {
-                    this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
-                    const obsRepo = await this._obsRepos(activeEvent.id);
+                const eventsToProcessors = this._organizer.organize(activeEvents, this._layerProcessors);
+                for (const pair of eventsToProcessors) {
+                    this._console.info('ArcGIS getting newest observations for event ' + pair.event.name);
+                    const obsRepo = await this._obsRepos(pair.event.id);
                     const pagingSettings = {
                         pageSize: this._batchSize,
                         pageIndex: 0,
@@ -181,7 +190,7 @@ export class ObservationProcessor {
                     let morePages = true;
                     let numberLeft = 0;
                     while (morePages) {
-                        numberLeft = await this.queryAndSend(obsRepo, pagingSettings, queryTime, numberLeft);
+                        numberLeft = await this.queryAndSend(pair.featureLayerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
                         morePages = numberLeft > 0;
                     }
                 }
@@ -206,13 +215,14 @@ export class ObservationProcessor {
 
     /**
      * Queries for new observations and sends them to any configured arc servers.
+     * @param layerProcessors The layer processors to use when processing arc objects.
      * @param obsRepo The observation repo for an event.
      * @param pagingSettings Current paging settings.
      * @param queryTime The time to query for.
      * @param numberLeft The number of observations left to query and send to arc.
      * @returns The number of observations still needing to be queried and sent to arc.
      */
-    private async queryAndSend(obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
+    private async queryAndSend(layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
         let newNumberLeft = numberLeft;
 
         let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
@@ -225,7 +235,7 @@ export class ObservationProcessor {
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
             const eventTransform = new EventTransform(this._config, mageEvent)
             const arcObjects = new ArcObjects()
-            this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, this._layerProcessors, this._firstRun);
+            this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, layerProcessors, this._firstRun);
             for (let i = 0; i < observations.length; i++) {
                 const observation = observations[i]
                 let deletion = false
@@ -245,7 +255,7 @@ export class ObservationProcessor {
                 }
             }
             arcObjects.firstRun = this._firstRun;
-            for (const layerProcessor of this._layerProcessors) {
+            for (const layerProcessor of layerProcessors) {
                 layerProcessor.processArcObjects(arcObjects);
             }
             newNumberLeft -= latestObs.items.length;

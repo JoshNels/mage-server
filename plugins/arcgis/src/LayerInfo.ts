@@ -24,20 +24,30 @@ export class LayerInfo {
     layerFields: Map<string, LayerField> = new Map();
 
     /**
+     * The events that are synching to this layer.
+     */
+    eventIds: Set<number>;
+
+    /**
      * Constructor.
      */
     constructor() {
         this.url = '';
         this.geometryType = '';
         this.fields = [];
+        this.eventIds = new Set<number>();
     }
 
     /**
      * Initialize.
      * @param url The url to the feature layer.
+     * @param eventIds The events that are synching to this layer.
      */
-    initialize(url: string) {
+    initialize(url: string, eventIds: number[]) {
         this.url = url;
+        for(const eventId of eventIds) {
+            this.eventIds.add(eventId);
+        }
         for (const field of this.fields) {
             this.layerFields.set(field.name, field)
         }

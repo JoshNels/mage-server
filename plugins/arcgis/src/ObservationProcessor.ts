@@ -142,7 +142,8 @@ export class ObservationProcessor {
     private getLayerInfos() {
         for (let i = 0; i < this._config.featureLayers.length; i++) {
             const url = this._config.featureLayers[i].url;
-            this._layerQuerier.queryLayerInfo(url, (info: LayerInfo) => this.handleLayerInfo(info));
+            const eventIds = this._config.featureLayers[i].events;
+            this._layerQuerier.queryLayerInfo(url, eventIds, (info: LayerInfo) => this.handleLayerInfo(info));
         }
     }
 

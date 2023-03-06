@@ -11,6 +11,7 @@ import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
 import { EventDeletionHandler } from './EventDeletionHandler';
+import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -95,6 +96,11 @@ export class ObservationProcessor {
     private _eventDeletionHandler: EventDeletionHandler;
 
     /**
+     * Maps the events to the processor they are synching data for.
+     */
+    private _organizer: EventLayerProcessorOrganizer;
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param eventRepo Used to get all the active events.
@@ -116,6 +122,7 @@ export class ObservationProcessor {
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
         this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
+        this._organizer = new EventLayerProcessorOrganizer();
     }
 
     /**
@@ -171,9 +178,10 @@ export class ObservationProcessor {
                 this._lastTimeStamp = Date.now();
                 const activeEvents = await this._eventRepo.findActiveEvents();
                 this._eventDeletionHandler.checkForEventDeletion(activeEvents, this._layerProcessors, this._firstRun);
-                for (const activeEvent of activeEvents) {
-                    this._console.info('ArcGIS getting newest observations for event ' + activeEvent.name);
-                    const obsRepo = await this._obsRepos(activeEvent.id);
+                const eventsToProcessors = this._organizer.organize(activeEvents, this._layerProcessors);
+                for (const pair of eventsToProcessors) {
+                    this._console.info('ArcGIS getting newest observations for event ' + pair.event.name);
+                    const obsRepo = await this._obsRepos(pair.event.id);
                     const pagingSettings = {
                         pageSize: this._batchSize,
                         pageIndex: 0,
@@ -182,7 +190,7 @@ export class ObservationProcessor {
                     let morePages = true;
                     let numberLeft = 0;
                     while (morePages) {
-                        numberLeft = await this.queryAndSend(this._layerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
+                        numberLeft = await this.queryAndSend(pair.featureLayerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
                         morePages = numberLeft > 0;
                     }
                 }

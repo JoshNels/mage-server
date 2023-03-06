@@ -113,10 +113,19 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   startupIntervalSeconds: 1,
   updateIntervalSeconds: 1,
   batchSize: 100,
-  featureLayers: [new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', [45]),
-    new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', [45]),
-    new FeatureLayerConfig('https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', [45])],
-  fieldAttributes: {},
+  featureLayers: [{ url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', events: [46, 47, 48] },
+  { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', events: [48] },
+  { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [47] }],
+  fieldAttributes: {
+    'Wood': {
+      'Polyline': {
+        'symbolid': 'symbolid'
+      },
+      'Polygon': {
+        'symbolid': 'symbolid'
+      }
+    }
+  },
   fieldConcatenations: {},
   observationIdField: 'description',
   eventIdField: 'description',
@@ -128,7 +137,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   createdAtField: 'created_at',
   lastModifiedField: 'last_modified',
   attachmentModifiedTolerance: 5000,
-  idSeperator: ' mageEventId '
+  idSeperator: '-mageEventId-'
 })
 
 /**

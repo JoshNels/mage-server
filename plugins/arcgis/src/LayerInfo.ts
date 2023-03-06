@@ -26,7 +26,7 @@ export class LayerInfo {
     /**
      * The events that are synching to this layer.
      */
-    eventIds: number[];
+    eventIds: Set<number>;
 
     /**
      * Constructor.
@@ -35,7 +35,7 @@ export class LayerInfo {
         this.url = '';
         this.geometryType = '';
         this.fields = [];
-        this.eventIds = [];
+        this.eventIds = new Set<number>();
     }
 
     /**
@@ -45,7 +45,9 @@ export class LayerInfo {
      */
     initialize(url: string, eventIds: number[]) {
         this.url = url;
-        this.eventIds = eventIds;
+        for(const eventId of eventIds) {
+            this.eventIds.add(eventId);
+        }
         for (const field of this.fields) {
             this.layerFields.set(field.name, field)
         }

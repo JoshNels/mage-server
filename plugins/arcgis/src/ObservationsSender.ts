@@ -162,8 +162,9 @@ export class ObservationsSender {
      * @returns The response handler.
      */
     private responseHandler(observations: ArcObjects, update: boolean): (chunk: any) => void {
+        const console = this._console
         return (chunk: any) => {
-            console.log((update ? 'Update' : 'Add') + ' Response: ' + chunk);
+            console.log('ArcGIS ' + (update ? 'Update' : 'Add') + ' Response: ' + chunk)
             const response = JSON.parse(chunk)
             const results = response[update ? 'updateResults' : 'addResults'] as EditResult[]
             if (results != null) {
@@ -171,6 +172,7 @@ export class ObservationsSender {
                 for (let i = 0; i < obs.length && i < results.length; i++) {
                     const observation = obs[i]
                     const result = results[i]
+
                     if (result.success != null && result.success) {
                         const objectId = result.objectId
                         if (objectId != null) {
@@ -181,6 +183,8 @@ export class ObservationsSender {
                                 this.sendAttachments(observation, objectId)
                             }
                         }
+                    } else if (result.error != null) {
+                        console.error('ArcGIS Error. Code: ' + result.error.code + ', Description: ' + result.error.description)
                     }
                 }
             }

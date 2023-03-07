@@ -5,7 +5,7 @@
 export interface EditResult {
     objectId: number
     success: boolean
-    error: {
+    error?: {
         code: number
         description: string
     }

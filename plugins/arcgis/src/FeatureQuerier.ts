@@ -61,7 +61,7 @@ export class FeatureQuerier {
     queryAllObservations(response: (result: QueryObjectResult) => void) {
         const queryUrl = this._url + '%' + this._config.idSeperator + '%\'';
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
-            console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
+            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
             const result = JSON.parse(chunk) as QueryObjectResult;
             response(result);
         });

@@ -25,6 +25,7 @@ export class HttpClient {
      * @param formData The data to put in the post.
      */
     sendPost(url: string, formData: string) {
+        const console = this._console
         this.sendPostHandleResponse(url, formData, function (chunk) {
             console.log('Response: ' + chunk);
         })
@@ -68,6 +69,7 @@ export class HttpClient {
      * @param form The data to put in the post.
      */
     sendPostForm(url: string, form: FormData) {
+        const console = this._console
         this.sendPostFormHandleResponse(url, form, function (chunk) {
             console.log('Response: ' + chunk)
         })
@@ -105,6 +107,7 @@ export class HttpClient {
      * @param url The url of the get request.
      */
     sendGet(url: string) {
+        const console = this._console
         this.sendGetHandleResponse(url, function (chunk) {
             console.log('Response: ' + chunk);
         })

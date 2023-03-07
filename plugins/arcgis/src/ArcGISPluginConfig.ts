@@ -40,7 +40,7 @@ export interface ArcGISPluginConfig {
   featureLayers: FeatureLayerConfig[]
 
   /**
-   * Override mappings between event form fields and arc attributes as: { event: { form: { field: attribute } } }
+   * Override mappings between event form fields and ArcGIS attributes as: { event: { form: { field: attribute } } }
    */
   fieldAttributes: any
 
@@ -48,6 +48,11 @@ export interface ArcGISPluginConfig {
    * Allowable concatenations with delimiters for multiple same string field values.
    */
   fieldConcatenations: { [field: string]: FieldConcatenation }
+
+  /**
+   * Field value mappings to ArcGIS attribute values as: { field: { value: attribute_value } }
+   */
+  fieldValues: any
 
   /**
    * The field name to save and query the observation id to and from the ArcGIS server.
@@ -118,6 +123,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [] }],
   fieldAttributes: {},
   fieldConcatenations: {},
+  fieldValues: {},
   observationIdField: 'description',
   eventIdField: 'description',
   eventNameField: 'event_name',

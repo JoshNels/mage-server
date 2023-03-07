@@ -332,6 +332,14 @@ export class ObservationsTransformer {
                 value = new Date(value).getTime()
             }
 
+            const fieldValues = this._config.fieldValues[name]
+            if (fieldValues != null) {
+                const fieldValue = fieldValues[value]
+                if (fieldValue != null) {
+                    value = fieldValue
+                }
+            }
+
             let existingValue = arcObject.attributes[attribute]
             if (existingValue !== undefined) {
 

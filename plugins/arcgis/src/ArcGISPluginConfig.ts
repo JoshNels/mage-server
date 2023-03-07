@@ -1,4 +1,4 @@
-import { FeatureLayerConfig } from "./FeatureLayerConfig"
+import { FeatureLayerConfig, FieldConcatenationConfig } from "./ArcGISConfig"
 
 /**
  * Contains various configuration values used by the plugin.
@@ -47,7 +47,7 @@ export interface ArcGISPluginConfig {
   /**
    * Allowable concatenations with delimiters for multiple same string field values.
    */
-  fieldConcatenations: { [field: string]: FieldConcatenation }
+  fieldConcatenations: { [field: string]: FieldConcatenationConfig }
 
   /**
    * Field value mappings to ArcGIS attribute values as: { field: { value: attribute_value } }
@@ -136,25 +136,3 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   attachmentModifiedTolerance: 5000,
   idSeperator: ' mageEventId '
 })
-
-/**
- * Same string field concatenation configuration.
- */
-export interface FieldConcatenation {
-
-  /**
-   * Delimiter used to combine two string values.
-   */
-  delimiter: string
-
-  /**
-   * Combine field values from multiple same forms.
-   */
-  sameForms: boolean
-
-  /**
-   * Combine field values form different forms.
-   */
-  differentForms: boolean
-
-}

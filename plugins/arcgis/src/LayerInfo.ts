@@ -26,7 +26,7 @@ export class LayerInfo {
     /**
      * The events that are synching to this layer.
      */
-    eventIds: Set<number>;
+    events: Set<string>;
 
     /**
      * Constructor.
@@ -35,18 +35,18 @@ export class LayerInfo {
         this.url = '';
         this.geometryType = '';
         this.fields = [];
-        this.eventIds = new Set<number>();
+        this.events = new Set<string>();
     }
 
     /**
      * Initialize.
      * @param url The url to the feature layer.
-     * @param eventIds The events that are synching to this layer.
+     * @param events The events that are synching to this layer.
      */
-    initialize(url: string, eventIds: number[]) {
+    initialize(url: string, events: string[]) {
         this.url = url;
-        for(const eventId of eventIds) {
-            this.eventIds.add(eventId);
+        for(const event of events) {
+            this.events.add(event);
         }
         for (const field of this.fields) {
             this.layerFields.set(field.name, field)
@@ -69,11 +69,11 @@ export class LayerInfo {
 
     /**
      * Determine if the layer is enabled for the event.
-     * @param eventId The event id.
+     * @param event The event.
      * @return true if enabled
      */
-    hasEvent(eventId: number) {
-        return this.eventIds.size == 0 || this.eventIds.has(eventId)
+    hasEvent(event: string) {
+        return this.events.size == 0 || this.events.has(event)
     }
 
 }

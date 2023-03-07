@@ -146,11 +146,23 @@ export class ObservationProcessor {
     /**
      * Gets information on all the configured features layers.
      */
-    private getLayerInfos() {
+    private async getLayerInfos() {
         for (let i = 0; i < this._config.featureLayers.length; i++) {
             const url = this._config.featureLayers[i].url;
-            const eventIds = this._config.featureLayers[i].events;
-            this._layerQuerier.queryLayerInfo(url, eventIds, (info: LayerInfo) => this.handleLayerInfo(info));
+            const eventNames: string[] = [];
+            const events = this._config.featureLayers[i].events;
+            for (const event of events) {
+                const eventId = Number(event);
+                if (isNaN(eventId)) {
+                    eventNames.push(String(event));
+                } else {
+                    const mageEvent = await this._eventRepo.findById(eventId)
+                    if (mageEvent != null) {
+                        eventNames.push(mageEvent.name);
+                    }
+                }
+            }
+            this._layerQuerier.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
         }
     }
 

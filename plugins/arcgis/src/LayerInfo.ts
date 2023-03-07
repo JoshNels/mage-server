@@ -66,6 +66,16 @@ export class LayerInfo {
         }
         return editable
     }
+
+    /**
+     * Determine if the layer is enabled for the event.
+     * @param eventId The event id.
+     * @return true if enabled
+     */
+    hasEvent(eventId: number) {
+        return this.eventIds.size == 0 || this.eventIds.has(eventId)
+    }
+
 }
 
 /**

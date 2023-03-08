@@ -15,9 +15,26 @@ export interface FeatureLayerConfig {
 }
 
 /**
- * Same string field concatenation configuration.
+ * Attribute configurations
  */
-export interface FieldConcatenationConfig {
+export interface AttributeConfig {
+
+    /**
+     * String value concatenation.
+     */
+    concatenation?: AttributeConcatenationConfig
+
+    /**
+     * Value mappings
+     */
+    mappings?: { [value: string]: any }
+
+}
+
+/**
+ * Same string attribute concatenation configuration.
+ */
+export interface AttributeConcatenationConfig {
 
     /**
      * Delimiter used to combine two string values.
@@ -25,13 +42,13 @@ export interface FieldConcatenationConfig {
     delimiter: string
 
     /**
-     * Combine field values from multiple same forms.
+     * Combine attribute values from multiple same forms.
      */
-    sameForms: boolean
+    sameForms?: boolean
 
     /**
-     * Combine field values form different forms.
+     * Combine attribute values form different forms.
      */
-    differentForms: boolean
+    differentForms?: boolean
 
 }

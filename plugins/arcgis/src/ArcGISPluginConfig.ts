@@ -1,4 +1,4 @@
-import { FeatureLayerConfig, FieldConcatenationConfig } from "./ArcGISConfig"
+import { FeatureLayerConfig, AttributeConfig } from "./ArcGISConfig"
 
 /**
  * Contains various configuration values used by the plugin.
@@ -45,14 +45,9 @@ export interface ArcGISPluginConfig {
   fieldAttributes: any
 
   /**
-   * Allowable concatenations with delimiters for multiple same string field values.
+   * The attribute configurations.
    */
-  fieldConcatenations: { [field: string]: FieldConcatenationConfig }
-
-  /**
-   * Field value mappings to ArcGIS attribute values as: { field: { value: attribute_value } }
-   */
-  fieldValues: any
+  attributes: { [attribute: string]: AttributeConfig }
 
   /**
    * The field name to save and query the observation id to and from the ArcGIS server.
@@ -122,8 +117,7 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', events: [] },
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [] }],
   fieldAttributes: {},
-  fieldConcatenations: {},
-  fieldValues: {},
+  attributes: {},
   observationIdField: 'description',
   eventIdField: 'description',
   eventNameField: 'event_name',

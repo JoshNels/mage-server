@@ -302,7 +302,7 @@ export class ObservationsTransformer {
     private addFormAttribute(name: string, count: number, value: any, arcObject: ArcObject) {
 
         if (count > 1) {
-            const concat = this._config.fieldConcatenations[name]
+            const concat = this._config.attributes[name]?.concatenation
             if (concat != null && (concat.sameForms == null || concat.sameForms)) {
                 count = 1
             }
@@ -332,9 +332,10 @@ export class ObservationsTransformer {
                 value = new Date(value).getTime()
             }
 
-            const fieldValues = this._config.fieldValues[name]
-            if (fieldValues != null) {
-                const fieldValue = fieldValues[value]
+            const config = this._config.attributes[name]
+
+            if (config?.mappings != null) {
+                const fieldValue = config.mappings[value]
                 if (fieldValue != null) {
                     value = fieldValue
                 }
@@ -343,9 +344,9 @@ export class ObservationsTransformer {
             let existingValue = arcObject.attributes[attribute]
             if (existingValue !== undefined) {
 
-                const concat = this._config.fieldConcatenations[name]
+                const concat = config?.concatenation
                 if (concat != null && (concat.differentForms == null || concat.differentForms)) {
-                    
+
                     let delimiter = concat.delimiter
                     if (delimiter == null) {
                         delimiter = ', '

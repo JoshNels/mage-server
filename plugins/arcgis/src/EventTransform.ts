@@ -1,6 +1,6 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig"
 import { MageEvent } from '@ngageoint/mage.service/lib/entities/events/entities.events'
-import { Form } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
+import { Form, FormId } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 
 /**
  * Contains information used to transform observations from a single event.
@@ -49,7 +49,7 @@ export class EventTransform {
 
         if (this.mageEvent != null) {
 
-            const formAttributes = config.fieldAttributes != null ? config.fieldAttributes[this.mageEvent.name] : null
+            const formAttributes = this.configValue(config.fieldAttributes, this.mageEvent.name, this.mageEvent.id)
 
             // Initialize active form active fields
             for (const form of this.mageEvent.activeForms) {
@@ -78,7 +78,7 @@ export class EventTransform {
 
         const fields = new FormFields(form)
 
-        const fieldAttributes = formAttributes != null ? formAttributes[fields.name] : null
+        const fieldAttributes = this.configValue(formAttributes, fields.name, fields.id)
 
         for (const field of form.fields) {
 
@@ -102,7 +102,7 @@ export class EventTransform {
 
             for (const fields of this.formFields.values()) {
 
-                const fieldAttributes = formAttributes != null ? formAttributes[fields.name] : null
+                const fieldAttributes = this.configValue(formAttributes, fields.name, fields.id)
 
                 for (const field of fields.archivedFields) {
                     const attribute = this.initializeField(field, fields.name, allFields, fieldAttributes)
@@ -111,6 +111,24 @@ export class EventTransform {
 
             }
 
+    }
+
+    /**
+     * Retrieve a config value by name or id.
+     * @param config The configuration.
+     * @param name Configuration name.
+     * @param id Configuration id.
+     * @return configuration value
+     */
+    private configValue(config: any, name: string, id: number): any {
+        let value = null
+        if (config != null) {
+            value = config[name]
+            if (value == null) {
+                value = config[id]
+            }
+        }
+        return value
     }
 
     /**
@@ -166,6 +184,11 @@ export class FormFields {
     name: string
 
     /**
+     * Form id
+     */
+    id: FormId
+
+    /**
      * Form archived flag
      */
     archived: boolean
@@ -186,6 +209,7 @@ export class FormFields {
      */
     constructor(form: Form) {
         this.name = form.name
+        this.id = form.id
         this.archived = form.archived
     }
 

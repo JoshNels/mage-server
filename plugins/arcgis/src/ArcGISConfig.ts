@@ -9,7 +9,7 @@ export interface FeatureLayerConfig {
     url: string;
 
     /**
-     * The event ids that sync to this arc feature layer.
+     * The event ids or names that sync to this arc feature layer.
      */
     events: (number|string)[];
 }
@@ -34,4 +34,4 @@ export interface FieldConcatenationConfig {
      */
     differentForms: boolean
 
-  }
+}

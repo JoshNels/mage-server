@@ -29,6 +29,11 @@ export interface AttributeConfig {
      */
     mappings?: { [value: string]: any }
 
+    /**
+     * Default values
+     */
+    defaults?: AttributeDefaultConfig[]
+
 }
 
 /**
@@ -50,5 +55,39 @@ export interface AttributeConcatenationConfig {
      * Combine attribute values form different forms.
      */
     differentForms?: boolean
+
+}
+
+/**
+ * Attribute default value configuration.
+ */
+export interface AttributeDefaultConfig {
+
+    /**
+     * Default value.
+     */
+    value: any
+
+    /**
+     * Conditional attribute equality values when the default applies.
+     */
+    condition?: AttributeValueConfig[]
+
+}
+
+/**
+ * Attribute value configuration.
+ */
+export interface AttributeValueConfig {
+
+    /**
+     * Attribute name.
+     */
+    attribute: string
+
+    /**
+     * Attribute values.
+     */
+    values: any[]
 
 }

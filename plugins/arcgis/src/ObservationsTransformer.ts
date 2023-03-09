@@ -57,6 +57,8 @@ export class ObservationsTransformer {
         }
 
         const arcObservation = this.createObservation(observation)
+        this.addAttribute(this._config.geometryType, arcObservation.esriGeometryType, arcObject)
+        this.addDefaults(arcObject)
 
         arcObservation.createdAt = arcObject.attributes['createdAt']
         arcObservation.lastModified = arcObject.attributes['lastModified']
@@ -378,6 +380,43 @@ export class ObservationsTransformer {
             }
 
             arcObject.attributes[attribute] = value
+        }
+
+    }
+
+    /**
+     * Add ArcObject attribute defaults.
+     * @param arcObject The converted ArcObject.
+     */
+    private addDefaults(arcObject: ArcObject) {
+
+        for (const attributes of Object.entries(this._config.attributes)) {
+            const attribute = attributes[0]
+            const defaults = attributes[1]?.defaults
+            if (defaults != null && arcObject.attributes[attribute] == null) {
+                for (const attributeDefault of defaults) {
+                    let setDefault = true
+                    const condition = attributeDefault.condition
+                    if (condition != null && condition.length > 0) {
+                        for (const valueConfig of condition) {
+                            const value = arcObject.attributes[valueConfig.attribute]
+                            const values = valueConfig.values
+                            if (values.length == 0) {
+                                setDefault = value == null
+                            } else {
+                                setDefault = values.includes(value)
+                            }
+                            if (!setDefault) {
+                                break
+                            }
+                        }
+                    }
+                    if (setDefault) {
+                        arcObject.attributes[attribute] = attributeDefault.value
+                        break
+                    }
+                }
+            }
         }
 
     }

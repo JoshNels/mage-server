@@ -40,16 +40,6 @@ export interface ArcGISPluginConfig {
   featureLayers: FeatureLayerConfig[]
 
   /**
-   * Override mappings between event form fields and ArcGIS attributes as: { event: { form: { field: attribute } } }
-   */
-  fieldAttributes: any
-
-  /**
-   * The attribute configurations.
-   */
-  attributes: { [attribute: string]: AttributeConfig }
-
-  /**
    * The field name to save and query the observation id to and from the ArcGIS server.
    */
   observationIdField: string
@@ -95,6 +85,11 @@ export interface ArcGISPluginConfig {
   lastModifiedField: string
 
   /**
+   * The Esri geometry type attribute name.
+   */
+  geometryType: string
+
+  /**
    * The time tolerance in miliseconds to consider an attachment last modified time equal
    * to or after an observation last modified time.
    */
@@ -104,6 +99,16 @@ export interface ArcGISPluginConfig {
    * The keyword used to seperate the observation id and the event id when combined into one field.
    */
   idSeperator: string;
+
+  /**
+   * Override mappings between event form fields and ArcGIS attributes as: { event: { form: { field: attribute } } }
+   */
+  fieldAttributes: any
+
+  /**
+   * The attribute configurations.
+   */
+  attributes: { [attribute: string]: AttributeConfig }
 
 }
 
@@ -116,8 +121,6 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   featureLayers: [{ url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', events: [] },
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', events: [] },
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [] }],
-  fieldAttributes: {},
-  attributes: {},
   observationIdField: 'description',
   eventIdField: 'description',
   eventNameField: 'event_name',
@@ -127,6 +130,26 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   deviceIdField: 'device_id',
   createdAtField: 'created_at',
   lastModifiedField: 'last_modified',
+  geometryType: 'geometry_type',
   attachmentModifiedTolerance: 5000,
-  idSeperator: ' mageEventId '
+  idSeperator: ' mageEventId ',
+  fieldAttributes: {},
+  attributes: {
+    'symbolid': {
+      defaults: [
+        {
+          value: 3,
+          condition: [
+            { attribute:'geometry_type', values: ['esriGeometryPolyline'] }
+          ]
+        },
+        {
+          value: 1,
+          condition: [
+            { attribute:'geometry_type', values: ['esriGeometryPolygon'] }
+          ]
+        }
+      ]
+    }
+  }
 })

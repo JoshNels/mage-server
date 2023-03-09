@@ -1,4 +1,5 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
+import { AttributeDefaultConfig } from "./ArcGISConfig";
 import { ObservationAttrs, Attachment } from '@ngageoint/mage.service/lib/entities/observations/entities.observations'
 import { User } from '@ngageoint/mage.service/lib/entities/users/entities.users'
 import { FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
@@ -23,6 +24,11 @@ export class ObservationsTransformer {
     private _console: Console
 
     /**
+     * Default values
+     */
+    private _defaults: { [attribute: string]: AttributeDefaultConfig[] } = {}
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
@@ -30,6 +36,12 @@ export class ObservationsTransformer {
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._config = config
         this._console = console
+        for (const attributes of Object.entries(this._config.attributes)) {
+            const defaults = attributes[1]?.defaults
+            if (defaults != null && defaults.length > 0) {
+                this._defaults[attributes[0]] = defaults
+            }
+        }
     }
 
     /**
@@ -390,10 +402,10 @@ export class ObservationsTransformer {
      */
     private addDefaults(arcObject: ArcObject) {
 
-        for (const attributes of Object.entries(this._config.attributes)) {
-            const attribute = attributes[0]
-            const defaults = attributes[1]?.defaults
-            if (defaults != null && arcObject.attributes[attribute] == null) {
+        for (const attributeDefaults of Object.entries(this._defaults)) {
+            const attribute = attributeDefaults[0]
+            if (arcObject.attributes[attribute] == null) {
+                const defaults = attributeDefaults[1]
                 for (const attributeDefault of defaults) {
                     let setDefault = true
                     const condition = attributeDefault.condition

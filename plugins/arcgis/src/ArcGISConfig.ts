@@ -34,6 +34,11 @@ export interface AttributeConfig {
      */
     defaults?: AttributeDefaultConfig[]
 
+    /**
+     * Omit the attribute (including count suffix versions) from ArcGIS adds and updates
+     */
+    omit?: boolean
+
 }
 
 /**

@@ -29,6 +29,11 @@ export class ObservationsTransformer {
     private _defaults: { [attribute: string]: AttributeDefaultConfig[] } = {}
 
     /**
+     * Omit attributes
+     */
+    private _omit: string[] = []
+
+    /**
      * Constructor.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
@@ -37,9 +42,14 @@ export class ObservationsTransformer {
         this._config = config
         this._console = console
         for (const attributes of Object.entries(this._config.attributes)) {
-            const defaults = attributes[1]?.defaults
+            const attribute = attributes[0]
+            const attributeConfig = attributes[1]
+            const defaults = attributeConfig.defaults
             if (defaults != null && defaults.length > 0) {
-                this._defaults[attributes[0]] = defaults
+                this._defaults[attribute] = defaults
+            }
+            if (attributeConfig.omit) {
+                this._omit.push(attribute)
             }
         }
     }
@@ -76,6 +86,8 @@ export class ObservationsTransformer {
         arcObservation.lastModified = arcObject.attributes['lastModified']
         arcObservation.object = arcObject
         arcObservation.attachments = this.attachments(observation.attachments, formIds, transform)
+
+        this.removeOmissions(arcObject)
 
         return arcObservation
     }
@@ -509,6 +521,25 @@ export class ObservationsTransformer {
             value += '_' + count
         }
         return value
+    }
+
+    /**
+     * Remove ArcObject attribute omissions.
+     * @param arcObject The converted ArcObject.
+     */
+    private removeOmissions(arcObject: ArcObject) {
+
+        const attributes = arcObject.attributes
+        const attributeKeys = Object.keys(attributes)
+
+        for (const omit of this._omit) {
+            const regex = new RegExp('^' + omit + '(_\\d+)?$')
+            var regexAttributes = attributeKeys.filter((name) => regex.test(name))
+            for (const attribute of regexAttributes) {
+                delete attributes[attribute]
+            }
+        }
+
     }
 
 }

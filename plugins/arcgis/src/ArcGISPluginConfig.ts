@@ -40,79 +40,79 @@ export interface ArcGISPluginConfig {
   featureLayers: FeatureLayerConfig[]
 
   /**
-   * The field name to save and query the observation id to and from the ArcGIS server.
-   */
-  observationIdField: string
-
-  /**
-  * The event id field attribute name.
-  */
-  eventIdField: string
-
-  /**
-   * The event name field attribute name.
-   */
-  eventNameField: string
-
-  /**
-   * The user id field attribute name.
-   */
-  userIdField: string
-
-  /**
-   * The username field attribute name.
-   */
-  usernameField: string
-
-  /**
-   * The user display name field attribute name.
-   */
-  userDisplayNameField: string
-
-  /**
-   * The device id field attribute name.
-   */
-  deviceIdField: string
-
-  /**
-   * The created at field attribute name.
-   */
-  createdAtField: string
-
-  /**
-   * The last modified field attribute name.
-   */
-  lastModifiedField: string
-
-  /**
-   * The Esri geometry type attribute name.
-   */
-  geometryType: string
-
-  /**
    * The time tolerance in miliseconds to consider an attachment last modified time equal
    * to or after an observation last modified time.
    */
   attachmentModifiedTolerance: number
 
   /**
+   * The field name to save and query the observation id to and from the ArcGIS server.
+   */
+  observationIdField: string
+
+  /**
    * The keyword used to seperate the observation id and the event id when combined into one field.
    */
-  idSeperator: string;
+  idSeperator: string
+
+  /**
+  * The event id field attribute name.
+  */
+  eventIdField?: string
+
+  /**
+   * The event name field attribute name.
+   */
+  eventNameField?: string
+
+  /**
+   * The user id field attribute name.
+   */
+  userIdField?: string
+
+  /**
+   * The username field attribute name.
+   */
+  usernameField?: string
+
+  /**
+   * The user display name field attribute name.
+   */
+  userDisplayNameField?: string
+
+  /**
+   * The device id field attribute name.
+   */
+  deviceIdField?: string
+
+  /**
+   * The created at field attribute name.
+   */
+  createdAtField?: string
+
+  /**
+   * The last modified field attribute name.
+   */
+  lastModifiedField?: string
+
+  /**
+   * The Esri geometry type attribute name.
+   */
+  geometryType?: string
 
   /**
    * Override mappings between event form fields and ArcGIS attributes as: { event: { form: { field: attribute } } }
    */
-  fieldAttributes: any
+  fieldAttributes?: any
 
   /**
    * The attribute configurations.
    */
-  attributes: { [attribute: string]: AttributeConfig }
+  attributes?: { [attribute: string]: AttributeConfig }
 
 }
 
-export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConfig>>({
+export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
   enabled: true,
   intervalSeconds: 60,
   startupIntervalSeconds: 1,
@@ -121,7 +121,9 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   featureLayers: [{ url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', events: [] },
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', events: [] },
   { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [] }],
+  attachmentModifiedTolerance: 5000,
   observationIdField: 'description',
+  idSeperator: '-',
   eventIdField: 'description',
   eventNameField: 'event_name',
   userIdField: 'user_id',
@@ -131,8 +133,6 @@ export const defaultArcGISPluginConfig = Object.freeze<Required<ArcGISPluginConf
   createdAtField: 'created_at',
   lastModifiedField: 'last_modified',
   geometryType: 'geometry_type',
-  attachmentModifiedTolerance: 5000,
-  idSeperator: ' mageEventId ',
   fieldAttributes: {},
   attributes: {
     'symbolid': {

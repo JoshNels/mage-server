@@ -36,16 +36,33 @@ export class EventTransform {
         const allFields = new Set<string>()
 
         allFields.add(config.observationIdField)
-        if (config.observationIdField != config.eventIdField) {
+        if (config.eventIdField != null) {
             allFields.add(config.eventIdField)
         }
-        allFields.add(config.eventNameField)
-        allFields.add(config.userIdField)
-        allFields.add(config.usernameField)
-        allFields.add(config.userDisplayNameField)
-        allFields.add(config.deviceIdField)
-        allFields.add(config.createdAtField)
-        allFields.add(config.lastModifiedField)
+        if (config.eventNameField != null) {
+            allFields.add(config.eventNameField)
+        }
+        if (config.userIdField != null) {
+            allFields.add(config.userIdField)
+        }
+        if (config.usernameField != null) {
+            allFields.add(config.usernameField)
+        }
+        if (config.userDisplayNameField != null) {
+            allFields.add(config.userDisplayNameField)
+        }
+        if (config.deviceIdField != null) {
+            allFields.add(config.deviceIdField)
+        }
+        if (config.createdAtField != null) {
+            allFields.add(config.createdAtField)
+        }
+        if (config.lastModifiedField != null) {
+            allFields.add(config.lastModifiedField)
+        }
+        if (config.geometryType != null) {
+            allFields.add(config.geometryType)
+        }
 
         if (this.mageEvent != null) {
 

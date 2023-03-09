@@ -87,7 +87,7 @@ export class EventDeletionHandler {
         this._console.log('ArcGIS investigating all events for feature layer ' + layerProcesor.layerInfo.url);
         let arcEventIds = new Set<number>();
         for (const feature of result.features) {
-            if (this._config.observationIdField == this._config.eventIdField) {
+            if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
                 const obsAndEventId = feature.attributes[this._config.observationIdField] as string;
                 const splitIds = obsAndEventId.split(this._config.idSeperator);
                 arcEventIds.add(parseInt(splitIds[1]));

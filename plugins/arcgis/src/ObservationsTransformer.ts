@@ -41,15 +41,17 @@ export class ObservationsTransformer {
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._config = config
         this._console = console
-        for (const attributes of Object.entries(this._config.attributes)) {
-            const attribute = attributes[0]
-            const attributeConfig = attributes[1]
-            const defaults = attributeConfig.defaults
-            if (defaults != null && defaults.length > 0) {
-                this._defaults[attribute] = defaults
-            }
-            if (attributeConfig.omit) {
-                this._omit.push(attribute)
+        if (this._config.attributes != null) {
+            for (const attributes of Object.entries(this._config.attributes)) {
+                const attribute = attributes[0]
+                const attributeConfig = attributes[1]
+                const defaults = attributeConfig.defaults
+                if (defaults != null && defaults.length > 0) {
+                    this._defaults[attribute] = defaults
+                }
+                if (attributeConfig.omit) {
+                    this._omit.push(attribute)
+                }
             }
         }
     }
@@ -79,11 +81,13 @@ export class ObservationsTransformer {
         }
 
         const arcObservation = this.createObservation(observation)
-        this.addAttribute(this._config.geometryType, arcObservation.esriGeometryType, arcObject)
+        if (this._config.geometryType != null) {
+            this.addAttribute(this._config.geometryType, arcObservation.esriGeometryType, arcObject)
+        }
         this.addDefaults(arcObject)
 
-        arcObservation.createdAt = arcObject.attributes['createdAt']
-        arcObservation.lastModified = arcObject.attributes['lastModified']
+        arcObservation.createdAt = new Date(observation.createdAt).getTime()
+        arcObservation.lastModified = new Date(observation.lastModified).getTime()
         arcObservation.object = arcObject
         arcObservation.attachments = this.attachments(observation.attachments, formIds, transform)
 
@@ -153,29 +157,37 @@ export class ObservationsTransformer {
      * @param arcObject The converted ArcObject.
      */
     private observationToAttributes(observation: ObservationAttrs, transform: EventTransform, user: User | null, arcObject: ArcObject) {
-        let observationIdValue = observation.id + this._config.idSeperator;
-        if (this._config.observationIdField == this._config.eventIdField) {
-            observationIdValue += observation.eventId
+        let observationIdValue = observation.id
+        if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
+            observationIdValue += this._config.idSeperator + observation.eventId
         } else {
             this.addAttribute(this._config.eventIdField, observation.eventId, arcObject)
         }
         this.addAttribute(this._config.observationIdField, observationIdValue, arcObject)
         const mageEvent = transform.mageEvent
-        if (mageEvent != null) {
+        if (this._config.eventNameField != null && mageEvent != null) {
             this.addAttribute(this._config.eventNameField, mageEvent.name, arcObject)
         }
-        if (observation.userId != null) {
+        if (this._config.userIdField != null && observation.userId != null) {
             this.addAttribute(this._config.userIdField, observation.userId, arcObject)
         }
         if (user != null) {
-            this.addAttribute(this._config.usernameField, user.username, arcObject)
-            this.addAttribute(this._config.userDisplayNameField, user.displayName, arcObject)
+            if (this._config.usernameField != null) {
+                this.addAttribute(this._config.usernameField, user.username, arcObject)
+            }
+            if (this._config.userDisplayNameField != null) {
+                this.addAttribute(this._config.userDisplayNameField, user.displayName, arcObject)
+            }
         }
-        if (observation.deviceId != null) {
+        if (this._config.deviceIdField != null && observation.deviceId != null) {
             this.addAttribute(this._config.deviceIdField, observation.deviceId, arcObject)
         }
-        this.addAttribute(this._config.createdAtField, observation.createdAt, arcObject)
-        this.addAttribute(this._config.lastModifiedField, observation.lastModified, arcObject)
+        if (this._config.createdAtField != null) {
+            this.addAttribute(this._config.createdAtField, observation.createdAt, arcObject)
+        }
+        if (this._config.lastModifiedField != null) {
+            this.addAttribute(this._config.lastModifiedField, observation.lastModified, arcObject)
+        }
     }
 
     /**
@@ -327,7 +339,7 @@ export class ObservationsTransformer {
      */
     private addFormAttribute(name: string, count: number, value: any, arcObject: ArcObject) {
 
-        if (count > 1) {
+        if (count > 1 && this._config.attributes != null) {
             const concat = this._config.attributes[name]?.concatenation
             if (concat != null && (concat.sameForms == null || concat.sameForms)) {
                 count = 1
@@ -358,7 +370,10 @@ export class ObservationsTransformer {
                 value = new Date(value).getTime()
             }
 
-            const config = this._config.attributes[name]
+            let config = null
+            if (this._config.attributes != null) {
+                config = this._config.attributes[name]
+            }
 
             if (config?.mappings != null) {
                 const fieldValue = config.mappings[value]

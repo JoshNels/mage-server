@@ -48,7 +48,7 @@ export class EventDeletionHandler {
 
             for (const layerProcessor of layerProcessors) {
                 const response: (result: QueryObjectResult) => void = (result) => { this.figureOutAllEventsOnArc(layerProcessor, result) }
-                if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
+                if (this._config.eventIdField == null) {
                     layerProcessor.featureQuerier.queryObservations(response, [this._config.observationIdField], false)
                 } else {
                     layerProcessor.featureQuerier.queryDistinct(response, this._config.eventIdField)
@@ -90,37 +90,33 @@ export class EventDeletionHandler {
      */
     figureOutAllEventsOnArc(layerProcessor: FeatureLayerProcessor, result: QueryObjectResult) {
         this._console.log('ArcGIS investigating all events for feature layer ' + layerProcessor.layerInfo.url);
-        let arcEventIds = new Set<number>();
 
-        let combined = false
-        let field = this._config.observationIdField
-        if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
-            combined = true
-        } else {
-            field = this._config.eventIdField
-        }
+        if (result.features != null) {
+            let arcEventIds = new Set<number>();
 
-        for (const feature of result.features) {
-            const value = feature.attributes[field]
-            if (combined) {
-                const splitIds = value.split(this._config.idSeperator);
-                if (splitIds.length == 2) {
-                    const eventId = parseInt(splitIds[1])
-                    if (!isNaN(eventId)) {
-                        arcEventIds.add(eventId)
+            for (const feature of result.features) {
+                if (this._config.eventIdField == null) {
+                    const value = feature.attributes[this._config.observationIdField]
+                    const splitIds = value.split(this._config.idSeperator)
+                    if (splitIds.length == 2) {
+                        const eventId = parseInt(splitIds[1])
+                        if (!isNaN(eventId)) {
+                            arcEventIds.add(eventId)
+                        }
                     }
+                } else {
+                    const value = feature.attributes[this._config.eventIdField]
+                    arcEventIds.add(value)
                 }
-            } else {
-                arcEventIds.add(value);
             }
-        }
 
-        this._currentEventIds.forEach((eventName: string, eventId: number) => {
-            arcEventIds.delete(eventId);
-        });
+            this._currentEventIds.forEach((eventName: string, eventId: number) => {
+                arcEventIds.delete(eventId);
+            });
 
-        for (const arcEventId of arcEventIds) {
-            layerProcessor.sender.sendDeleteEvent(arcEventId);
+            for (const arcEventId of arcEventIds) {
+                layerProcessor.sender.sendDeleteEvent(arcEventId);
+            }
         }
     }
 }

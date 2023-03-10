@@ -61,6 +61,11 @@ export interface ArcGISPluginConfig {
   eventIdField?: string
 
   /**
+  * The last edited date field attribute name on the ArcGIS server.
+  */
+  lastEditedDateField?: string
+
+  /**
    * The event name field attribute name.
    */
   eventNameField?: string
@@ -91,7 +96,7 @@ export interface ArcGISPluginConfig {
   createdAtField?: string
 
   /**
-   * The last modified field attribute name.
+   * The last modified field attribute name from MAGE observations (may be the same as lastEditedDateField if editable).
    */
   lastModifiedField?: string
 
@@ -124,7 +129,8 @@ export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
   attachmentModifiedTolerance: 5000,
   observationIdField: 'description',
   idSeperator: '-',
-  eventIdField: 'description',
+  // eventIdField: 'event_id',
+  lastEditedDateField: 'last_edited_date',
   eventNameField: 'event_name',
   userIdField: 'user_id',
   usernameField: 'username',

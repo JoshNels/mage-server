@@ -1,3 +1,4 @@
+import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from "./ArcObjects";
 import { ArcObservation } from "./ArcObservation";
 import { FeatureQuerier } from "./FeatureQuerier";
@@ -30,14 +31,21 @@ export class ObservationBinner {
     private _pendingNewAndUpdates: ObservationBins;
 
     /**
+     * The plugins configuration.
+     */
+    private _config: ArcGISPluginConfig;
+
+    /**
      * Constructor.
      * @param layerInfo Information about the arc feature layer this class sends observations to.
      * @param featureQuerier Used to query for observation on the arc feature layer.
+     * @param config The plugins configuration.
      */
-    constructor(layerInfo: LayerInfo, featureQuerier: FeatureQuerier) {
+    constructor(layerInfo: LayerInfo, featureQuerier: FeatureQuerier, config: ArcGISPluginConfig) {
         this.layerInfo = layerInfo;
         this._featureQuerier = featureQuerier;
         this._pendingNewAndUpdates = new ObservationBins;
+        this._config = config;
         this._existenceQueryCount = 0;
     }
 
@@ -77,8 +85,7 @@ export class ObservationBinner {
         for (const arcObservation of observations.observations) {
             const arcObject = arcObservation.object
             if (observations.firstRun
-                || arcObservation.lastModified != arcObservation.createdAt
-                || arcObject.attributes.last_modified != arcObject.attributes.created_at) {
+                || arcObservation.lastModified != arcObservation.createdAt) {
                 bins.updates.add(arcObservation);
             } else {
                 bins.adds.add(arcObservation);
@@ -104,26 +111,35 @@ export class ObservationBinner {
             this._existenceQueryCount--;
             if (result.features != null && result.features.length > 0) {
 
-                const objectIdField = result.objectIdFieldName
                 const arcAttributes = result.features[0].attributes
 
-                const updateAttributes = arcObservation.object.attributes
+                let lastEdited = null
+                if (this._config.lastEditedDateField != null) {
+                    lastEdited = arcAttributes[this._config.lastEditedDateField]
+                }
+                if (lastEdited == null || lastEdited < arcObservation.lastModified) {
 
-                updateAttributes[objectIdField] = arcAttributes[objectIdField]
+                    const objectIdField = result.objectIdFieldName
+                    const updateAttributes = arcObservation.object.attributes
 
-                // Determine if any editable attribute values should be deleted
-                const lowerCaseUpdateAttributes = Object.fromEntries(
-                    Object.entries(updateAttributes).map(([k, v]) => [k.toLowerCase(), v])
-                )
-                for (const arcAttribute of Object.keys(arcAttributes)) {
-                    if (this.layerInfo.isEditable(arcAttribute)
-                        && arcAttributes[arcAttribute] != null
-                        && lowerCaseUpdateAttributes[arcAttribute.toLowerCase()] == null) {
-                        updateAttributes[arcAttribute] = null
+                    updateAttributes[objectIdField] = arcAttributes[objectIdField]
+
+                    // Determine if any editable attribute values should be deleted
+                    const lowerCaseUpdateAttributes = Object.fromEntries(
+                        Object.entries(updateAttributes).map(([k, v]) => [k.toLowerCase(), v])
+                    )
+                    for (const arcAttribute of Object.keys(arcAttributes)) {
+                        if (this.layerInfo.isEditable(arcAttribute)
+                            && arcAttributes[arcAttribute] != null
+                            && lowerCaseUpdateAttributes[arcAttribute.toLowerCase()] == null) {
+                            updateAttributes[arcAttribute] = null
+                        }
                     }
+
+                    this._pendingNewAndUpdates.updates.add(arcObservation)
+
                 }
 
-                this._pendingNewAndUpdates.updates.add(arcObservation)
             } else {
                 this._pendingNewAndUpdates.adds.add(arcObservation);
             }

@@ -158,7 +158,7 @@ export class ObservationsTransformer {
      */
     private observationToAttributes(observation: ObservationAttrs, transform: EventTransform, user: User | null, arcObject: ArcObject) {
         let observationIdValue = observation.id
-        if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
+        if (this._config.eventIdField == null) {
             observationIdValue += this._config.idSeperator + observation.eventId
         } else {
             this.addAttribute(this._config.eventIdField, observation.eventId, arcObject)

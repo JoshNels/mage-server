@@ -48,7 +48,13 @@ export class FeatureQuerier {
      * @param geometry query the geometry, default is true
      */
     queryObservation(observationId: string, response: (result: QueryObjectResult) => void, fields?: string[], geometry?: boolean) {
-        const queryUrl = this._url + this._config.observationIdField + ' LIKE \'' + observationId + '%\'' + this.outFields(fields) + this.returnGeometry(geometry)
+        let queryUrl = this._url + this._config.observationIdField
+        if (this._config.eventIdField == null) {
+            queryUrl += ' LIKE \'' + observationId + this._config.idSeperator + '%\''
+        } else {
+            queryUrl += '=\'' + observationId + '\''
+        }
+        queryUrl += this.outFields(fields) + this.returnGeometry(geometry)
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
             const result = JSON.parse(chunk) as QueryObjectResult

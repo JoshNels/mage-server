@@ -46,8 +46,13 @@ export class EventDeletionHandler {
                 this._currentEventIds.set(activeEvent.id, activeEvent.name);
             }
 
-            for (const layerProcesor of layerProcessors) {
-                layerProcesor.featureQuerier.queryAllObservations((result) => { this.figureOutAllEventsOnArc(layerProcesor, result); });
+            for (const layerProcessor of layerProcessors) {
+                const response: (result: QueryObjectResult) => void = (result) => { this.figureOutAllEventsOnArc(layerProcessor, result) }
+                if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
+                    layerProcessor.featureQuerier.queryObservations(response, [this._config.observationIdField], false)
+                } else {
+                    layerProcessor.featureQuerier.queryDistinct(response, this._config.eventIdField)
+                }
             }
         } else {
             this._console.log('Checking for event deletions the previous known events are:');
@@ -80,19 +85,33 @@ export class EventDeletionHandler {
     /**
      * Called when the query is finished.  It goes through the results and gathers all even Ids currently stored
      * in the arc layer.  It then will remove any events from the arc layer that do not exist.
-     * @param layerUrl The url to the layer.
+     * @param layerProcessor The feature layer processor.
      * @param result The returned results.
      */
-    figureOutAllEventsOnArc(layerProcesor: FeatureLayerProcessor, result: QueryObjectResult) {
-        this._console.log('ArcGIS investigating all events for feature layer ' + layerProcesor.layerInfo.url);
+    figureOutAllEventsOnArc(layerProcessor: FeatureLayerProcessor, result: QueryObjectResult) {
+        this._console.log('ArcGIS investigating all events for feature layer ' + layerProcessor.layerInfo.url);
         let arcEventIds = new Set<number>();
+
+        let combined = false
+        let field = this._config.observationIdField
+        if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
+            combined = true
+        } else {
+            field = this._config.eventIdField
+        }
+
         for (const feature of result.features) {
-            if (this._config.eventIdField == null || this._config.observationIdField == this._config.eventIdField) {
-                const obsAndEventId = feature.attributes[this._config.observationIdField] as string;
-                const splitIds = obsAndEventId.split(this._config.idSeperator);
-                arcEventIds.add(parseInt(splitIds[1]));
+            const value = feature.attributes[field]
+            if (combined) {
+                const splitIds = value.split(this._config.idSeperator);
+                if (splitIds.length == 2) {
+                    const eventId = parseInt(splitIds[1])
+                    if (!isNaN(eventId)) {
+                        arcEventIds.add(eventId)
+                    }
+                }
             } else {
-                arcEventIds.add(feature.attributes[this._config.eventIdField]);
+                arcEventIds.add(value);
             }
         }
 
@@ -101,7 +120,7 @@ export class EventDeletionHandler {
         });
 
         for (const arcEventId of arcEventIds) {
-            layerProcesor.sender.sendDeleteEvent(arcEventId);
+            layerProcessor.sender.sendDeleteEvent(arcEventId);
         }
     }
 }

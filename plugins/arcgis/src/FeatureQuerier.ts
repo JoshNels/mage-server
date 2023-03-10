@@ -35,35 +35,87 @@ export class FeatureQuerier {
      */
     constructor(url: string, config: ArcGISPluginConfig, console: Console) {
         this._httpClient = new HttpClient(console);
-        this._url = url + '/query?f=json&where=' + config.observationIdField + ' LIKE \'';
+        this._url = url + '/query?f=json&where=';
         this._console = console;
         this._config = config;
     }
 
     /**
-     * Queries for an observations object id stored in the arc layer.
+     * Queries for an observation by id.
      * @param observationId The id of the observation to query for on the arc feature layer.
      * @param response The function called once the response is received.
+     * @param fields fields to query, all fields if not provided
+     * @param geometry query the geometry, default is true
      */
-    queryObject(observationId: string, response: (result: QueryObjectResult) => void) {
-        const queryUrl = this._url + observationId + '%\'&outFields=*';
+    queryObservation(observationId: string, response: (result: QueryObjectResult) => void, fields?: string[], geometry?: boolean) {
+        const queryUrl = this._url + this._config.observationIdField + ' LIKE \'' + observationId + '%\'' + this.outFields(fields) + this.returnGeometry(geometry)
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
-            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = JSON.parse(chunk) as QueryObjectResult;
-            response(result);
+            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
+            const result = JSON.parse(chunk) as QueryObjectResult
+            response(result)
         });
     }
 
     /**
-     * Queries a specific arc feature layer and retrieves all observation that have been added to it.
+     * Queries all observations.
      * @param response Function called once query is complete.
+     * @param fields fields to query, all fields if not provided
+     * @param geometry query the geometry, default is true
      */
-    queryAllObservations(response: (result: QueryObjectResult) => void) {
-        const queryUrl = this._url + '%\'';
+    queryObservations(response: (result: QueryObjectResult) => void, fields?: string[], geometry?: boolean) {
+        let queryUrl = this._url + this._config.observationIdField + ' IS NOT NULL' + this.outFields(fields) + this.returnGeometry(geometry)
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
-            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk);
-            const result = JSON.parse(chunk) as QueryObjectResult;
-            response(result);
+            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
+            const result = JSON.parse(chunk) as QueryObjectResult
+            response(result)
         });
     }
+
+    /**
+     * Queries for distinct non null observation field values
+     * @param response Function called once query is complete.
+     * @param field field to query
+     */
+    queryDistinct(response: (result: QueryObjectResult) => void, field: string) {
+        let queryUrl = this._url + field + ' IS NOT NULL&returnDistinctValues=true' + this.outFields([field]) + this.returnGeometry(false)
+        this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
+            this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
+            const result = JSON.parse(chunk) as QueryObjectResult
+            response(result)
+        });
+    }
+
+    /**
+     * Build the out fields query parameter
+     * @param fields query fields
+     * @returns out fields
+     */
+    private outFields(fields?: string[]): string {
+        let outFields = '&outFields='
+        if (fields != null && fields.length > 0) {
+            for (let i = 0; i < fields.length; i++) {
+                if (i > 0) {
+                    outFields += ","
+                }
+                outFields += fields[i]
+            }
+        } else{
+            outFields += '*'
+        }
+        return outFields
+    }
+
+    /**
+     * Build the return geometry query parameter
+     * @param fields query fields
+     * @returns out fields
+     */
+    private returnGeometry(geometry?: boolean): string {
+        let returnGeometry = ''
+        if (geometry != null && !geometry) {
+            returnGeometry = '&returnGeometry=false'
+        }
+        return returnGeometry
+    }
+
 }

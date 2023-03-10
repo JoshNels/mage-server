@@ -100,7 +100,7 @@ export class ObservationBinner {
      */
     checkForExistence(arcObservation: ArcObservation) {
         this._existenceQueryCount++;
-        this._featureQuerier.queryObject(arcObservation.id, (result) => {
+        this._featureQuerier.queryObservation(arcObservation.id, (result) => {
             this._existenceQueryCount--;
             if (result.features != null && result.features.length > 0) {
 
@@ -127,6 +127,6 @@ export class ObservationBinner {
             } else {
                 this._pendingNewAndUpdates.adds.add(arcObservation);
             }
-        });
+        }, undefined, false);
     }
 }

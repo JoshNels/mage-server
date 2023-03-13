@@ -1,4 +1,4 @@
-import { FeatureLayerConfig, AttributeConfig } from "./ArcGISConfig"
+import { FeatureServiceConfig, AttributeConfig } from "./ArcGISConfig"
 
 /**
  * Contains various configuration values used by the plugin.
@@ -35,9 +35,9 @@ export interface ArcGISPluginConfig {
   batchSize: number
 
   /**
-   * The feature layers to send new observations to.
+   * The feature services to send new observations to.
    */
-  featureLayers: FeatureLayerConfig[]
+  featureServices: FeatureServiceConfig[]
 
   /**
    * The time tolerance in miliseconds to consider an attachment last modified time equal
@@ -123,9 +123,25 @@ export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
   startupIntervalSeconds: 1,
   updateIntervalSeconds: 1,
   batchSize: 100,
-  featureLayers: [{ url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/0', events: [] },
-  { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/1', events: [] },
-  { url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer/2', events: [] }],
+  featureServices: [
+    {
+      url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer',
+      layers: [
+        {
+          layer: 'Wildfire Response Points',
+          events: []
+        },
+        {
+          layer: 'Wildfire Response Lines',
+          events: []
+        },
+        {
+          layer: 'Wildfire Response Polygons',
+          events: []
+        }
+      ]
+    }
+  ],
   attachmentModifiedTolerance: 5000,
   observationIdField: 'description',
   idSeperator: '-',

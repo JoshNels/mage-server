@@ -70,7 +70,7 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
               enabled: typeof bodyConfig.enabled === 'boolean' ? bodyConfig.enabled : undefined,
               batchSize: typeof bodyConfig.batchSize === 'number' ? bodyConfig.batchSize : undefined,
               intervalSeconds: typeof bodyConfig.intervalSeconds === 'number' ? bodyConfig.intervalSeconds : undefined,
-              featureLayers: Array.isArray(bodyConfig.featureLayers) ?
+              featureServices: Array.isArray(bodyConfig.featureServices) ?
                 bodyConfig.thumbnailSizes.reduce((sizes: number[], size: any) => {
                   return typeof size === 'number' ? [...sizes, size] : sizes
                 }, [] as number[])

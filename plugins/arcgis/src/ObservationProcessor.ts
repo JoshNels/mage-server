@@ -6,12 +6,14 @@ import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ArcObjects } from './ArcObjects'
 import { LayerQuerier } from './LayerQuerier';
+import { FeatureService, FeatureLayer } from './FeatureService';
 import { LayerInfo } from './LayerInfo';
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
 import { EventDeletionHandler } from './EventDeletionHandler';
 import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
+import { FeatureServiceConfig } from "./ArcGISConfig"
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -131,7 +133,7 @@ export class ObservationProcessor {
     start() {
         this._isRunning = true;
         this._firstRun = true;
-        this.getLayerInfos();
+        this.getFeatureServiceLayers();
         this.processAndScheduleNext();
     }
 
@@ -144,21 +146,56 @@ export class ObservationProcessor {
     }
 
     /**
-     * Gets information on all the configured features layers.
+     * Gets information on all the configured features service layers.
      */
-    private async getLayerInfos() {
-        for (let i = 0; i < this._config.featureLayers.length; i++) {
-            const url = this._config.featureLayers[i].url;
-            const eventNames: string[] = [];
-            const events = this._config.featureLayers[i].events;
-            for (const event of events) {
-                const eventId = Number(event);
-                if (isNaN(eventId)) {
-                    eventNames.push(String(event));
-                } else {
-                    const mageEvent = await this._eventRepo.findById(eventId)
-                    if (mageEvent != null) {
-                        eventNames.push(mageEvent.name);
+    private getFeatureServiceLayers() {
+        for (const service of this._config.featureServices) {
+            this._layerQuerier.queryFeatureService(service, (featureService: FeatureService, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
+        }
+    }
+
+    /**
+     * Called when information on a feature service is returned from an arc server.
+     * @param featureService The feature service.
+     * @param featureServiceConfig The feature service config.
+     */
+    private async handleFeatureService(featureService: FeatureService, featureServiceConfig: FeatureServiceConfig) {
+
+        const serviceLayers = new Map<any, FeatureLayer>()
+
+        let maxId = -1
+        for (const layer of featureService.layers) {
+            serviceLayers.set(layer.id, layer)
+            serviceLayers.set(layer.name, layer)
+            maxId = Math.max(maxId, layer.id)
+        }
+
+        for (const layerConfig of featureServiceConfig.layers) {
+
+            const featureLayer = serviceLayers.get(layerConfig.layer)
+
+            let layerId
+            if (featureLayer == null) {
+                layerId = ++maxId
+                // TODO: layer needs to be created with layer id
+                throw new Error('TODO: layer needs to be created with layer id ' + layerId)
+            } else {
+                layerId = featureLayer.id
+            }
+
+            const url = featureServiceConfig.url + '/' + layerId
+            const eventNames: string[] = []
+            const events = layerConfig.events
+            if (events != null) {
+                for (const event of events) {
+                    const eventId = Number(event);
+                    if (isNaN(eventId)) {
+                        eventNames.push(String(event));
+                    } else {
+                        const mageEvent = await this._eventRepo.findById(eventId)
+                        if (mageEvent != null) {
+                            eventNames.push(mageEvent.name);
+                        }
                     }
                 }
             }

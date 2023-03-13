@@ -1,17 +1,35 @@
 /**
- * Contains an arc feature layer url and the event ids that sync to it.
+ * Contains an arc feature service url and layers.
  */
-export interface FeatureLayerConfig {
+export interface FeatureServiceConfig {
 
     /**
      * The url to the arc feature layer.
      */
-    url: string;
+    url: string
+
+    /**
+     * The url to the arc feature layer.
+     */
+    layers: FeatureLayerConfig[]
+
+}
+
+/**
+ * Contains an arc feature layer and the event ids that sync to it.
+ */
+export interface FeatureLayerConfig {
+
+    /**
+     * The layer id or name.
+     */
+    layer: number|string
 
     /**
      * The event ids or names that sync to this arc feature layer.
      */
-    events: (number|string)[];
+    events?: (number|string)[]
+
 }
 
 /**

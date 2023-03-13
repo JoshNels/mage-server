@@ -5,8 +5,8 @@ import { UserRepository } from '@ngageoint/mage.service/lib/entities/users/entit
 import { ArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ArcObjects } from './ArcObjects'
-import { LayerQuerier } from './LayerQuerier';
-import { FeatureService, FeatureLayer } from './FeatureService';
+import { FeatureService } from './FeatureService';
+import { FeatureServiceResult, FeatureLayer } from './FeatureServiceResult';
 import { LayerInfo } from './LayerInfo';
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
@@ -67,9 +67,9 @@ export class ObservationProcessor {
     private _transformer: ObservationsTransformer;
 
     /**
-     * Gets info about certain feature layers.
+     * Gets feature service layer information.
      */
-    private _layerQuerier: LayerQuerier;
+    private _featureService: FeatureService;
 
     /**
      * Contains the different feature layers to send observations too.
@@ -120,7 +120,7 @@ export class ObservationProcessor {
         this._console = console;
         this._transformer = new ObservationsTransformer(config, console);
         this._layerProcessors = [];
-        this._layerQuerier = new LayerQuerier(console);
+        this._featureService = new FeatureService(console);
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
         this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
@@ -150,7 +150,7 @@ export class ObservationProcessor {
      */
     private getFeatureServiceLayers() {
         for (const service of this._config.featureServices) {
-            this._layerQuerier.queryFeatureService(service, (featureService: FeatureService, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
+            this._featureService.queryFeatureService(service, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
         }
     }
 
@@ -159,7 +159,7 @@ export class ObservationProcessor {
      * @param featureService The feature service.
      * @param featureServiceConfig The feature service config.
      */
-    private async handleFeatureService(featureService: FeatureService, featureServiceConfig: FeatureServiceConfig) {
+    private async handleFeatureService(featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) {
 
         const serviceLayers = new Map<any, FeatureLayer>()
 
@@ -199,7 +199,7 @@ export class ObservationProcessor {
                     }
                 }
             }
-            this._layerQuerier.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
+            this._featureService.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
         }
     }
 

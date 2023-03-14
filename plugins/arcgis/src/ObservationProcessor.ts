@@ -161,45 +161,49 @@ export class ObservationProcessor {
      */
     private async handleFeatureService(featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) {
 
-        const serviceLayers = new Map<any, FeatureLayer>()
+        if (featureService.layers != null) {
 
-        let maxId = -1
-        for (const layer of featureService.layers) {
-            serviceLayers.set(layer.id, layer)
-            serviceLayers.set(layer.name, layer)
-            maxId = Math.max(maxId, layer.id)
-        }
+            const serviceLayers = new Map<any, FeatureLayer>()
 
-        for (const layerConfig of featureServiceConfig.layers) {
-
-            const featureLayer = serviceLayers.get(layerConfig.layer)
-
-            let layerId
-            if (featureLayer == null) {
-                layerId = ++maxId
-                // TODO: layer needs to be created with layer id
-                throw new Error('TODO: layer needs to be created with layer id ' + layerId)
-            } else {
-                layerId = featureLayer.id
+            let maxId = -1
+            for (const layer of featureService.layers) {
+                serviceLayers.set(layer.id, layer)
+                serviceLayers.set(layer.name, layer)
+                maxId = Math.max(maxId, layer.id)
             }
 
-            const url = featureServiceConfig.url + '/' + layerId
-            const eventNames: string[] = []
-            const events = layerConfig.events
-            if (events != null) {
-                for (const event of events) {
-                    const eventId = Number(event);
-                    if (isNaN(eventId)) {
-                        eventNames.push(String(event));
-                    } else {
-                        const mageEvent = await this._eventRepo.findById(eventId)
-                        if (mageEvent != null) {
-                            eventNames.push(mageEvent.name);
+            for (const layerConfig of featureServiceConfig.layers) {
+
+                const featureLayer = serviceLayers.get(layerConfig.layer)
+
+                let layerId
+                if (featureLayer == null) {
+                    layerId = ++maxId
+                    // TODO: layer needs to be created with layer id
+                    throw new Error('TODO: layer needs to be created with layer id ' + layerId)
+                } else {
+                    layerId = featureLayer.id
+                }
+
+                const url = featureServiceConfig.url + '/' + layerId
+                const eventNames: string[] = []
+                const events = layerConfig.events
+                if (events != null) {
+                    for (const event of events) {
+                        const eventId = Number(event);
+                        if (isNaN(eventId)) {
+                            eventNames.push(String(event));
+                        } else {
+                            const mageEvent = await this._eventRepo.findById(eventId)
+                            if (mageEvent != null) {
+                                eventNames.push(mageEvent.name);
+                            }
                         }
                     }
                 }
+                this._featureService.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
             }
-            this._featureService.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
+
         }
     }
 

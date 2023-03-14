@@ -43,6 +43,7 @@ export class FeatureService {
      */
     private parseFeatureService(featureServiceConfig: FeatureServiceConfig, callback: (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => void) {
         return (chunk: any) => {
+            this._console.log('Feature Service request. url: ' + featureServiceConfig.url + ', response: ' + chunk)
             const service = JSON.parse(chunk) as FeatureServiceResult
             callback(service, featureServiceConfig)
         }

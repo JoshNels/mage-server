@@ -1,3 +1,5 @@
+import { LayerInfoResult, LayerField } from "./LayerInfoResult";
+
 /**
  * Contains information about a specific arc feature layer.
  */
@@ -6,51 +8,39 @@ export class LayerInfo {
     /**
      * The url to the feature layer.
      */
-    url: string;
+    url: string
 
     /**
      * The geometry type this feature layer accepts.
      */
-    geometryType: string;
-
-    /**
-     * The feature layer fields.
-     */
-    fields: LayerField[];
+    geometryType: string
 
     /**
      * Mapping between field names and layer fields.
      */
-    layerFields: Map<string, LayerField> = new Map();
+    layerFields: Map<string, LayerField> = new Map()
 
     /**
      * The events that are synching to this layer.
      */
-    events: Set<string>;
+    events: Set<string> = new Set<string>()
 
     /**
      * Constructor.
-     */
-    constructor() {
-        this.url = '';
-        this.geometryType = '';
-        this.fields = [];
-        this.events = new Set<string>();
-    }
-
-    /**
-     * Initialize.
      * @param url The url to the feature layer.
      * @param events The events that are synching to this layer.
+     * @param layerInfo The layer info.
      */
-    initialize(url: string, events: string[]) {
-        this.url = url;
+    constructor(url: string, events: string[], layerInfo: LayerInfoResult) {
+        this.url = url
         for(const event of events) {
             this.events.add(event);
         }
-        for (const field of this.fields) {
+        this.geometryType = layerInfo.geometryType
+        for (const field of layerInfo.fields) {
             this.layerFields.set(field.name, field)
         }
+        this.events = new Set<string>();
     }
 
     /**
@@ -76,12 +66,4 @@ export class LayerInfo {
         return this.events.size == 0 || this.events.has(event)
     }
 
-}
-
-/**
- * Contains information about a specific arc feature layer field.
- */
-export interface LayerField {
-    name: string
-    editable: boolean
 }

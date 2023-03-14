@@ -1,4 +1,4 @@
-import { LayerInfo } from "./LayerInfo";
+import { LayerInfoResult} from "./LayerInfoResult";
 import { FeatureServiceResult} from "./FeatureServiceResult";
 import { HttpClient } from "./HttpClient";
 import { FeatureServiceConfig } from "./ArcGISConfig";
@@ -43,7 +43,7 @@ export class FeatureService {
      */
     private parseFeatureService(featureServiceConfig: FeatureServiceConfig, callback: (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => void) {
         return (chunk: any) => {
-            this._console.log('Feature Service request. url: ' + featureServiceConfig.url + ', response: ' + chunk)
+            this._console.log('Feature Service. url: ' + featureServiceConfig.url + ', response: ' + chunk)
             const service = JSON.parse(chunk) as FeatureServiceResult
             callback(service, featureServiceConfig)
         }
@@ -55,7 +55,7 @@ export class FeatureService {
      * @param events The events configured to sync to the specified arc feature layer.
      * @param infoCallback Function to call once response has been received and parsed.
      */
-    queryLayerInfo(url: string, events: string[], infoCallback: (layerInfo: LayerInfo) => void) {
+    queryLayerInfo(url: string, events: string[], infoCallback: (url: string, events: string[], layerInfo: LayerInfoResult) => void) {
         this._httpClient.sendGetHandleResponse(url + '?f=json', this.parseLayerInfo(url, events, infoCallback));
     }
 
@@ -65,12 +65,11 @@ export class FeatureService {
      * @param events The events configured to sync to the specified arc feature layer.
      * @param infoCallback The callback to call and send the layer info to.
      */
-    private parseLayerInfo(url: string, events: string[], infoCallback: (layerInfo: LayerInfo) => void) {
+    private parseLayerInfo(url: string, events: string[], infoCallback: (url: string, events: string[], layerInfo: LayerInfoResult) => void) {
         return (chunk: any) => {
-            const info: LayerInfo = Object.assign(new LayerInfo(), JSON.parse(chunk));
-            info.initialize(url, events);
-            this._console.log('Query layer response for ' + url + ' geometryType: ' + info.geometryType);
-            infoCallback(info);
+            this._console.log('Query Layer. url: ' + url + ', response: ' + chunk)
+            const layerInfo = JSON.parse(chunk) as LayerInfoResult
+            infoCallback(url, events, layerInfo)
         }
     }
 }

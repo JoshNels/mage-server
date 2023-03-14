@@ -8,6 +8,7 @@ import { ArcObjects } from './ArcObjects'
 import { FeatureService } from './FeatureService';
 import { FeatureServiceResult, FeatureLayer } from './FeatureServiceResult';
 import { LayerInfo } from './LayerInfo';
+import { LayerInfoResult} from "./LayerInfoResult";
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
@@ -201,7 +202,7 @@ export class ObservationProcessor {
                         }
                     }
                 }
-                this._featureService.queryLayerInfo(url, eventNames, (info: LayerInfo) => this.handleLayerInfo(info));
+                this._featureService.queryLayerInfo(url, eventNames, (url: string, events: string[], layerInfo: LayerInfoResult) => this.handleLayerInfo(url, events, layerInfo));
             }
 
         }
@@ -211,9 +212,12 @@ export class ObservationProcessor {
      * Called when information on a feature layer is returned from an arc server.
      * @param info The information on a layer.
      */
-    private handleLayerInfo(info: LayerInfo) {
-        const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
-        this._layerProcessors.push(layerProcessor);
+    private handleLayerInfo(url: string, events: string[], layerInfo: LayerInfoResult) {
+        if (layerInfo.geometryType != null) {
+            const info = new LayerInfo(url, events, layerInfo)
+            const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
+            this._layerProcessors.push(layerProcessor);
+        }
     }
 
     /**

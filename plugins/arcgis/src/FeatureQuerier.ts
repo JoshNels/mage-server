@@ -1,5 +1,6 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { HttpClient } from "./HttpClient";
+import { LayerInfo } from "./LayerInfo";
 import { QueryObjectResult } from "./QueryObjectResult";
 
 /**
@@ -29,13 +30,13 @@ export class FeatureQuerier {
 
     /**
      * Constructor.
-     * @param url The url to the feature layer.
+     * @param layerInfo The layer info.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
-    constructor(url: string, config: ArcGISPluginConfig, console: Console) {
-        this._httpClient = new HttpClient(console);
-        this._url = url + '/query?f=json&where=';
+    constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
+        this._httpClient = new HttpClient(console, layerInfo.token);
+        this._url = layerInfo.url + '/query?where=';
         this._console = console;
         this._config = config;
     }

@@ -14,7 +14,7 @@ import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
 import { EventDeletionHandler } from './EventDeletionHandler';
 import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
-import { FeatureServiceConfig } from "./ArcGISConfig"
+import { FeatureServiceConfig, FeatureLayerConfig } from "./ArcGISConfig"
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -68,11 +68,6 @@ export class ObservationProcessor {
     private _transformer: ObservationsTransformer;
 
     /**
-     * Gets feature service layer information.
-     */
-    private _featureService: FeatureService;
-
-    /**
      * Contains the different feature layers to send observations too.
      */
     private _config: ArcGISPluginConfig;
@@ -121,7 +116,6 @@ export class ObservationProcessor {
         this._console = console;
         this._transformer = new ObservationsTransformer(config, console);
         this._layerProcessors = [];
-        this._featureService = new FeatureService(console);
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
         this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
@@ -150,9 +144,43 @@ export class ObservationProcessor {
      * Gets information on all the configured features service layers.
      */
     private getFeatureServiceLayers() {
+
         for (const service of this._config.featureServices) {
-            this._featureService.queryFeatureService(service, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
+
+            const services = []
+
+            if (service.token == null) {
+                const tokenServices = new Map()
+                const nonTokenLayers = []
+                for (const layer of service.layers) {
+                    if (layer.token != null) {
+                        let serv = tokenServices.get(layer.token)
+                        if (serv == null) {
+                            serv = { url: service.url, token: layer.token, layers: [] }
+                            tokenServices.set(layer.token, serv)
+                            services.push(serv)
+                        }
+                        serv.layers.push(layer)
+                    } else {
+                        nonTokenLayers.push(layer)
+                    }
+                }
+                if (services.length > 0) {
+                    service.layers = nonTokenLayers
+                }
+            }
+
+            if (service.layers.length > 0) {
+                services.push(service)
+            }
+
+            for (const serv of services) {
+                const featureService = new FeatureService(console, serv.token)
+                featureService.queryFeatureService(serv, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
+            }
+
         }
+
     }
 
     /**
@@ -173,22 +201,27 @@ export class ObservationProcessor {
                 maxId = Math.max(maxId, layer.id)
             }
 
-            for (const layerConfig of featureServiceConfig.layers) {
+            for (const featureLayer of featureServiceConfig.layers) {
 
-                const featureLayer = serviceLayers.get(layerConfig.layer)
+                if (featureLayer.token == null) {
+                    featureLayer.token = featureServiceConfig.token
+                }
+
+                const layer = serviceLayers.get(featureLayer.layer)
 
                 let layerId
-                if (featureLayer == null) {
+                if (layer == null) {
                     layerId = ++maxId
                     // TODO: layer needs to be created with layer id
                     throw new Error('TODO: layer needs to be created with layer id ' + layerId)
                 } else {
-                    layerId = featureLayer.id
+                    layerId = layer.id
                 }
 
                 const url = featureServiceConfig.url + '/' + layerId
+
                 const eventNames: string[] = []
-                const events = layerConfig.events
+                const events = featureLayer.events
                 if (events != null) {
                     for (const event of events) {
                         const eventId = Number(event);
@@ -202,7 +235,10 @@ export class ObservationProcessor {
                         }
                     }
                 }
-                this._featureService.queryLayerInfo(url, eventNames, (url: string, events: string[], layerInfo: LayerInfoResult) => this.handleLayerInfo(url, events, layerInfo));
+                featureLayer.events = eventNames
+
+                const featureService = new FeatureService(console, featureLayer.token)
+                featureService.queryLayerInfo(url, featureLayer, (url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo));
             }
 
         }
@@ -210,11 +246,14 @@ export class ObservationProcessor {
 
     /**
      * Called when information on a feature layer is returned from an arc server.
-     * @param info The information on a layer.
+     * @param url The layer url.
+     * @param featureLayer The feature layer configuration.
+     * @param layerInfo The information on a layer.
      */
-    private handleLayerInfo(url: string, events: string[], layerInfo: LayerInfoResult) {
+    private handleLayerInfo(url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult) {
         if (layerInfo.geometryType != null) {
-            const info = new LayerInfo(url, events, layerInfo)
+            const events = featureLayer.events as string[]
+            const info = new LayerInfo(url, events, layerInfo, featureLayer.token)
             const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
             this._layerProcessors.push(layerProcessor);
         }

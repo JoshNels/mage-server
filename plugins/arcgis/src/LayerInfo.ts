@@ -11,6 +11,11 @@ export class LayerInfo {
     url: string
 
     /**
+     * The access token
+     */
+    token?: string
+
+    /**
      * The geometry type this feature layer accepts.
      */
     geometryType: string
@@ -30,9 +35,11 @@ export class LayerInfo {
      * @param url The url to the feature layer.
      * @param events The events that are synching to this layer.
      * @param layerInfo The layer info.
+     * @param token The access token.
      */
-    constructor(url: string, events: string[], layerInfo: LayerInfoResult) {
+    constructor(url: string, events: string[], layerInfo: LayerInfoResult, token?: string) {
         this.url = url
+        this.token = token
         for(const event of events) {
             this.events.add(event);
         }

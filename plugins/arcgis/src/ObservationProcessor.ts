@@ -2,30 +2,26 @@ import { PagingParameters } from '@ngageoint/mage.service/lib/entities/entities.
 import { MageEventRepository } from '@ngageoint/mage.service/lib/entities/events/entities.events';
 import { EventScopedObservationRepository, ObservationRepositoryForEvent } from '@ngageoint/mage.service/lib/entities/observations/entities.observations';
 import { UserRepository } from '@ngageoint/mage.service/lib/entities/users/entities.users';
-import { ArcGISPluginConfig } from './ArcGISPluginConfig';
+import { ArcGISPluginConfig, defaultArcGISPluginConfig } from './ArcGISPluginConfig';
 import { ObservationsTransformer } from './ObservationsTransformer'
 import { ArcObjects } from './ArcObjects'
 import { FeatureService } from './FeatureService';
 import { FeatureServiceResult, FeatureLayer } from './FeatureServiceResult';
 import { LayerInfo } from './LayerInfo';
-import { LayerInfoResult} from "./LayerInfoResult";
+import { LayerInfoResult } from "./LayerInfoResult";
 import { FeatureLayerProcessor } from './FeatureLayerProcessor';
 import { EventTransform } from './EventTransform';
 import { GeometryChangedHandler } from './GeometryChangedHandler';
 import { EventDeletionHandler } from './EventDeletionHandler';
 import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
 import { FeatureServiceConfig } from "./ArcGISConfig"
+import { PluginStateRepository } from '@ngageoint/mage.service/lib/plugins.api'
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
  * sent to any specified ArcGIS feature layers.
  */
 export class ObservationProcessor {
-
-    /**
-     * The max number of records to send to arc per request.
-     */
-    private _batchSize: number;
 
     /**
      * True if the processor is currently active, false otherwise.
@@ -75,7 +71,7 @@ export class ObservationProcessor {
     /**
      * Contains the different feature layers to send observations too.
      */
-    private _config: ArcGISPluginConfig;
+    private _stateRepo: PluginStateRepository<ArcGISPluginConfig>;
 
     /**
      * Sends observations to a single feature layer.
@@ -105,36 +101,46 @@ export class ObservationProcessor {
 
     /**
      * Constructor.
-     * @param config The plugins configuration.
+     * @param stateRepo Access totThe plugins configuration.
      * @param eventRepo Used to get all the active events.
      * @param obsRepo Used to get new observations.
      * @param userRepo Used to get user information.
      * @param console Used to log to the console.
      */
-    constructor(config: ArcGISPluginConfig, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, userRepo: UserRepository, console: Console) {
-        this._config = config;
-        this._batchSize = config.batchSize;
+    constructor(stateRepo: PluginStateRepository<ArcGISPluginConfig>, eventRepo: MageEventRepository, obsRepos: ObservationRepositoryForEvent, userRepo: UserRepository, console: Console) {
+        this._stateRepo = stateRepo;
         this._eventRepo = eventRepo;
         this._obsRepos = obsRepos;
         this._userRepo = userRepo;
         this._lastTimeStamp = 0;
         this._console = console;
-        this._transformer = new ObservationsTransformer(config, console);
+        this._transformer = new ObservationsTransformer(defaultArcGISPluginConfig, console);
         this._layerProcessors = [];
         this._featureService = new FeatureService(console);
         this._firstRun = true;
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
-        this._eventDeletionHandler = new EventDeletionHandler(this._console, this._config);
+        this._eventDeletionHandler = new EventDeletionHandler(this._console, defaultArcGISPluginConfig);
         this._organizer = new EventLayerProcessorOrganizer();
+    }
+
+    /**
+     * Gets the current configuration from the database.
+     * @returns The current configuration from the database.
+     */
+    async safeGetConfig(): Promise<ArcGISPluginConfig> {
+        return await this._stateRepo.get().then(x => !!x ? x : this._stateRepo.put(defaultArcGISPluginConfig))
     }
 
     /**
      * Starts the processor.
      */
-    start() {
+    async start() {
         this._isRunning = true;
         this._firstRun = true;
-        this.getFeatureServiceLayers();
+        const config = await this.safeGetConfig();
+        this._transformer.setConfig(config);
+        this._eventDeletionHandler.setConfig(config);
+        this.getFeatureServiceLayers(config);
         this.processAndScheduleNext();
     }
 
@@ -148,10 +154,11 @@ export class ObservationProcessor {
 
     /**
      * Gets information on all the configured features service layers.
+     * @param config The plugins configuration.
      */
-    private getFeatureServiceLayers() {
-        for (const service of this._config.featureServices) {
-            this._featureService.queryFeatureService(service, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig))
+    private getFeatureServiceLayers(config: ArcGISPluginConfig) {
+        for (const service of config.featureServices) {
+            this._featureService.queryFeatureService(service, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig, config))
         }
     }
 
@@ -159,8 +166,9 @@ export class ObservationProcessor {
      * Called when information on a feature service is returned from an arc server.
      * @param featureService The feature service.
      * @param featureServiceConfig The feature service config.
+     * @param config The plugin configuration.
      */
-    private async handleFeatureService(featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) {
+    private async handleFeatureService(featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig, config: ArcGISPluginConfig) {
 
         if (featureService.layers != null) {
 
@@ -202,7 +210,7 @@ export class ObservationProcessor {
                         }
                     }
                 }
-                this._featureService.queryLayerInfo(url, eventNames, (url: string, events: string[], layerInfo: LayerInfoResult) => this.handleLayerInfo(url, events, layerInfo));
+                this._featureService.queryLayerInfo(url, eventNames, (url: string, events: string[], layerInfo: LayerInfoResult) => this.handleLayerInfo(url, events, layerInfo, config));
             }
 
         }
@@ -210,12 +218,15 @@ export class ObservationProcessor {
 
     /**
      * Called when information on a feature layer is returned from an arc server.
-     * @param info The information on a layer.
+     * @param url The url to the layer.
+     * @param events The events that are synching to the layer.
+     * @param layerInfo The information on a layer.
+     * @param config The plugins configuration.
      */
-    private handleLayerInfo(url: string, events: string[], layerInfo: LayerInfoResult) {
+    private handleLayerInfo(url: string, events: string[], layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
         if (layerInfo.geometryType != null) {
             const info = new LayerInfo(url, events, layerInfo)
-            const layerProcessor = new FeatureLayerProcessor(info, this._config, this._console);
+            const layerProcessor = new FeatureLayerProcessor(info, config, this._console);
             this._layerProcessors.push(layerProcessor);
         }
     }
@@ -224,6 +235,7 @@ export class ObservationProcessor {
      * Processes any new observations and then schedules its next run if it hasn't been stopped.
      */
     private async processAndScheduleNext() {
+        const config = await this.safeGetConfig();
         if (this._isRunning) {
             if (this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');
@@ -240,27 +252,27 @@ export class ObservationProcessor {
                     this._console.info('ArcGIS getting newest observations for event ' + pair.event.name);
                     const obsRepo = await this._obsRepos(pair.event.id);
                     const pagingSettings = {
-                        pageSize: this._batchSize,
+                        pageSize: config.batchSize,
                         pageIndex: 0,
                         includeTotalCount: true
                     }
                     let morePages = true;
                     let numberLeft = 0;
                     while (morePages) {
-                        numberLeft = await this.queryAndSend(pair.featureLayerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
+                        numberLeft = await this.queryAndSend(config, pair.featureLayerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
                         morePages = numberLeft > 0;
                     }
                 }
                 this._firstRun = false;
             }
             if (this._isRunning) {
-                let interval = this._config.intervalSeconds;
+                let interval = config.intervalSeconds;
                 if (this._firstRun) {
-                    interval = this._config.startupIntervalSeconds;
+                    interval = config.startupIntervalSeconds;
                 } else {
                     for (const layerProcessor of this._layerProcessors) {
                         if (layerProcessor.hasPendingUpdates()) {
-                            interval = this._config.updateIntervalSeconds;
+                            interval = config.updateIntervalSeconds;
                             break;
                         }
                     }
@@ -272,6 +284,7 @@ export class ObservationProcessor {
 
     /**
      * Queries for new observations and sends them to any configured arc servers.
+     * @param config The plugin configuration.
      * @param layerProcessors The layer processors to use when processing arc objects.
      * @param obsRepo The observation repo for an event.
      * @param pagingSettings Current paging settings.
@@ -279,7 +292,7 @@ export class ObservationProcessor {
      * @param numberLeft The number of observations left to query and send to arc.
      * @returns The number of observations still needing to be queried and sent to arc.
      */
-    private async queryAndSend(layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
+    private async queryAndSend(config: ArcGISPluginConfig, layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
         let newNumberLeft = numberLeft;
 
         let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
@@ -290,7 +303,7 @@ export class ObservationProcessor {
             }
             const observations = latestObs.items
             const mageEvent = await this._eventRepo.findById(obsRepo.eventScope)
-            const eventTransform = new EventTransform(this._config, mageEvent)
+            const eventTransform = new EventTransform(config, mageEvent)
             const arcObjects = new ArcObjects()
             this._geometryChangeHandler.checkForGeometryChange(observations, arcObjects, layerProcessors, this._firstRun);
             for (let i = 0; i < observations.length; i++) {

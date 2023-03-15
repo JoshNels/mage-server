@@ -57,6 +57,14 @@ export class ObservationsTransformer {
     }
 
     /**
+     * Sets the current configuration.
+     * @param config The new configuration.
+     */
+    setConfig(config: ArcGISPluginConfig) {
+        this._config = config;
+    }
+
+    /**
      * Converts the specified observation into an ArcObservation that can be sent to an arcgis server.
      * @param observation The observation to convert.
      * @param transform The Event transform.

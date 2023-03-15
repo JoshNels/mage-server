@@ -119,4 +119,12 @@ export class EventDeletionHandler {
             }
         }
     }
+
+    /**
+     * Sets the current configuration.
+     * @param config The current configuration.,
+     */
+    setConfig(config: ArcGISPluginConfig) {
+        this._config = config;
+    }
 }

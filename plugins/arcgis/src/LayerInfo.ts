@@ -47,7 +47,6 @@ export class LayerInfo {
         for (const field of layerInfo.fields) {
             this.layerFields.set(field.name, field)
         }
-        this.events = new Set<string>();
     }
 
     /**

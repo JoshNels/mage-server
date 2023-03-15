@@ -9,6 +9,11 @@ export interface FeatureServiceConfig {
     url: string
 
     /**
+     * Access token
+     */
+    token?: string
+
+    /**
      * The url to the arc feature layer.
      */
     layers: FeatureLayerConfig[]
@@ -24,6 +29,11 @@ export interface FeatureLayerConfig {
      * The layer id or name.
      */
     layer: number|string
+
+    /**
+     * Access token
+     */
+    token?: string
 
     /**
      * The event ids or names that sync to this arc feature layer.

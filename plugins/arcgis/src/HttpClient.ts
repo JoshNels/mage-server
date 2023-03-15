@@ -12,11 +12,18 @@ export class HttpClient {
     private _console: Console;
 
     /**
+     * The access token
+     */
+    private _token?: string
+
+    /**
      * Constructor.
      * @param console Used to log to the console.
+     * @param token The access token.
      */
-    constructor(console: Console) {
-        this._console = console;
+    constructor(console: Console, token?: string) {
+        this._console = console
+        this._token = token
     }
 
     /**
@@ -38,8 +45,11 @@ export class HttpClient {
      * @param response The post response handler function.
      */
     sendPostHandleResponse(url: string, formData: string, response: (chunk: any) => void) {
-
         const aUrl = new URL(url);
+
+        formData += this.tokenParam()
+        formData += this.jsonFormatParam()
+
         var post_options = {
             host: aUrl.host,
             port: aUrl.port,
@@ -84,6 +94,11 @@ export class HttpClient {
     sendPostFormHandleResponse(url: string, form: FormData, response: (chunk: any) => void) {
         const aUrl = new URL(url)
 
+        if (this._token != null) {
+            form.append('token', this._token)
+        }
+        form.append('f', 'json')
+
         var post_options = {
             host: aUrl.host,
             port: aUrl.port,
@@ -119,7 +134,12 @@ export class HttpClient {
      * @param response The get response handler function.
      */
     sendGetHandleResponse(url: string, response: (chunk: any) => void) {
-        const aUrl = new URL(url);
+
+        url += this.tokenParam(url)
+        url += this.jsonFormatParam(url)
+
+        const aUrl = new URL(url)
+
         var options = {
             host: aUrl.host,
             port: aUrl.port,
@@ -140,6 +160,49 @@ export class HttpClient {
 
         // get the data
         get_req.end();
+    }
+
+    /**
+     * Get the token parameter
+     * @param url URL the parameter will be added to
+     * @returns token param
+     */
+    private tokenParam(url?: string): string {
+        let token = ''
+        if (this._token != null) {
+            token += this.paramSeparator(url)
+            token += "token=" + this._token
+        }
+        return token
+    }
+
+    /**
+     * Get the JSON format parameter
+     * @param url URL the parameter will be added to
+     * @returns json format parameter
+     */
+    private jsonFormatParam(url?: string): string {
+        return this.paramSeparator(url) + "f=json"
+    }
+
+    /**
+     * Get the parameter separator
+     * @param url URL a separator will be added to
+     * @returns parameter separator
+     */
+    private paramSeparator(url?: string): string {
+        let separator = ''
+        if (url != null && url.length > 0) {
+            const index = url.indexOf('?')
+            if (index == -1) {
+                separator = '?'
+            } else if (index < url.length - 1){
+                separator = '&'
+            }
+        } else {
+            separator = '&'
+        }
+        return separator
     }
 
 }

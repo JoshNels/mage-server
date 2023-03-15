@@ -2,6 +2,7 @@ import { ArcGISPluginConfig } from "./ArcGISPluginConfig";
 import { ArcObjects } from './ArcObjects';
 import { ArcObservation, ArcAttachment } from './ArcObservation';
 import { HttpClient } from './HttpClient';
+import { LayerInfo } from "./LayerInfo";
 import { EditResult } from './EditResult';
 import { AttachmentInfosResult, AttachmentInfo } from './AttachmentInfosResult';
 import environment from '@ngageoint/mage.service/lib/environment/env'
@@ -51,16 +52,16 @@ export class ObservationsSender {
 
     /**
      * Constructor.
-     * @param url The url to the feature layer.
+     * @param layerInfo The layer info.
      * @param config The plugins configuration.
      * @param console Used to log to the console.
      */
-    constructor(url: string, config: ArcGISPluginConfig, console: Console) {
-        this._url = url;
+    constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
+        this._url = layerInfo.url;
         this._urlAdd = this._url + '/addFeatures';
         this._urlUpdate = this._url + '/updateFeatures';
         this._console = console;
-        this._httpClient = new HttpClient(console);
+        this._httpClient = new HttpClient(console, layerInfo.token);
         this._attachmentDirectory = environment.attachmentBaseDirectory;
         this._config = config;
     }
@@ -71,7 +72,7 @@ export class ObservationsSender {
      * @param observations The observations to convert.
      */
     sendAdds(observations: ArcObjects) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=json&features=' + JSON.stringify(observations.objects);
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS addFeatures url ' + this._urlAdd);
         this._console.info('ArcGIS addFeatures content ' + contentString);
@@ -87,7 +88,7 @@ export class ObservationsSender {
      * @returns The json string of the observations.
      */
     sendUpdates(observations: ArcObjects) {
-        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&f=json&features=' + JSON.stringify(observations.objects);
+        const contentString = 'gdbVersion=&rollbackOnFailure=true&timeReferenceUnknownClient=false&features=' + JSON.stringify(observations.objects);
 
         this._console.info('ArcGIS updateFeatures url ' + this._urlUpdate);
         this._console.info('ArcGIS updateFeatures content ' + contentString);
@@ -108,7 +109,6 @@ export class ObservationsSender {
 
         const form = new FormData()
         form.append('where', this._config.observationIdField + ' LIKE\'' + id + "%\'")
-        form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
 
@@ -131,7 +131,6 @@ export class ObservationsSender {
         } else {
             form.append('where', this._config.eventIdField + '=' + id)
         }
-        form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
 
@@ -212,7 +211,7 @@ export class ObservationsSender {
     private queryAndUpdateAttachments(observation: ArcObservation, objectId: number) {
 
         // Query for existing attachments
-        const queryUrl = this._url + '/' + objectId + '/attachments?f=json'
+        const queryUrl = this._url + '/' + objectId + '/attachments'
         this._httpClient.sendGetHandleResponse(queryUrl, (chunk) => {
             this._console.info('ArcGIS response for ' + queryUrl + ' ' + chunk)
             const result = JSON.parse(chunk) as AttachmentInfosResult
@@ -315,7 +314,6 @@ export class ObservationsSender {
             form.append('attachment', readStream, {
                 filename: fileName
             })
-            form.append('f', 'json')
 
             this._httpClient.sendPostForm(url, form)
 
@@ -360,7 +358,6 @@ export class ObservationsSender {
 
         const form = new FormData()
         form.append('attachmentIds', ids)
-        form.append('f', 'json')
 
         this._httpClient.sendPostForm(url, form)
 

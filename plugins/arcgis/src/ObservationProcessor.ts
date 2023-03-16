@@ -70,9 +70,14 @@ export class ObservationProcessor {
     private _stateRepo: PluginStateRepository<ArcGISPluginConfig>;
 
     /**
+     * The previous plugins configuration JSON.
+     */
+    private _previousConfig?: string;
+
+    /**
      * Sends observations to a single feature layer.
      */
-    private _layerProcessors: FeatureLayerProcessor[];
+    private _layerProcessors: FeatureLayerProcessor[] = [];
 
     /**
      * True if this is a first run at updating arc feature layers.  If so we need to make sure the layers are
@@ -110,20 +115,37 @@ export class ObservationProcessor {
         this._userRepo = userRepo;
         this._lastTimeStamp = 0;
         this._console = console;
-        this._transformer = new ObservationsTransformer(defaultArcGISPluginConfig, console);
-        this._layerProcessors = [];
         this._firstRun = true;
+        this._organizer = new EventLayerProcessorOrganizer();
+        this._transformer = new ObservationsTransformer(defaultArcGISPluginConfig, console);
         this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
         this._eventDeletionHandler = new EventDeletionHandler(this._console, defaultArcGISPluginConfig);
-        this._organizer = new EventLayerProcessorOrganizer();
     }
 
     /**
      * Gets the current configuration from the database.
      * @returns The current configuration from the database.
      */
-    async safeGetConfig(): Promise<ArcGISPluginConfig> {
+    private async safeGetConfig(): Promise<ArcGISPluginConfig> {
         return await this._stateRepo.get().then(x => !!x ? x : this._stateRepo.put(defaultArcGISPluginConfig))
+    }
+
+    /**
+     * Gets the current configuration and updates the processor if needed
+     * @returns The current configuration from the database.
+     */
+    private async updateConfig(): Promise<ArcGISPluginConfig> {
+        const config = await this.safeGetConfig()
+        const configJson = JSON.stringify(config)
+        if (this._previousConfig == null || this._previousConfig != configJson) {
+            this._transformer = new ObservationsTransformer(config, console);
+            this._geometryChangeHandler = new GeometryChangedHandler(this._transformer);
+            this._eventDeletionHandler = new EventDeletionHandler(this._console, config);
+            this._layerProcessors = [];
+            this.getFeatureServiceLayers(config);
+            this._previousConfig = configJson
+        }
+        return config
     }
 
     /**
@@ -132,10 +154,6 @@ export class ObservationProcessor {
     async start() {
         this._isRunning = true;
         this._firstRun = true;
-        const config = await this.safeGetConfig();
-        this._transformer.setConfig(config);
-        this._eventDeletionHandler.setConfig(config);
-        this.getFeatureServiceLayers(config);
         this.processAndScheduleNext();
     }
 
@@ -277,7 +295,7 @@ export class ObservationProcessor {
      * Processes any new observations and then schedules its next run if it hasn't been stopped.
      */
     private async processAndScheduleNext() {
-        const config = await this.safeGetConfig();
+        const config = await this.updateConfig();
         if (this._isRunning) {
             if (this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');

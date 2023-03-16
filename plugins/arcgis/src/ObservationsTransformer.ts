@@ -24,6 +24,11 @@ export class ObservationsTransformer {
     private _console: Console
 
     /**
+     * Initialized flag
+     */
+    private _initialized: boolean = false
+
+    /**
      * Default values
      */
     private _defaults: { [attribute: string]: AttributeDefaultConfig[] } = {}
@@ -41,27 +46,28 @@ export class ObservationsTransformer {
     constructor(config: ArcGISPluginConfig, console: Console) {
         this._config = config
         this._console = console
-        if (this._config.attributes != null) {
-            for (const attributes of Object.entries(this._config.attributes)) {
-                const attribute = attributes[0]
-                const attributeConfig = attributes[1]
-                const defaults = attributeConfig.defaults
-                if (defaults != null && defaults.length > 0) {
-                    this._defaults[attribute] = defaults
-                }
-                if (attributeConfig.omit) {
-                    this._omit.push(attribute)
-                }
-            }
-        }
     }
 
     /**
-     * Sets the current configuration.
-     * @param config The new configuration.
+     * Initialize configuration settings
      */
-    setConfig(config: ArcGISPluginConfig) {
-        this._config = config;
+    private init() {
+        if (!this._initialized) {
+            this._initialized = true
+            if (this._config.attributes != null) {
+                for (const attributes of Object.entries(this._config.attributes)) {
+                    const attribute = attributes[0]
+                    const attributeConfig = attributes[1]
+                    const defaults = attributeConfig.defaults
+                    if (defaults != null && defaults.length > 0) {
+                        this._defaults[attribute] = defaults
+                    }
+                    if (attributeConfig.omit) {
+                        this._omit.push(attribute)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -72,6 +78,8 @@ export class ObservationsTransformer {
      * @returns The ArcObservation of the observation.
      */
     transform(observation: ObservationAttrs, transform: EventTransform, user: User | null): ArcObservation {
+        this.init()
+
         const arcObject = {} as ArcObject
 
         this.observationToAttributes(observation, transform, user, arcObject)

@@ -16,6 +16,7 @@ import { EventDeletionHandler } from './EventDeletionHandler';
 import { EventLayerProcessorOrganizer } from './EventLayerProcessorOrganizer';
 import { FeatureServiceConfig, FeatureLayerConfig } from "./ArcGISConfig"
 import { PluginStateRepository } from '@ngageoint/mage.service/lib/plugins.api'
+import { FeatureServiceAdmin } from './FeatureServiceAdmin';
 
 /**
  * Class that wakes up at a certain configured interval and processes any new observations that can be
@@ -96,7 +97,7 @@ export class ObservationProcessor {
 
     /**
      * Constructor.
-     * @param stateRepo Access totThe plugins configuration.
+     * @param stateRepo The plugins configuration.
      * @param eventRepo Used to get all the active events.
      * @param obsRepo Used to get new observations.
      * @param userRepo Used to get user information.
@@ -154,7 +155,7 @@ export class ObservationProcessor {
 
         for (const service of config.featureServices) {
 
-            const services = []
+            const services: FeatureServiceConfig[] = []
 
             if (service.token == null) {
                 const tokenServices = new Map()
@@ -183,7 +184,7 @@ export class ObservationProcessor {
 
             for (const serv of services) {
                 const featureService = new FeatureService(console, serv.token)
-                featureService.queryFeatureService(serv, (featureService: FeatureServiceResult, featureServiceConfig: FeatureServiceConfig) => this.handleFeatureService(featureService, featureServiceConfig, config))
+                featureService.queryFeatureService(serv.url, (featureServiceResult: FeatureServiceResult) => this.handleFeatureService(featureServiceResult, serv, config))
             }
         }
     }
@@ -213,19 +214,6 @@ export class ObservationProcessor {
                     featureLayer.token = featureServiceConfig.token
                 }
 
-                const layer = serviceLayers.get(featureLayer.layer)
-
-                let layerId
-                if (layer == null) {
-                    layerId = ++maxId
-                    // TODO: layer needs to be created with layer id
-                    throw new Error('TODO: layer needs to be created with layer id ' + layerId)
-                } else {
-                    layerId = layer.id
-                }
-
-                const url = featureServiceConfig.url + '/' + layerId
-
                 const eventNames: string[] = []
                 const events = featureLayer.events
                 if (events != null) {
@@ -241,11 +229,29 @@ export class ObservationProcessor {
                         }
                     }
                 }
-
                 featureLayer.events = eventNames
 
-                const featureService = new FeatureService(console, featureLayer.token)
-                featureService.queryLayerInfo(url, featureLayer, (url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config));
+                const layer = serviceLayers.get(featureLayer.layer)
+
+                let layerId
+                if (layer == null) {
+                    layerId = maxId
+                    const admin = new FeatureServiceAdmin(config, this._console)
+                    layerId = admin.createLayer(featureServiceConfig, featureLayer, layerId, this._eventRepo)
+                    if (layerId != null && layerId == maxId) {
+                        maxId++
+                    }
+                } else {
+                    layerId = layer.id
+                }
+
+                if (layerId != null) {
+
+                    const url = featureServiceConfig.url + '/' + layerId
+
+                    const featureService = new FeatureService(console, featureLayer.token)
+                    featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config));
+                }
             }
 
         }

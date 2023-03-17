@@ -253,11 +253,11 @@ export class ObservationProcessor {
 
                 let layerId
                 if (layer == null) {
-                    layerId = maxId
+                    layerId = maxId + 1
                     const admin = new FeatureServiceAdmin(config, this._console)
-                    layerId = admin.createLayer(featureServiceConfig, featureLayer, layerId, this._eventRepo)
-                    if (layerId != null && layerId == maxId) {
-                        maxId++
+                    layerId = await admin.createLayer(featureServiceConfig, featureLayer, layerId, this._eventRepo)
+                    if (layerId != null) {
+                        maxId = Math.max(maxId, layerId)
                     }
                 } else {
                     layerId = layer.id

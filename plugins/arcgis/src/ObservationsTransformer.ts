@@ -380,7 +380,7 @@ export class ObservationsTransformer {
                 arcObject.attributes = {}
             }
 
-            let attribute = this.replaceSpaces(name)
+            let attribute = ObservationsTransformer.replaceSpaces(name)
 
             if (Object.prototype.toString.call(value) === '[object Date]') {
                 value = new Date(value).getTime()
@@ -505,7 +505,7 @@ export class ObservationsTransformer {
                 }
 
                 const arcAttachment = {} as ArcAttachment
-                arcAttachment.field = this.replaceSpaces(fieldName)
+                arcAttachment.field = ObservationsTransformer.replaceSpaces(fieldName)
                 if (attachment.lastModified != null) {
                     arcAttachment.lastModified = new Date(attachment.lastModified).getTime()
                 }
@@ -536,7 +536,7 @@ export class ObservationsTransformer {
      * @param name The name.
      * @return name with replaced spaces.
      */
-    private replaceSpaces(name: string): string {
+    static replaceSpaces(name: string): string {
         return name.replace(/ /g, '_')
     }
 

@@ -46,6 +46,16 @@ export interface ArcGISPluginConfig {
   attachmentModifiedTolerance: number
 
   /**
+   * Default length of ArcGIS created text fields from MAGE form text fields
+   */
+  textFieldLength: number
+
+  /**
+   * Default length of ArcGIS created text fields from MAGE form text areas
+   */
+  textAreaFieldLength: number
+
+  /**
    * The field name to save and query the observation id to and from the ArcGIS server.
    */
   observationIdField: string
@@ -143,6 +153,8 @@ export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
     }
   ],
   attachmentModifiedTolerance: 5000,
+  textFieldLength: 100,
+  textAreaFieldLength: 256,
   observationIdField: 'description',
   idSeperator: '-',
   // eventIdField: 'event_id',

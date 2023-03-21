@@ -17,7 +17,7 @@ export interface Layer {
 export interface Field {
     name: string
     type: string
-    actualType: string
+    actualType?: string
     alias: string
     sqlType: string
     length: number

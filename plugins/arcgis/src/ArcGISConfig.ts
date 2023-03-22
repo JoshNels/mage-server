@@ -31,6 +31,11 @@ export interface FeatureLayerConfig {
     layer: number|string
 
     /**
+     * The geometry type for new layers
+     */
+    geometryType?: string
+
+    /**
      * Access token
      */
     token?: string

@@ -1,8 +1,8 @@
 import { ArcGISPluginConfig } from "./ArcGISPluginConfig"
 import { FeatureServiceConfig, FeatureLayerConfig } from "./ArcGISConfig"
 import { MageEvent, MageEventRepository } from '@ngageoint/mage.service/lib/entities/events/entities.events'
-import { Field } from "./AddLayersRequest"
-import { FormField, FormFieldType } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
+import { Layer, Field } from "./AddLayersRequest"
+import { Form, FormField, FormFieldType, FormId } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { ObservationsTransformer } from "./ObservationsTransformer"
 
 /**
@@ -33,36 +33,41 @@ export class FeatureServiceAdmin {
     /**
      * Create the layer
      * @param service feature service
-     * @param layer feature layer
+     * @param featureLayer feature layer
      * @param nextId next service layer id
      * @param eventRepo event repository
      * @returns layer id
      */
-    async createLayer(service: FeatureServiceConfig, layer: FeatureLayerConfig, nextId: number, eventRepo: MageEventRepository): Promise<number | null> {
+    async createLayer(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, nextId: number, eventRepo: MageEventRepository): Promise<number | null> {
 
-        let layerName = null
-        let layerId = 0
+        const layer = { type: 'Feature Layer' } as Layer
 
-        const layerIdentifier = layer.layer
+        const layerIdentifier = featureLayer.layer
         const layerIdentifierNumber = Number(layerIdentifier)
         if (isNaN(layerIdentifierNumber)) {
-            layerName = String(layerIdentifier)
-            layerId = nextId
+            layer.name = String(layerIdentifier)
+            layer.id = nextId
         } else {
-            layerId = layerIdentifierNumber
+            layer.id = layerIdentifierNumber
         }
 
         const events = await this.layerEvents(layer, eventRepo)
 
-        if (layerName == null) {
-            layerName = this.layerName(events)
+        if (layer.name == null) {
+            layer.name = this.layerName(events)
         }
 
-        const fields = this.fields(events)
+        if (featureLayer.geometryType != null) {
+            layer.geometryType = featureLayer.geometryType
+        } else {
+            layer.geometryType = 'esriGeometryPoint'
+        }
+
+        layer.fields = this.fields(events)
 
         // TODO Create the layer
 
-        return layerId
+        return layer.id
     }
 
     /**
@@ -154,13 +159,12 @@ export class FeatureServiceAdmin {
             fields.push(this.createTextField(this._config.geometryType, true))
         }
 
-        const eventFields = this.eventsFields(events)
-        for (const field of eventFields) {
-
-            // TODO handle duplicate field name between forms and events
-
-            fields.push(field)
+        const fieldNames = new Set<string>()
+        for (const field of fields) {
+            fieldNames.add(field.name)
         }
+
+        this.eventsFields(events, fields, fieldNames)
 
         return fields
     }
@@ -228,71 +232,74 @@ export class FeatureServiceAdmin {
     /**
      * Build fields from the layer events
      * @param events layer events
-     * @returns fields
+     * @param fields created fields
+     * @param fieldNames set of all field names
      */
-    private eventsFields(events: MageEvent[]): Field[] {
+    private eventsFields(events: MageEvent[], fields: Field[], fieldNames: Set<string>) {
 
-        const fields: Field[] = []
+        const forms = new Set<FormId>()
 
         for (const event of events) {
-
-            const eventFields = this.eventFields(event)
-
-            for (const field of eventFields) {
-
-                // TODO handle duplicate field name between forms and events
-
-                fields.push(field)
-            }
-
+            this.eventFields(event, forms, fields, fieldNames)
         }
 
-        return fields
     }
 
     /**
      * Build fields from the layer event
      * @param event layer event
-     * @returns fields
+     * @param forms set of processed forms
+     * @param fields created fields
+     * @param fieldNames set of all field names
      */
-    private eventFields(event: MageEvent): Field[] {
-
-        const fields: Field[] = []
+    private eventFields(event: MageEvent, forms: Set<FormId>, fields: Field[], fieldNames: Set<string>) {
 
         for (const form of event.activeForms) {
-            for (const formField of form.fields) {
-                if (formField.archived == null || !formField.archived) {
-                    const field = this.createFormField(formField)
-                    if (field != null) {
-                        fields.push(field)
+
+            if (!forms.has(form.id)) {
+
+                forms.add(form.id)
+
+                for (const formField of form.fields) {
+                    if (formField.archived == null || !formField.archived) {
+                        this.createFormField(form, formField, fields, fieldNames)
                     }
                 }
+
             }
         }
 
-        return fields
     }
 
     /**
      * Build a field from the form field
-     * @param formField
-     * @returns field or null
+     * @param form form
+     * @param formField form field
+     * @param fields created fields
+     * @param fieldNames set of all field names
      */
-    private createFormField(formField: FormField): Field | null {
+    private createFormField(form: Form, formField: FormField, fields: Field[], fieldNames: Set<string>) {
 
         const field = this.initField(formField.type)
 
         if (field != null) {
 
-            field.name = ObservationsTransformer.replaceSpaces(formField.title)
+            let name = ObservationsTransformer.replaceSpaces(formField.title)
+
+            if (fieldNames.has(name)) {
+                name = form.name + '_' + name
+            }
+            fieldNames.add(name)
+
+            field.name = name
             field.alias = field.name
             field.nullable = !formField.required
             field.editable = true
             field.defaultValue = formField.value
 
+            fields.push(field)
         }
 
-        return field
     }
 
     /**

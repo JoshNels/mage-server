@@ -51,7 +51,7 @@ export class FeatureServiceAdmin {
             layer.id = layerIdentifierNumber
         }
 
-        const events = await this.layerEvents(layer, eventRepo)
+        const events = await this.layerEvents(featureLayer, eventRepo)
 
         if (layer.name == null) {
             layer.name = this.layerName(events)

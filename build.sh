@@ -3,8 +3,8 @@
 dir_array=(
 "./service"
 "../web-app"
-"../plugins/arcgis"
-"../image/service"
+"../plugins/arcgis/service"
+"../../image/service"
 "../../nga-msi"
 "../random"
 )
@@ -18,4 +18,4 @@ done
 
 cd ../../instance
 echo "npm i in $PWD"
-npm i --omit=dev ../service ../web-app/dist/app ../plugins/arcgis ../plugins/image/service ../plugins/nga-msi ../plugins/random
+npm i --omit=dev ../service ../web-app/dist/app ../plugins/arcgis/service ../plugins/image/service ../plugins/nga-msi ../plugins/random

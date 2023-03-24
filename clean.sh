@@ -3,8 +3,8 @@
 dir_array=(
 "./service"
 "../web-app"
-"../plugins/arcgis"
-"../image/service"
+"../plugins/arcgis/service"
+"../../image/service"
 "../../nga-msi"
 "../random"
 )

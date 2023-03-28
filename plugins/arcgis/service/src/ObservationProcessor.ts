@@ -126,7 +126,7 @@ export class ObservationProcessor {
      * Gets the current configuration from the database.
      * @returns The current configuration from the database.
      */
-    private async safeGetConfig(): Promise<ArcGISPluginConfig> {
+    public async safeGetConfig(): Promise<ArcGISPluginConfig> {
         return await this._stateRepo.get().then(x => !!x ? x : this._stateRepo.put(defaultArcGISPluginConfig))
     }
 

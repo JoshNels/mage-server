@@ -62,7 +62,7 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
         routes.route('/config')
           .get(async (req, res, next) => {
             console.info('Getting ArcGIS plugin config...')
-            const config = defaultArcGISPluginConfig;
+            const config = await processor.safeGetConfig();
             res.json(config)
           })
           .put(async (req, res, next) => {

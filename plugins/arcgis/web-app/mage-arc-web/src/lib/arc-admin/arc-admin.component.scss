@@ -43,6 +43,17 @@ section {
 
 .arcLayer__value {
   grid-column-start: 1;
+  margin-block-end: 0.25em;
+}
+
+.arcLayer__action {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  text-align: end;
+}
+
+.featureLayer__value {
+  grid-column-start: 1;
   opacity: 0.5;
   font-size: 0.9em;
   margin-block-end: 0.25em;
@@ -50,10 +61,4 @@ section {
     margin-block-start: 0;
     margin-block-end: 0.1em;
   }
-}
-
-.arcLayer__action {
-  grid-column: 2 / 3;
-  grid-row: 1 / 3;
-  text-align: end;
 }

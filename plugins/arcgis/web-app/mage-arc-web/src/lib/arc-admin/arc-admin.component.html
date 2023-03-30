@@ -21,6 +21,11 @@
         <div class="arcLayer__action">
           <button class="mat-hint" mat-icon-button aria-label="Delete ArcGIS layer" (click)="onDeleteLayer(arcLayer)"><mat-icon>delete_outline</mat-icon></button>
         </div>
+        <div class="featureLayers" *ngFor="let featureLayer of arcLayer.layers">
+          <div class="featureLayer__value">
+            {{featureLayer.layer}}
+          </div>
+        </div>
       </ng-container>
     </div>
   </section>

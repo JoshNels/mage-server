@@ -4,6 +4,8 @@ import { MageEvent, MageEventRepository } from '@ngageoint/mage.service/lib/enti
 import { Layer, Field } from "./AddLayersRequest"
 import { Form, FormField, FormFieldType, FormId } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { ObservationsTransformer } from "./ObservationsTransformer"
+import { HttpClient } from './HttpClient'
+import FormData from 'form-data'
 
 /**
  * Administers hosted feature services such as layer creation and updates.
@@ -65,7 +67,7 @@ export class FeatureServiceAdmin {
 
         layer.fields = this.fields(events)
 
-        // TODO Create the layer
+        this.create(service, layer)
 
         return layer.id
     }
@@ -355,6 +357,37 @@ export class FeatureServiceAdmin {
         }
 
         return field.type != null ? field : null
+    }
+
+    /**
+     * Create the layer
+     * @param service feature service
+     * @param layer layer
+     */
+    private create(service: FeatureServiceConfig, layer: Layer) {
+
+        let url = service.adminUrl
+        let token = service.adminToken
+
+        if (url == null) {
+            url = service.url.replace('/services/', '/admin/services/')
+        }
+
+        if (token == null) {
+            token = service.token
+        }
+
+        const httpClient = new HttpClient(console, token)
+
+        url += '/addToDefinition'
+
+        this._console.info('ArcGIS addToDefinition (create layer) url ' + url)
+
+        const form = new FormData()
+        form.append('addToDefinition', JSON.stringify(layer))
+
+        httpClient.sendPostForm(url, form) // TODO wait for and handle response
+
     }
 
 }

@@ -6,7 +6,8 @@
       <p class="subheading">Add urls to ArcGIS feature layers, MAGE will send its data to.</p>
     </header>
     <div>
-      <button mat-button mat-stroked-button color="primary" aria-label="Add ArcGIS feature layer" (click)="onAddLayer()">ADD ARCGIS LAYER</button>
+      <button mat-button mat-stroked-button color="primary" aria-label="Add ArcGIS feature layer"
+        (click)="onAddLayer()">ADD ARCGIS LAYER</button>
     </div>
     <div class="arcLayers" *ngIf="!config.featureServices.length">
       <div class="arcLayer__value">
@@ -15,11 +16,14 @@
     </div>
     <div class="arcLayers" *ngFor="let arcLayer of config.featureServices">
       <ng-container>
-        <div class="arcLayer__value">
-          {{arcLayer.url}}
-        </div>
-        <div class="arcLayer__action">
-          <button class="mat-hint" mat-icon-button aria-label="Delete ArcGIS layer" (click)="onDeleteLayer(arcLayer)"><mat-icon>delete_outline</mat-icon></button>
+        <div class="arcLayer">
+          <div class="arcLayer__value">
+            {{arcLayer.url}}
+          </div>
+          <div class="arcLayer__action">
+            <button class="mat-hint" mat-icon-button aria-label="Delete ArcGIS layer"
+              (click)="onDeleteLayer(arcLayer)"><mat-icon>delete_outline</mat-icon></button>
+          </div>
         </div>
         <div class="featureLayers" *ngFor="let featureLayer of arcLayer.layers">
           <div class="featureLayer__value">
@@ -32,16 +36,17 @@
 </div>
 <ng-template #addLayerDialog let-data>
   <h2 matDialogTitle>Add ArcGIS Layer</h2>
-    <mat-dialog-content>
-      <div class="arc-layer-form">
-        <mat-form-field [style.width.%]="100">
-          <mat-label>ArcGIS Feature Layer URL</mat-label>
-          <input type="text" matInput [formControl]="arcLayerControl" placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl>
-          <mat-error *ngIf="arcLayerControl.hasError('required')">
-            URL is <strong>required</strong>
-          </mat-error>
-        </mat-form-field>
-      </div>
+  <mat-dialog-content>
+    <div class="arc-layer-form">
+      <mat-form-field [style.width.%]="100">
+        <mat-label>ArcGIS Feature Layer URL</mat-label>
+        <input type="text" matInput [formControl]="arcLayerControl"
+          placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl>
+        <mat-error *ngIf="arcLayerControl.hasError('required')">
+          URL is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>

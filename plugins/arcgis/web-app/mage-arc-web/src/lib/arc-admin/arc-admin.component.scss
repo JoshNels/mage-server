@@ -34,7 +34,7 @@ section {
   margin-block-end: 2em;
 }
 
-.arcLayers {
+.arcLayer {
   margin-block-start: 1em;
   display: grid;
   grid-template-columns: 4fr 1fr;
@@ -43,7 +43,6 @@ section {
 
 .arcLayer__value {
   grid-column-start: 1;
-  margin-block-end: 0.25em;
 }
 
 .arcLayer__action {
@@ -52,13 +51,8 @@ section {
   text-align: end;
 }
 
-.featureLayer__value {
-  grid-column-start: 1;
+.featureLayers {
+  display: grid;
   opacity: 0.5;
   font-size: 0.9em;
-  margin-block-end: 0.25em;
-  > * {
-    margin-block-start: 0;
-    margin-block-end: 0.1em;
-  }
 }

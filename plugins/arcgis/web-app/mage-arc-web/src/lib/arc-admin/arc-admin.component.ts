@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
 import { MatDialog, } from '@angular/material/dialog'
 import { FeatureServiceConfig } from '../ArcGISConfig';
-import { ArcGISPluginConfig } from '../ArcGISPluginConfig'
+import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 
 @Component({
@@ -19,6 +19,7 @@ export class ArcAdminComponent implements OnInit {
   private addLayerTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
+    this.config = defaultArcGISPluginConfig
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })

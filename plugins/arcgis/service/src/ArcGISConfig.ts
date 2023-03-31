@@ -4,7 +4,7 @@
 export interface FeatureServiceConfig {
 
     /**
-     * The url to the arc feature layer.
+     * The url to the arc feature service.
      */
     url: string
 
@@ -12,6 +12,16 @@ export interface FeatureServiceConfig {
      * Access token
      */
     token?: string
+
+    /**
+     * The administration url to the arc feature service.
+     */
+    adminUrl?: string
+
+    /**
+     * Administration access token
+     */
+    adminToken?: string
 
     /**
      * The url to the arc feature layer.

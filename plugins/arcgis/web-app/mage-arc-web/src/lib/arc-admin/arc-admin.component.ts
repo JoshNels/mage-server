@@ -13,6 +13,8 @@ import { ArcService } from '../arc.service'
 export class ArcAdminComponent implements OnInit {
 
   config: ArcGISPluginConfig;
+  private currentUrl: string;
+  private timeoutId: number;
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
@@ -30,6 +32,19 @@ export class ArcAdminComponent implements OnInit {
 
   onAddLayer() {
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
+  }
+
+  inputChanged(layerUrl: string) {
+    console.log('Input changed ' + layerUrl);
+    this.currentUrl = layerUrl;
+    if (this.timeoutId !== undefined) {
+      window.clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = window.setTimeout(() => this.fetchLayers(this.currentUrl), 1000);
+  }
+
+  fetchLayers(currentUrl: string) {
+    console.log('Fetching layers for ' + currentUrl);
   }
 
   onAddLayerUrl(layerUrl: string) {

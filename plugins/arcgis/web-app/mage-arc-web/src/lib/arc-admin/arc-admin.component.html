@@ -40,7 +40,7 @@
     <div class="arc-layer-form">
       <mat-form-field [style.width.%]="100">
         <mat-label>ArcGIS Feature Layer URL</mat-label>
-        <input type="text" matInput [formControl]="arcLayerControl"
+        <input type="text" matInput [formControl]="arcLayerControl" (keyup)="inputChanged(layerUrl.value)"
           placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl>
         <mat-error *ngIf="arcLayerControl.hasError('required')">
           URL is <strong>required</strong>

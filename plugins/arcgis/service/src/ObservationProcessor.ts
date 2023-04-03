@@ -218,6 +218,7 @@ export class ObservationProcessor {
         if (featureService.layers != null) {
 
             const serviceLayers = new Map<any, FeatureLayer>()
+            const admin = new FeatureServiceAdmin(config, this._console)
 
             let maxId = -1
             for (const layer of featureService.layers) {
@@ -253,23 +254,16 @@ export class ObservationProcessor {
 
                 let layerId
                 if (layer == null) {
-                    layerId = maxId + 1
-                    const admin = new FeatureServiceAdmin(config, this._console)
-                    layerId = await admin.createLayer(featureServiceConfig, featureLayer, layerId, this._eventRepo)
-                    if (layerId != null) {
-                        maxId = Math.max(maxId, layerId)
-                    }
+                    layerId = await admin.createLayer(featureServiceConfig, featureLayer, maxId + 1, this._eventRepo)
+                    maxId = Math.max(maxId, layerId)
                 } else {
                     layerId = layer.id
                 }
 
-                if (layerId != null) {
+                const featureService = new FeatureService(console, featureLayer.token)
+                const url = featureServiceConfig.url + '/' + layerId
+                featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config))
 
-                    const url = featureServiceConfig.url + '/' + layerId
-
-                    const featureService = new FeatureService(console, featureLayer.token)
-                    featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config));
-                }
             }
 
         }

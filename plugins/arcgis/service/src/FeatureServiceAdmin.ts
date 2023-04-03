@@ -40,7 +40,7 @@ export class FeatureServiceAdmin {
      * @param eventRepo event repository
      * @returns layer id
      */
-    async createLayer(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, nextId: number, eventRepo: MageEventRepository): Promise<number | null> {
+    async createLayer(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, nextId: number, eventRepo: MageEventRepository): Promise<number> {
 
         const layer = { type: 'Feature Layer' } as Layer
 
@@ -66,6 +66,9 @@ export class FeatureServiceAdmin {
         }
 
         layer.fields = this.fields(events)
+
+        // TODO What other layer properties are needed or required?
+        // https://developers.arcgis.com/rest/services-reference/online/add-to-definition-feature-service-.htm#GUID-63F2BD08-DCF4-485D-A3E6-C7116E17DDD8
 
         this.create(service, layer)
 
@@ -386,7 +389,7 @@ export class FeatureServiceAdmin {
         const form = new FormData()
         form.append('addToDefinition', JSON.stringify(layer))
 
-        httpClient.sendPostForm(url, form) // TODO wait for and handle response
+        httpClient.sendPostForm(url, form)
 
     }
 

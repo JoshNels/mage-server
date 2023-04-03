@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ArcGISPluginConfig } from './ArcGISPluginConfig'
+import { FeatureServiceResult } from './FeatureServiceResult'
 
 export const baseUrl = '/plugins/@ngageoint/mage.arcgis'
 
@@ -21,6 +22,10 @@ export class ArcService {
 
   fetchArcConfig(): Observable<ArcGISPluginConfig> {
     return this.http.get<ArcGISPluginConfig>(`${baseUrl}/config`)
+  }
+
+  fetchArcLayers(featureUrl: string) {
+    return this.http.get<FeatureServiceResult>(`${baseUrl}/arcgisLayers?featureUrl=${featureUrl}`)
   }
 
   putArcConfig(config: ArcGISPluginConfig) {

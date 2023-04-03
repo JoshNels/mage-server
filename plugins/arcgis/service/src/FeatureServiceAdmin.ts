@@ -5,6 +5,7 @@ import { Layer, Field } from "./AddLayersRequest"
 import { Form, FormField, FormFieldType, FormId } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { ObservationsTransformer } from "./ObservationsTransformer"
 import { HttpClient } from './HttpClient'
+import { LayerInfoResult } from "./LayerInfoResult"
 import FormData from 'form-data'
 
 /**
@@ -73,6 +74,55 @@ export class FeatureServiceAdmin {
         this.create(service, layer)
 
         return layer.id
+    }
+
+    /**
+     * Update the layer fields
+     * @param featureLayer feature layer
+     * @param layerInfo layer info
+     * @param eventRepo event repository
+     */
+    async updateLayer(featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, eventRepo: MageEventRepository) {
+
+        const events = await this.layerEvents(featureLayer, eventRepo)
+
+        const eventFields = this.fields(events)
+        const layerFields = layerInfo.fields
+
+        const eventFieldSet = new Set()
+        for (const field of eventFields) {
+            eventFieldSet.add(field.name)
+        }
+
+        const layerFieldSet = new Set()
+        for (const field of layerFields) {
+            layerFieldSet.add(field.name)
+        }
+
+        const addFields = []
+        for (const field of eventFields) {
+            if (!layerFieldSet.has(field.name)) {
+                addFields.push(field)
+            }
+        }
+
+        const deleteFields = []
+        for (const field of layerFields) {
+            if (field.editable && !eventFieldSet.has(field.name)) {
+                deleteFields.push(field)
+            }
+        }
+
+        if (addFields.length > 0) {
+            // TODO Add Fields
+            // https://developers.arcgis.com/rest/services-reference/online/add-to-definition-feature-layer-.htm
+        }
+
+        if (deleteFields.length > 0) {
+            // TODO Delete Fields
+            // https://developers.arcgis.com/rest/services-reference/online/delete-from-definition-feature-layer-.htm
+        }
+
     }
 
     /**

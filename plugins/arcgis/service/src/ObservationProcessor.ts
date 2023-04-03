@@ -276,9 +276,11 @@ export class ObservationProcessor {
      * @param layerInfo The information on a layer.
      * @param config The plugins configuration.
      */
-    private handleLayerInfo(url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
+    private async handleLayerInfo(url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
         if (layerInfo.geometryType != null) {
             const events = featureLayer.events as string[]
+            const admin = new FeatureServiceAdmin(config, this._console)
+            await admin.updateLayer(featureLayer, layerInfo, this._eventRepo)
             const info = new LayerInfo(url, events, layerInfo, featureLayer.token)
             const layerProcessor = new FeatureLayerProcessor(info, config, this._console);
             this._layerProcessors.push(layerProcessor);

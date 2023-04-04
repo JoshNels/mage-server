@@ -4,6 +4,7 @@ import { MatDialog, } from '@angular/material/dialog'
 import { FeatureServiceConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
+import { FeatureServiceResult } from '../FeatureServiceResult';
 
 @Component({
   selector: 'arc-admin',
@@ -15,13 +16,15 @@ export class ArcAdminComponent implements OnInit {
   config: ArcGISPluginConfig;
   private currentUrl: string;
   private timeoutId: number;
+  layers: string[];
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
   private addLayerTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
-    this.config = defaultArcGISPluginConfig
+    this.config = defaultArcGISPluginConfig;
+    this.layers = new Array<string>();
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })
@@ -45,6 +48,12 @@ export class ArcAdminComponent implements OnInit {
 
   fetchLayers(currentUrl: string) {
     console.log('Fetching layers for ' + currentUrl);
+    this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
+      console.log('arclayer response ' + x);
+      for(const layer of x.layers) {
+        this.layers.push(layer.name);
+      }
+    })
   }
 
   onAddLayerUrl(layerUrl: string) {

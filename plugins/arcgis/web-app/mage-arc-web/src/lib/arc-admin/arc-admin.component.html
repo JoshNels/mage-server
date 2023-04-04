@@ -22,7 +22,7 @@
           </div>
           <div class="arcLayer__action">
             <button class="mat-hint" mat-icon-button aria-label="Delete ArcGIS layer"
-              (click)="onDeleteLayer(arcLayer)"><mat-icon>delete_outline</mat-icon></button>
+              (click)="onDeleteLayer(arcLayer.url)"><mat-icon>delete_outline</mat-icon></button>
           </div>
         </div>
         <div class="featureLayers" *ngFor="let featureLayer of arcLayer.layers">
@@ -46,6 +46,11 @@
           URL is <strong>required</strong>
         </mat-error>
       </mat-form-field>
+    </div>
+    <div class="arc-layers" *ngFor="let arcLayer of layers">
+      <div class="featureLayer__value">
+        {{arcLayer}}
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">

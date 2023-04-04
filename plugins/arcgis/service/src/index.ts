@@ -4,9 +4,11 @@ import { ObservationRepositoryToken } from '@ngageoint/mage.service/lib/plugins.
 import { MageEventRepositoryToken } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.events'
 import { UserRepositoryToken } from '@ngageoint/mage.service/lib/plugins.api/plugins.api.users'
 import { SettingPermission } from '@ngageoint/mage.service/lib/entities/authorization/entities.permissions'
-import express from 'express'
+import express, { query } from 'express'
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from './ArcGISPluginConfig'
 import { ObservationProcessor } from './ObservationProcessor'
+import {HttpClient} from './HttpClient'
+import { FeatureServiceResult } from './FeatureServiceResult'
 
 const logPrefix = '[mage.arcgis]'
 const logMethods = ['log', 'debug', 'info', 'warn', 'error'] as const
@@ -78,6 +80,17 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
                 }, [] as number[])
                 : []
             }
+          })
+        routes.route('/arcgisLayers')
+          .get(async (req, res, next) => {
+            const featureUrl = req.query.featureUrl as string;
+            console.info('Getting ArcGIS layer info for ' + featureUrl)
+            const httpClient = new HttpClient(console);
+            httpClient.sendGetHandleResponse(featureUrl + '?f=json', (chunk) => {
+              console.info('ArcGIS layer info response ' + chunk);
+              const featureServiceResult = JSON.parse(chunk) as FeatureServiceResult;
+              res.json(featureServiceResult);
+            });
           })
         return routes
       }

@@ -8,6 +8,7 @@ import express, { query } from 'express'
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from './ArcGISPluginConfig'
 import { ObservationProcessor } from './ObservationProcessor'
 import {HttpClient} from './HttpClient'
+import { FeatureServiceResult } from './FeatureServiceResult'
 
 const logPrefix = '[mage.arcgis]'
 const logMethods = ['log', 'debug', 'info', 'warn', 'error'] as const
@@ -86,7 +87,9 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
             console.info('Getting ArcGIS layer info for ' + featureUrl)
             const httpClient = new HttpClient(console);
             httpClient.sendGetHandleResponse(featureUrl + '?f=json', (chunk) => {
-              res.json(chunk);
+              console.info('ArcGIS layer info response ' + chunk);
+              const featureServiceResult = JSON.parse(chunk) as FeatureServiceResult;
+              res.json(featureServiceResult);
             });
           })
         return routes

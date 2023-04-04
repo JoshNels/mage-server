@@ -158,6 +158,10 @@ export class HttpClient {
             res.on('end', (): void =>{response(data);});
         });
 
+        get_req.on('error', function(error) {
+            console.log('Error for ' + url + ' ' + error);
+        });
+
         // get the data
         get_req.end();
     }

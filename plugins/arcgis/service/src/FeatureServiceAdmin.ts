@@ -5,7 +5,7 @@ import { Layer, Field } from "./AddLayersRequest"
 import { Form, FormField, FormFieldType, FormId } from '@ngageoint/mage.service/lib/entities/events/entities.events.forms'
 import { ObservationsTransformer } from "./ObservationsTransformer"
 import { HttpClient } from './HttpClient'
-import { LayerInfoResult } from "./LayerInfoResult"
+import { LayerInfoResult, LayerField } from "./LayerInfoResult"
 import FormData from 'form-data'
 
 /**
@@ -78,49 +78,64 @@ export class FeatureServiceAdmin {
 
     /**
      * Update the layer fields
+     * @param service feature service
      * @param featureLayer feature layer
      * @param layerInfo layer info
      * @param eventRepo event repository
      */
-    async updateLayer(featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, eventRepo: MageEventRepository) {
+    async updateLayer(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, eventRepo: MageEventRepository) {
 
         const events = await this.layerEvents(featureLayer, eventRepo)
 
         const eventFields = this.fields(events)
         const layerFields = layerInfo.fields
 
-        const eventFieldSet = new Set()
-        for (const field of eventFields) {
-            eventFieldSet.add(field.name)
-        }
+        if (featureLayer.addFields) {
 
-        const layerFieldSet = new Set()
-        for (const field of layerFields) {
-            layerFieldSet.add(field.name)
-        }
-
-        const addFields = []
-        for (const field of eventFields) {
-            if (!layerFieldSet.has(field.name)) {
-                addFields.push(field)
+            const layerFieldSet = new Set()
+            for (const field of layerFields) {
+                layerFieldSet.add(field.name)
             }
-        }
 
-        const deleteFields = []
-        for (const field of layerFields) {
-            if (field.editable && !eventFieldSet.has(field.name)) {
-                deleteFields.push(field)
+            const addFields = []
+            for (const field of eventFields) {
+                if (!layerFieldSet.has(field.name)) {
+                    addFields.push(field)
+                    const layerField = {} as LayerField
+                    layerField.name = field.name
+                    layerField.editable = true
+                    layerFields.push(layerField)
+                }
             }
+
+            if (addFields.length > 0) {
+                this.addFields(service, featureLayer, addFields)
+            }
+
         }
 
-        if (addFields.length > 0) {
-            // TODO Add Fields
-            // https://developers.arcgis.com/rest/services-reference/online/add-to-definition-feature-layer-.htm
-        }
+        if (featureLayer.deleteFields) {
 
-        if (deleteFields.length > 0) {
-            // TODO Delete Fields
-            // https://developers.arcgis.com/rest/services-reference/online/delete-from-definition-feature-layer-.htm
+            const eventFieldSet = new Set()
+            for (const field of eventFields) {
+                eventFieldSet.add(field.name)
+            }
+
+            const deleteFields = []
+            const remainingFields = []
+            for (const field of layerFields) {
+                if (field.editable && !eventFieldSet.has(field.name)) {
+                    deleteFields.push(field)
+                } else {
+                    remainingFields.push(field)
+                }
+            }
+
+            if (deleteFields.length > 0) {
+                layerInfo.fields = remainingFields
+                this.deleteFields(service, featureLayer, deleteFields)
+            }
+
         }
 
     }
@@ -165,7 +180,7 @@ export class FeatureServiceAdmin {
      * @param events layer events
      * @returns layer name
      */
-    private layerName(events: MageEvent[]) {
+    private layerName(events: MageEvent[]): string {
         let layerName = ''
         for (let i = 0; i < events.length; i++) {
             if (i > 0) {
@@ -419,28 +434,98 @@ export class FeatureServiceAdmin {
      */
     private create(service: FeatureServiceConfig, layer: Layer) {
 
-        let url = service.adminUrl
-        let token = service.adminToken
+        const httpClient = this.httpClient(service)
+        const url = this.adminUrl(service) + 'addToDefinition'
 
-        if (url == null) {
-            url = service.url.replace('/services/', '/admin/services/')
-        }
-
-        if (token == null) {
-            token = service.token
-        }
-
-        const httpClient = new HttpClient(console, token)
-
-        url += '/addToDefinition'
-
-        this._console.info('ArcGIS addToDefinition (create layer) url ' + url)
+        this._console.info('ArcGIS feature service addToDefinition (create layer) url ' + url)
 
         const form = new FormData()
         form.append('addToDefinition', JSON.stringify(layer))
 
         httpClient.sendPostForm(url, form)
 
+    }
+
+    /**
+     * Add fields to the layer
+     * @param service feature service
+     * @param featureLayer feature layer
+     * @param fields fields to add
+     */
+    private addFields(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, fields: Field[]) {
+
+        const layer = {} as Layer
+        layer.fields = fields
+
+        const httpClient = this.httpClient(service)
+        const url = this.adminUrl(service) + featureLayer.layer.toString() + '/addToDefinition'
+
+        this._console.info('ArcGIS feature layer addToDefinition (add fields) url ' + url)
+
+        const form = new FormData()
+        form.append('addToDefinition', JSON.stringify(layer))
+
+        httpClient.sendPostForm(url, form)
+
+    }
+
+    /**
+     * Delete fields from the layer
+     * @param service feature service
+     * @param featureLayer feature layer
+     * @param fields fields to delete
+     */
+    private deleteFields(service: FeatureServiceConfig, featureLayer: FeatureLayerConfig, fields: LayerField[]) {
+
+        const deleteFields = []
+        for (const layerField of fields) {
+            const field = {} as Field
+            field.name = layerField.name
+            deleteFields.push(field)
+        }
+
+        const layer = {} as Layer
+        layer.fields = deleteFields
+
+        const httpClient = this.httpClient(service)
+        const url = this.adminUrl(service) + featureLayer.layer.toString() + '/deleteFromDefinition'
+
+        this._console.info('ArcGIS feature layer deleteFromDefinition (delete fields) url ' + url)
+
+        const form = new FormData()
+        form.append('deleteFromDefinition', JSON.stringify(layer))
+
+        httpClient.sendPostForm(url, form)
+
+    }
+
+    /**
+     * Get the administration url
+     * @param service feature service
+     * @returns url
+     */
+    private adminUrl(service: FeatureServiceConfig): String {
+        let url = service.adminUrl
+        if (url == null) {
+            url = service.url.replace('/services/', '/admin/services/')
+        }
+        if (!url.endsWith('/')) {
+            url += '/'
+        }
+        return url
+    }
+
+    /**
+     * Get a HTTP Client with administration token
+     * @param service feature service
+     * @returns http client
+     */
+    private httpClient(service: FeatureServiceConfig): HttpClient {
+        let token = service.adminToken
+        if (token == null) {
+            token = service.token
+        }
+        return new HttpClient(console, token)
     }
 
 }

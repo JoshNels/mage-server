@@ -252,17 +252,20 @@ export class ObservationProcessor {
 
                 const layer = serviceLayers.get(featureLayer.layer)
 
-                let layerId
-                if (layer == null) {
+                let layerId = undefined
+                if (layer != null) {
+                    layerId = layer.id
+                } else if (featureServiceConfig.createLayers) {
                     layerId = await admin.createLayer(featureServiceConfig, featureLayer, maxId + 1, this._eventRepo)
                     maxId = Math.max(maxId, layerId)
-                } else {
-                    layerId = layer.id
                 }
 
-                const featureService = new FeatureService(console, featureLayer.token)
-                const url = featureServiceConfig.url + '/' + layerId
-                featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config))
+                if (layerId != null) {
+                    featureLayer.layer = layerId
+                    const featureService = new FeatureService(console, featureLayer.token)
+                    const url = featureServiceConfig.url + '/' + layerId
+                    featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureServiceConfig, featureLayer, layerInfo, config))
+                }
 
             }
 
@@ -272,15 +275,18 @@ export class ObservationProcessor {
     /**
      * Called when information on a feature layer is returned from an arc server.
      * @param url The layer url.
+     * @param featureServiceConfig The feature service config.
      * @param featureLayer The feature layer configuration.
      * @param layerInfo The information on a layer.
      * @param config The plugins configuration.
      */
-    private async handleLayerInfo(url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
+    private async handleLayerInfo(url: string, featureServiceConfig: FeatureServiceConfig, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
         if (layerInfo.geometryType != null) {
             const events = featureLayer.events as string[]
-            const admin = new FeatureServiceAdmin(config, this._console)
-            await admin.updateLayer(featureLayer, layerInfo, this._eventRepo)
+            if (featureLayer.addFields || featureLayer.deleteFields) {
+                const admin = new FeatureServiceAdmin(config, this._console)
+                await admin.updateLayer(featureServiceConfig, featureLayer, layerInfo, this._eventRepo)
+            }
             const info = new LayerInfo(url, events, layerInfo, featureLayer.token)
             const layerProcessor = new FeatureLayerProcessor(info, config, this._console);
             this._layerProcessors.push(layerProcessor);

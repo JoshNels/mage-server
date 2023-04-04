@@ -259,10 +259,11 @@ export class ObservationProcessor {
                 } else {
                     layerId = layer.id
                 }
+                featureLayer.layer = layerId
 
                 const featureService = new FeatureService(console, featureLayer.token)
                 const url = featureServiceConfig.url + '/' + layerId
-                featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureLayer, layerInfo, config))
+                featureService.queryLayerInfo(url, (layerInfo: LayerInfoResult) => this.handleLayerInfo(url, featureServiceConfig, featureLayer, layerInfo, config))
 
             }
 
@@ -272,15 +273,16 @@ export class ObservationProcessor {
     /**
      * Called when information on a feature layer is returned from an arc server.
      * @param url The layer url.
+     * @param featureServiceConfig The feature service config.
      * @param featureLayer The feature layer configuration.
      * @param layerInfo The information on a layer.
      * @param config The plugins configuration.
      */
-    private async handleLayerInfo(url: string, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
+    private async handleLayerInfo(url: string, featureServiceConfig: FeatureServiceConfig, featureLayer: FeatureLayerConfig, layerInfo: LayerInfoResult, config: ArcGISPluginConfig) {
         if (layerInfo.geometryType != null) {
             const events = featureLayer.events as string[]
             const admin = new FeatureServiceAdmin(config, this._console)
-            await admin.updateLayer(featureLayer, layerInfo, this._eventRepo)
+            await admin.updateLayer(featureServiceConfig, featureLayer, layerInfo, this._eventRepo)
             const info = new LayerInfo(url, events, layerInfo, featureLayer.token)
             const layerProcessor = new FeatureLayerProcessor(info, config, this._console);
             this._layerProcessors.push(layerProcessor);

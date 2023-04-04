@@ -90,36 +90,52 @@ export class FeatureServiceAdmin {
         const eventFields = this.fields(events)
         const layerFields = layerInfo.fields
 
-        const eventFieldSet = new Set()
-        for (const field of eventFields) {
-            eventFieldSet.add(field.name)
-        }
+        if (featureLayer.addFields) {
 
-        const layerFieldSet = new Set()
-        for (const field of layerFields) {
-            layerFieldSet.add(field.name)
-        }
-
-        const addFields = []
-        for (const field of eventFields) {
-            if (!layerFieldSet.has(field.name)) {
-                addFields.push(field)
+            const layerFieldSet = new Set()
+            for (const field of layerFields) {
+                layerFieldSet.add(field.name)
             }
-        }
 
-        if (addFields.length > 0) {
-            this.addFields(service, featureLayer, addFields)
-        }
-
-        const deleteFields = []
-        for (const field of layerFields) {
-            if (field.editable && !eventFieldSet.has(field.name)) {
-                deleteFields.push(field)
+            const addFields = []
+            for (const field of eventFields) {
+                if (!layerFieldSet.has(field.name)) {
+                    addFields.push(field)
+                    const layerField = {} as LayerField
+                    layerField.name = field.name
+                    layerField.editable = true
+                    layerFields.push(layerField)
+                }
             }
+
+            if (addFields.length > 0) {
+                this.addFields(service, featureLayer, addFields)
+            }
+
         }
 
-        if (deleteFields.length > 0) {
-            this.deleteFields(service, featureLayer, deleteFields)
+        if (featureLayer.deleteFields) {
+
+            const eventFieldSet = new Set()
+            for (const field of eventFields) {
+                eventFieldSet.add(field.name)
+            }
+
+            const deleteFields = []
+            const remainingFields = []
+            for (const field of layerFields) {
+                if (field.editable && !eventFieldSet.has(field.name)) {
+                    deleteFields.push(field)
+                } else {
+                    remainingFields.push(field)
+                }
+            }
+
+            if (deleteFields.length > 0) {
+                layerInfo.fields = remainingFields
+                this.deleteFields(service, featureLayer, deleteFields)
+            }
+
         }
 
     }

@@ -323,7 +323,7 @@ export class ObservationProcessor {
             }
             if (this._isRunning) {
                 let interval = config.intervalSeconds;
-                if (this._firstRun) {
+                if (this._firstRun && config.featureServices.length > 0) {
                     interval = config.startupIntervalSeconds;
                 } else {
                     for (const layerProcessor of this._layerProcessors) {

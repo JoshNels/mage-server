@@ -56,11 +56,18 @@ export class ArcAdminComponent implements OnInit {
     })
   }
 
-  onAddLayerUrl(layerUrl: string) {
+  onAddLayerUrl(layerUrl: string, layers: string[]) {
     console.log('Adding layer ' + layerUrl)
     const featureLayer = {
-      url: layerUrl
+      url: layerUrl,
+      layers: []
     } as FeatureServiceConfig;
+    for (const aLayer of layers) {
+      const layerConfig = {
+        layer: aLayer
+      }
+      featureLayer.layers.push(layerConfig);
+    }
     this.config.featureServices.push(featureLayer);
     this.arcService.putArcConfig(this.config);
   }

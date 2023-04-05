@@ -30,7 +30,7 @@ export class ArcService {
 
   putArcConfig(config: ArcGISPluginConfig) {
     const body = JSON.stringify(config)
-    this.http.put(`${baseUrl}/config`, body)
+    this.http.put(`${baseUrl}/config`, body).subscribe()
   }
 
   removeUserTrack(userTrackId: string): Observable<ArcGISPluginConfig> {

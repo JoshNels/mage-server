@@ -131,6 +131,14 @@ export class ObservationProcessor {
     }
 
     /**
+     * Puts a new confguration in the state repo.
+     * @param newConfig The new config to put into the state repo.
+     */
+    public putConfig(newConfig: ArcGISPluginConfig) {
+        this._stateRepo.put(newConfig);
+    }
+
+    /**
      * Gets the current configuration and updates the processor if needed
      * @returns The current configuration from the database.
      */

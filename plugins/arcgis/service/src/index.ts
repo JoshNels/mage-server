@@ -69,17 +69,9 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
           })
           .put(async (req, res, next) => {
             console.info('Applying ArcGIS plugin config...')
-            const bodyConfig = req.body as any
-            const configPatch: Partial<ArcGISPluginConfig> = {
-              enabled: typeof bodyConfig.enabled === 'boolean' ? bodyConfig.enabled : undefined,
-              batchSize: typeof bodyConfig.batchSize === 'number' ? bodyConfig.batchSize : undefined,
-              intervalSeconds: typeof bodyConfig.intervalSeconds === 'number' ? bodyConfig.intervalSeconds : undefined,
-              featureServices: Array.isArray(bodyConfig.featureServices) ?
-                bodyConfig.thumbnailSizes.reduce((sizes: number[], size: any) => {
-                  return typeof size === 'number' ? [...sizes, size] : sizes
-                }, [] as number[])
-                : []
-            }
+            const bodyConfig = req.body as ArcGISPluginConfig
+            processor.putConfig(bodyConfig)
+            res.status(200)
           })
         routes.route('/arcgisLayers')
           .get(async (req, res, next) => {

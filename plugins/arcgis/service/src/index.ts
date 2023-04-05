@@ -78,10 +78,19 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
             const featureUrl = req.query.featureUrl as string;
             console.info('Getting ArcGIS layer info for ' + featureUrl)
             const httpClient = new HttpClient(console);
-            httpClient.sendGetHandleResponse(featureUrl + '?f=json', (chunk) => {
+            httpClient.sendGetHandleResponse(featureUrl, (chunk) => {
               console.info('ArcGIS layer info response ' + chunk);
-              const featureServiceResult = JSON.parse(chunk) as FeatureServiceResult;
-              res.json(featureServiceResult);
+              try {
+                const featureServiceResult = JSON.parse(chunk) as FeatureServiceResult;
+                res.json(featureServiceResult);
+              } catch(e) {
+                if(e instanceof SyntaxError) {
+                  console.error('Problem with url response for url ' + featureUrl + ' error ' + e)
+                  res.sendStatus(500)
+                } else {
+                  throw e;
+                }
+              }
             });
           })
         return routes

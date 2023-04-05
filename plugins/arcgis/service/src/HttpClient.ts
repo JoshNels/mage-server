@@ -138,32 +138,40 @@ export class HttpClient {
         url += this.tokenParam(url)
         url += this.jsonFormatParam(url)
 
-        const aUrl = new URL(url)
+        try {
+            const aUrl = new URL(url)
 
-        var options = {
-            host: aUrl.host,
-            port: aUrl.port,
-            path: aUrl.pathname + '?' + aUrl.searchParams,
-            method: 'GET',
-            headers: {
-                'accept': 'application/json'
+            var options = {
+                host: aUrl.host,
+                port: aUrl.port,
+                path: aUrl.pathname + '?' + aUrl.searchParams,
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json'
+                }
+            };
+
+            // Set up the request
+            var get_req = https.request(options, function (res) {
+                let data = '';
+                res.setEncoding('utf8');
+                res.on('data', (chunk: string): void => {data += chunk;});
+                res.on('end', (): void =>{response(data);});
+            });
+
+            get_req.on('error', function(error) {
+                console.log('Error for ' + url + ' ' + error);
+            });
+
+            // get the data
+            get_req.end();
+        } catch (e) {
+            if (e instanceof TypeError) {
+                console.log('Error for ' + url + ' ' + e)
+            } else {
+                throw e;//cause we dont know what it is or we want to only handle TypeError
             }
-        };
-
-        // Set up the request
-        var get_req = https.request(options, function (res) {
-            let data = '';
-            res.setEncoding('utf8');
-            res.on('data', (chunk: string): void => {data += chunk;});
-            res.on('end', (): void =>{response(data);});
-        });
-
-        get_req.on('error', function(error) {
-            console.log('Error for ' + url + ' ' + error);
-        });
-
-        // get the data
-        get_req.end();
+        }
     }
 
     /**

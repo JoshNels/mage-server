@@ -133,25 +133,7 @@ export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
   startupIntervalSeconds: 1,
   updateIntervalSeconds: 1,
   batchSize: 100,
-  featureServices: [
-    {
-      url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Wildfire/FeatureServer',
-      layers: [
-        {
-          layer: 'Wildfire Response Points',
-          events: []
-        },
-        {
-          layer: 'Wildfire Response Lines',
-          events: []
-        },
-        {
-          layer: 'Wildfire Response Polygons',
-          events: []
-        }
-      ]
-    }
-  ],
+  featureServices: [],
   attachmentModifiedTolerance: 5000,
   textFieldLength: 100,
   textAreaFieldLength: 256,

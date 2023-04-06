@@ -69,9 +69,11 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
           })
           .put(async (req, res, next) => {
             console.info('Applying ArcGIS plugin config...')
-            const bodyConfig = req.body as ArcGISPluginConfig
-            processor.putConfig(bodyConfig)
-            res.status(200)
+            const arcConfig = req.body as ArcGISPluginConfig
+            const configString = JSON.stringify(arcConfig)
+            console.info(configString)
+            processor.putConfig(arcConfig)
+            res.status(200).json({})
           })
         routes.route('/arcgisLayers')
           .get(async (req, res, next) => {

@@ -56,3 +56,16 @@ section {
   opacity: 0.5;
   font-size: 0.9em;
 }
+
+.attributes-table {
+  tr {
+    th {
+      font-weight: normal;
+    }
+    td {
+      padding-left: 20px;
+      opacity: 0.5;
+      font-size: 0.9em;
+    }
+  }
+}

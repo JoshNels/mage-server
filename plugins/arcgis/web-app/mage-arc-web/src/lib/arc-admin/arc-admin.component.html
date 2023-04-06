@@ -33,6 +33,64 @@
       </ng-container>
     </div>
   </section>
+  <section class="arc-fields">
+    <header>
+      <h2>Attributes</h2>
+      <p class="subheading">MAGE Field to ArcGIS Attribute mappings.</p>
+    </header>
+    <div class="attributes">
+      <table class="attributes-table">
+        <tr>
+          <th>Observation Id Field</th>
+          <td>{{config.observationIdField}}</td>
+        </tr>
+        <tr>
+          <th>Id Seperator</th>
+          <td>{{config.idSeperator}}</td>
+        </tr>
+        <tr>
+          <th>Event Id Field</th>
+          <td>{{config.eventIdField}}</td>
+        </tr>
+        <tr>
+          <th>Last Edited Date Field</th>
+          <td>{{config.lastEditedDateField}}</td>
+        </tr>
+        <tr>
+          <th>Event Name Field</th>
+          <td>{{config.eventNameField}}</td>
+        </tr>
+        <tr>
+          <th>User Id Field</th>
+          <td>{{config.userIdField}}</td>
+        </tr>
+        <tr>
+          <th>Username Field</th>
+          <td>{{config.usernameField}}</td>
+        </tr>
+        <tr>
+          <th>User Display Name Field</th>
+          <td>{{config.userDisplayNameField}}</td>
+        </tr>
+        <tr>
+          <th>Device Id Field</th>
+          <td>{{config.deviceIdField}}</td>
+        </tr>
+        <tr>
+          <th>Created At Field</th>
+          <td>{{config.createdAtField}}</td>
+        </tr>
+        <tr>
+          <th>Last Modified Field</th>
+          <td>{{config.lastModifiedField}}</td>
+        </tr>
+        <tr>
+          <th>Geometry Type Field</th>
+          <td>{{config.geometryType}}</td>
+        </tr>
+      </table>
+    </div>
+  </section>
 </div>
 <ng-template #addLayerDialog let-data>
   <h2 matDialogTitle>Add ArcGIS Layer</h2>

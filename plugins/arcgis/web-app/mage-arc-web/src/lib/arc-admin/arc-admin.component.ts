@@ -34,6 +34,8 @@ export class ArcAdminComponent implements OnInit {
   }
 
   onAddLayer() {
+    this.arcLayerControl.setValue('')
+    this.layers = []
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 

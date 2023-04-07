@@ -34,6 +34,19 @@ section {
   margin-block-end: 2em;
 }
 
+.processing-table {
+  tr {
+    th {
+      font-weight: normal;
+    }
+    td {
+      padding-left: 20px;
+      opacity: 0.5;
+      font-size: 0.9em;
+    }
+  }
+}
+
 .arcLayer {
   margin-block-start: 1em;
   display: grid;
@@ -64,6 +77,60 @@ section {
     }
     td {
       padding-left: 20px;
+      opacity: 0.5;
+      font-size: 0.9em;
+    }
+  }
+}
+
+.fieldOverrides {
+  margin-top: 20px;
+}
+
+.fieldOverrides-table {
+  margin-top: 5px;
+  tr {
+    th {
+      font-weight: normal;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 0.9em;
+      border-top: 1px solid;
+      border-bottom: 1px solid;
+    }
+    td {
+      padding-left: 10px;
+      padding-right: 10px;
+      opacity: 0.5;
+      font-size: 0.9em;
+    }
+  }
+}
+
+.attributeConfigurations {
+  margin-top: 20px;
+}
+
+.attributeConfiguration {
+  margin-top: 5px;
+  opacity: 0.5;
+  font-size: 0.9em;
+}
+
+.attributeConfigurations-table {
+  margin-top: 5px;
+  tr {
+    th {
+      font-weight: normal;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 0.9em;
+      border-top: 1px solid;
+      border-bottom: 1px solid;
+    }
+    td {
+      padding-left: 10px;
+      padding-right: 10px;
       opacity: 0.5;
       font-size: 0.9em;
     }

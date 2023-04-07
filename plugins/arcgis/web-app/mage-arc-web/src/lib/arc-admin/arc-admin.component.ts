@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
 import { MatDialog, } from '@angular/material/dialog'
-import { FeatureServiceConfig } from '../ArcGISConfig';
+import { FeatureServiceConfig, AttributeConfig, AttributeConcatenationConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 import { FeatureServiceResult } from '../FeatureServiceResult';
@@ -87,4 +87,34 @@ export class ArcAdminComponent implements OnInit {
     }
     this.arcService.putArcConfig(this.config);
   }
+
+  keys(value: any): string[] {
+    return Object.keys(value)
+  }
+
+  attributeConfig(attribute: string): AttributeConfig | undefined {
+    let attributeConfig = undefined
+    if (this.config.attributes) {
+      attributeConfig = this.config.attributes[attribute]
+    }
+    return attributeConfig
+  }
+
+  hasConcatenation(attribute: string): boolean {
+    return this.concatenation(attribute) != undefined
+  }
+
+  getConcatenation(attribute: string): AttributeConcatenationConfig {
+    return this.concatenation(attribute)!
+  }
+
+  private concatenation(attribute: string): AttributeConcatenationConfig | undefined {
+    let concat = undefined
+    const attributeConfig = this.attributeConfig(attribute)
+    if (attributeConfig) {
+      concat = attributeConfig.concatenation
+    }
+    return concat
+  }
+
 }

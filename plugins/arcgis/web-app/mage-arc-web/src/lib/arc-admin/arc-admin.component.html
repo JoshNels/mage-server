@@ -1,9 +1,43 @@
 <div class="arc-admin">
   <h1>ArcGIS Configuration</h1>
+  <section class="arc-processing">
+    <header>
+      <h2>Processing</h2>
+      <p class="subheading">MAGE ArcGIS plugin processing settings.</p>
+    </header>
+    <div class="processing">
+      <table class="processing-table">
+        <tr>
+          <th>Enabled</th>
+          <td>{{config.enabled}}</td>
+        </tr>
+        <tr>
+          <th>Interval (s)</th>
+          <td>{{config.intervalSeconds}}</td>
+        </tr>
+        <tr>
+          <th>Startup Interval (s)</th>
+          <td>{{config.startupIntervalSeconds}}</td>
+        </tr>
+        <tr>
+          <th>Update Interval (s)</th>
+          <td>{{config.updateIntervalSeconds}}</td>
+        </tr>
+        <tr>
+          <th>Batch Size</th>
+          <td>{{config.batchSize}}</td>
+        </tr>
+        <tr>
+          <th>Attachment Modified Tolerance (ms)</th>
+          <td>{{config.attachmentModifiedTolerance}}</td>
+        </tr>
+      </table>
+    </div>
+  </section>
   <section class="arc-service">
     <header>
-      <h2>ArcGIS Feature Layers to Synchronize</h2>
-      <p class="subheading">Add urls to ArcGIS feature layers, MAGE will send its data to.</p>
+      <h2>Feature Layers</h2>
+      <p class="subheading">Add ArcGIS feature service urls and layers to sychronize MAGE data to.</p>
     </header>
     <div>
       <button mat-button mat-stroked-button color="primary" aria-label="Add ArcGIS feature layer"
@@ -88,6 +122,77 @@
           <th>Geometry Type Field</th>
           <td>{{config.geometryType}}</td>
         </tr>
+      </table>
+    </div>
+    <div class="fieldOverrides">
+      Field Mappings
+      <table class="fieldOverrides-table">
+        <tr>
+          <th>Event</th>
+          <th>Form</th>
+          <th>Field</th>
+          <th>Attribute</th>
+        </tr>
+        <ng-container *ngFor="let event of keys(config.fieldAttributes)">
+          <tr>
+            <td>{{event}}</td>
+          </tr>
+          <ng-container *ngFor="let form of keys(config.fieldAttributes[event])">
+            <tr>
+              <td></td>
+              <td>{{form}}</td>
+            </tr>
+            <ng-container *ngFor="let field of keys(config.fieldAttributes[event][form])">
+              <tr>
+                <td></td>
+                <td></td>
+                <td>{{field}}</td>
+                <td>{{config.fieldAttributes[event][form][field]}}</td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </table>
+    </div>
+    <div class="attributeConfigurations">
+      Attribute Configurations
+      <table class="attributeConfigurations-table">
+        <tr>
+          <th>Attribute</th>
+          <th>Setting</th>
+          <th> </th>
+          <th> </th>
+          <th> </th>
+        </tr>
+        <ng-container *ngFor="let attribute of keys(config.attributes)">
+          <tr>
+            <td>{{attribute}}</td>
+          </tr>
+          <div *ngIf="hasConcatenation(attribute)">
+            <tr>
+              <td></td>
+              <td>Concatenation</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>Delimiter</td>
+              <td>{{getConcatenation(attribute).delimiter}}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>Same Forms</td>
+              <td>{{getConcatenation(attribute).sameForms}}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>Different Forms</td>
+              <td>{{getConcatenation(attribute).differentForms}}</td>
+            </tr>
+          </div>
+        </ng-container>
       </table>
     </div>
   </section>

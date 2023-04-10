@@ -155,20 +155,20 @@
       </table>
     </div>
     <div class="attributeConfigurations">
-      Attribute Configurations
+      Attribute Settings
       <table class="attributeConfigurations-table">
         <tr>
           <th>Attribute</th>
           <th>Setting</th>
-          <th> </th>
-          <th> </th>
-          <th> </th>
+          <th></th>
+          <th></th>
+          <th></th>
         </tr>
         <ng-container *ngFor="let attribute of keys(config.attributes)">
           <tr>
             <td>{{attribute}}</td>
           </tr>
-          <div *ngIf="hasConcatenation(attribute)">
+          <ng-container *ngIf="hasConcatenation(attribute)">
             <tr>
               <td></td>
               <td>Concatenation</td>
@@ -191,7 +191,7 @@
               <td>Different Forms</td>
               <td>{{getConcatenation(attribute).differentForms}}</td>
             </tr>
-          </div>
+          </ng-container>
         </ng-container>
       </table>
     </div>

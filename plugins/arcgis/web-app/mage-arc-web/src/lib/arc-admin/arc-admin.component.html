@@ -192,6 +192,20 @@
               <td>{{getConcatenation(attribute).differentForms}}</td>
             </tr>
           </ng-container>
+          <ng-container *ngIf="hasMappings(attribute)">
+            <tr>
+              <td></td>
+              <td>Mappings</td>
+            </tr>
+            <ng-container *ngFor="let mapping of keys(getMappings(attribute))">
+              <tr>
+                <td></td>
+                <td></td>
+                <td>{{mapping}}</td>
+                <td>{{getMappings(attribute)[mapping]}}</td>
+              </tr>
+            </ng-container>
+          </ng-container>
         </ng-container>
       </table>
     </div>

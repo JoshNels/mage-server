@@ -117,4 +117,21 @@ export class ArcAdminComponent implements OnInit {
     return concat
   }
 
+  hasMappings(attribute: string): boolean {
+    return this.mappings(attribute) != undefined
+  }
+
+  getMappings(attribute: string): { [value: string]: any } {
+    return this.mappings(attribute)!
+  }
+
+  private mappings(attribute: string): { [value: string]: any } | undefined {
+    let mappings = undefined
+    const attributeConfig = this.attributeConfig(attribute)
+    if (attributeConfig) {
+      mappings = attributeConfig.mappings
+    }
+    return mappings
+  }
+
 }

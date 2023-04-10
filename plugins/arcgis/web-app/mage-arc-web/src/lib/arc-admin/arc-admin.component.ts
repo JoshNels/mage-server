@@ -89,7 +89,13 @@ export class ArcAdminComponent implements OnInit {
   }
 
   keys(value: any): string[] {
-    return Object.keys(value)
+    let keys: string[]
+    if (value != undefined) {
+      keys = Object.keys(value)
+    } else {
+      keys = []
+    }
+    return keys
   }
 
   attributeConfig(attribute: string): AttributeConfig | undefined {

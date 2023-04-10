@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
 import { MatDialog, } from '@angular/material/dialog'
-import { FeatureServiceConfig, AttributeConfig, AttributeConcatenationConfig } from '../ArcGISConfig';
+import { FeatureServiceConfig, AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 import { FeatureServiceResult } from '../FeatureServiceResult';
@@ -132,6 +132,40 @@ export class ArcAdminComponent implements OnInit {
       mappings = attributeConfig.mappings
     }
     return mappings
+  }
+
+  hasDefaults(attribute: string): boolean {
+    return this.defaults(attribute) != undefined
+  }
+
+  getDefaults(attribute: string): AttributeDefaultConfig[] {
+    return this.defaults(attribute)!
+  }
+
+  private defaults(attribute: string): AttributeDefaultConfig[] | undefined {
+    let defaults = undefined
+    const attributeConfig = this.attributeConfig(attribute)
+    if (attributeConfig) {
+      defaults = attributeConfig.defaults
+    }
+    return defaults
+  }
+
+  hasOmit(attribute: string): boolean {
+    return this.omit(attribute) != undefined
+  }
+
+  getOmit(attribute: string): boolean {
+    return this.omit(attribute)!
+  }
+
+  private omit(attribute: string): boolean | undefined {
+    let omit = undefined
+    const attributeConfig = this.attributeConfig(attribute)
+    if (attributeConfig) {
+      omit = attributeConfig.omit
+    }
+    return omit
   }
 
 }

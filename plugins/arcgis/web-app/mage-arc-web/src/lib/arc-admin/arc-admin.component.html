@@ -216,6 +216,10 @@
     </div>
     <div class="fieldOverrides">
       Field Mappings
+      <button class="info-button" mat-icon-button
+        (click)="showInfo('Field Mappings', 'Override mappings between event form fields and ArcGIS attributes')">
+        <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+      </button>
       <table class="fieldOverrides-table">
         <tr>
           <th>Event</th>
@@ -246,6 +250,10 @@
     </div>
     <div class="attributeConfigurations">
       Attribute Settings
+      <button class="info-button" mat-icon-button
+        (click)="showInfo('Attribute Settings', 'Attribute settings including concatenation, value mappings, defaults, and omissions')">
+        <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+      </button>
       <table class="attributeConfigurations-table">
         <tr>
           <th>Attribute</th>

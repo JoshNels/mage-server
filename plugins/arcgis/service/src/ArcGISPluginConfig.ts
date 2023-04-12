@@ -40,7 +40,7 @@ export interface ArcGISPluginConfig {
   featureServices: FeatureServiceConfig[]
 
   /**
-   * The time tolerance in miliseconds to consider an attachment last modified time equal
+   * The time tolerance in milliseconds to consider an attachment last modified time equal
    * to or after an observation last modified time.
    */
   attachmentModifiedTolerance: number

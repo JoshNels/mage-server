@@ -127,7 +127,7 @@ export class ObservationsSender {
         const form = new FormData()
 
         if (this._config.eventIdField == null) {
-            form.append('where', this._config.observationIdField + ' LIKE\'%' + this._config.idSeperator + id + '\'')
+            form.append('where', this._config.observationIdField + ' LIKE\'%' + this._config.idSeparator + id + '\'')
         } else {
             form.append('where', this._config.eventIdField + '=' + id)
         }

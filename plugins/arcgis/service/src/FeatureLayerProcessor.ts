@@ -62,7 +62,7 @@ export class FeatureLayerProcessor {
 
     /**
      * Goes through each observation and figures out if the geometry type matches the arc feature layer.
-     * If so it then seperates the adds from the updates and sends them to the arc feature layer.
+     * If so it then separates the adds from the updates and sends them to the arc feature layer.
      * @param observations 
      */
     processArcObjects(observations: ArcObjects) {

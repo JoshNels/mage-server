@@ -18,6 +18,7 @@ export class ArcAdminComponent implements OnInit {
   layers: string[];
   infoTitle: string;
   infoMessage: string;
+  isLoading: boolean;
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
@@ -28,6 +29,7 @@ export class ArcAdminComponent implements OnInit {
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
     this.layers = new Array<string>();
+    this.isLoading = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })
@@ -53,11 +55,13 @@ export class ArcAdminComponent implements OnInit {
 
   fetchLayers(currentUrl: string) {
     console.log('Fetching layers for ' + currentUrl);
+    this.isLoading = true;
     this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
       console.log('arclayer response ' + x);
       for(const layer of x.layers) {
         this.layers.push(layer.name);
       }
+      this.isLoading = false;
     })
   }
 

@@ -152,6 +152,8 @@ export class ObservationProcessor {
             this._layerProcessors = [];
             this.getFeatureServiceLayers(config);
             this._previousConfig = configJson
+            this._lastTimeStamp = 0;
+            this._firstRun = true;
         }
         return config
     }

@@ -1,10 +1,9 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
-import { MatDialog, } from '@angular/material/dialog'
+import { MatDialog } from '@angular/material/dialog'
 import { FeatureServiceConfig, AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
-import { FeatureServiceResult } from '../FeatureServiceResult';
 
 @Component({
   selector: 'arc-admin',
@@ -17,10 +16,14 @@ export class ArcAdminComponent implements OnInit {
   private currentUrl: string;
   private timeoutId: number;
   layers: string[];
+  infoTitle: string;
+  infoMessage: string;
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
   private addLayerTemplate: TemplateRef<unknown>
+  @ViewChild('infoDialog', { static: true })
+  private infoTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
@@ -86,6 +89,14 @@ export class ArcAdminComponent implements OnInit {
       this.config.featureServices.splice(index, 1);
     }
     this.arcService.putArcConfig(this.config);
+  }
+
+  onEditProcessing() {
+    // TODO
+  }
+
+  onEditAttributes() {
+    // TODO
   }
 
   keys(value: any): string[] {
@@ -172,6 +183,12 @@ export class ArcAdminComponent implements OnInit {
       omit = attributeConfig.omit
     }
     return omit
+  }
+
+  showInfo(title: string, message: string) {
+    this.infoTitle = title
+    this.infoMessage = message
+    this.dialog.open<unknown, unknown, string>(this.infoTemplate)
   }
 
 }

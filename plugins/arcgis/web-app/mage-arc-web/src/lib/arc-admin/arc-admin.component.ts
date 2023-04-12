@@ -56,6 +56,7 @@ export class ArcAdminComponent implements OnInit {
   fetchLayers(currentUrl: string) {
     console.log('Fetching layers for ' + currentUrl);
     this.isLoading = true;
+    this.layers = []
     this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
       console.log('arclayer response ' + x);
       if (x.layers !== undefined) {

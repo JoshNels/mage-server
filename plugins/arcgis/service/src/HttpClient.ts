@@ -168,6 +168,7 @@ export class HttpClient {
         } catch (e) {
             if (e instanceof TypeError) {
                 console.log('Error for ' + url + ' ' + e)
+                response('{}')
             } else {
                 throw e;//cause we dont know what it is or we want to only handle TypeError
             }

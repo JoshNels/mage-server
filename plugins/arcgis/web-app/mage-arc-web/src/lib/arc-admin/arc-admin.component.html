@@ -132,39 +132,84 @@
           <td>{{config.eventIdField}}</td>
         </tr>
         <tr>
-          <th>Last Edited Date Field</th>
+          <th>Last Edited Date Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Last Edited Date Field', 'The last edited date field attribute name on the ArcGIS layer')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.lastEditedDateField}}</td>
         </tr>
         <tr>
-          <th>Event Name Field</th>
+          <th>Event Name Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Event Name Field', 'The ArcGIS layer text field attribute name to store the MAGE event name')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.eventNameField}}</td>
         </tr>
         <tr>
-          <th>User Id Field</th>
+          <th>User Id Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('User Id Field', 'The ArcGIS layer text field attribute name to store the MAGE user id')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.userIdField}}</td>
         </tr>
         <tr>
-          <th>Username Field</th>
+          <th>Username Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Username Field', 'The ArcGIS layer text field attribute name to store the MAGE username')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.usernameField}}</td>
         </tr>
         <tr>
-          <th>User Display Name Field</th>
+          <th>User Display Name Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('User Display Name Field', 'The ArcGIS layer text field attribute name to store the MAGE user display name')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.userDisplayNameField}}</td>
         </tr>
         <tr>
-          <th>Device Id Field</th>
+          <th>Device Id Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Device Id Field', 'The ArcGIS layer text field attribute name to store the MAGE device id')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.deviceIdField}}</td>
         </tr>
         <tr>
-          <th>Created At Field</th>
+          <th>Created At Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Created At Field', 'The ArcGIS layer date time field attribute name to store the MAGE created at date')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.createdAtField}}</td>
         </tr>
         <tr>
-          <th>Last Modified Field</th>
+          <th>Last Modified Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Last Modified Field', 'The ArcGIS layer date time field attribute name to store the MAGE last modified date (may be the same as last edited date field if editable)')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.lastModifiedField}}</td>
         </tr>
         <tr>
-          <th>Geometry Type Field</th>
+          <th>Geometry Type Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Geometry Type Field', 'The ArcGIS layer text field attribute name to store the Esri geometry type')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.geometryType}}</td>
         </tr>
       </table>

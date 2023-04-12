@@ -51,7 +51,7 @@ export class FeatureQuerier {
     queryObservation(observationId: string, response: (result: QueryObjectResult) => void, fields?: string[], geometry?: boolean) {
         let queryUrl = this._url + this._config.observationIdField
         if (this._config.eventIdField == null) {
-            queryUrl += ' LIKE \'' + observationId + this._config.idSeperator + '%\''
+            queryUrl += ' LIKE \'' + observationId + this._config.idSeparator + '%\''
         } else {
             queryUrl += '=\'' + observationId + '\''
         }

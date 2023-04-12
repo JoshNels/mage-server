@@ -61,9 +61,9 @@ export interface ArcGISPluginConfig {
   observationIdField: string
 
   /**
-   * The keyword used to seperate the observation id and the event id when combined into one field.
+   * The separator between the observation id and the event id when combined into one field.
    */
-  idSeperator: string
+  idSeparator: string
 
   /**
   * The event id field attribute name.
@@ -138,7 +138,7 @@ export const defaultArcGISPluginConfig = Object.freeze<ArcGISPluginConfig>({
   textFieldLength: 100,
   textAreaFieldLength: 256,
   observationIdField: 'description',
-  idSeperator: '-',
+  idSeparator: '-',
   // eventIdField: 'event_id',
   lastEditedDateField: 'last_edited_date',
   eventNameField: 'event_name',

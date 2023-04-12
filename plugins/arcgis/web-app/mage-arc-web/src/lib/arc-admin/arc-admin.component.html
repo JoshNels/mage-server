@@ -105,15 +105,30 @@
     <div class="attributes">
       <table class="attributes-table">
         <tr>
-          <th>Observation Id Field</th>
+          <th>Observation Id Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Observation Id Field', 'The ArcGIS layer text field attribute name to store the MAGE observation id')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.observationIdField}}</td>
         </tr>
         <tr>
-          <th>Id Seperator</th>
-          <td>{{config.idSeperator}}</td>
+          <th>Id Separator
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Id Separator', 'When event id field is not configured, the separator combining observation ids and event ids in the observation id field')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
+          <td>{{config.idSeparator}}</td>
         </tr>
         <tr>
-          <th>Event Id Field</th>
+          <th>Event Id Field
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Event Id Field', 'The ArcGIS layer integer field attribute name to store the MAGE event id')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.eventIdField}}</td>
         </tr>
         <tr>

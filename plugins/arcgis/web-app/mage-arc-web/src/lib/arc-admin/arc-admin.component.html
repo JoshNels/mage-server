@@ -8,8 +8,8 @@
     <div class="processing">
       <table class="processing-table">
         <tr>
-          <th>Enabled 
-            <button class="info-button" mat-icon-button 
+          <th>Enabled
+            <button class="info-button" mat-icon-button
               (click)="showInfo('Enabled', 'Process observations and send to configured ArcGIS feature layers')">
               <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
             </button>
@@ -17,23 +17,48 @@
           <td>{{config.enabled}}</td>
         </tr>
         <tr>
-          <th>Interval (s)</th>
+          <th>Interval (s)
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Interval', 'Observation query and processing frequency time interval in seconds')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.intervalSeconds}}</td>
         </tr>
         <tr>
-          <th>Startup Interval (s)</th>
+          <th>Startup Interval (s)
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Startup Interval', 'Startup interval in seconds to wait for ready feature layer processors')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.startupIntervalSeconds}}</td>
         </tr>
         <tr>
-          <th>Update Interval (s)</th>
+          <th>Update Interval (s)
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Update Interval', 'Processing wait time interval in seconds when pending observation updates exist')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.updateIntervalSeconds}}</td>
         </tr>
         <tr>
-          <th>Batch Size</th>
+          <th>Batch Size
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Batch Size', 'Maximum observation count process limit during a single time interval')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.batchSize}}</td>
         </tr>
         <tr>
-          <th>Attachment Modified Tolerance (ms)</th>
+          <th>Attachment Modified Tolerance (ms)
+            <button class="info-button" mat-icon-button
+              (click)="showInfo('Attachment Modified Tolerance', 'Time tolerance in miliseconds to consider an attachment as modified compared to the observation')">
+              <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+            </button>
+          </th>
           <td>{{config.attachmentModifiedTolerance}}</td>
         </tr>
       </table>

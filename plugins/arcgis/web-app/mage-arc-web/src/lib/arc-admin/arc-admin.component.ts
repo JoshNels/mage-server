@@ -55,8 +55,10 @@ export class ArcAdminComponent implements OnInit {
     this.isLoading = true;
     this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
       console.log('arclayer response ' + x);
-      for(const layer of x.layers) {
-        this.layers.push(layer.name);
+      if (x.layers !== undefined) {
+        for (const layer of x.layers) {
+          this.layers.push(layer.name);
+        }
       }
       this.isLoading = false;
     })

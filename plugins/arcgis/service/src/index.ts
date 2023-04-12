@@ -88,7 +88,7 @@ const arcgisPluginHooks: InitPluginHook<typeof InjectedServices> = {
               } catch(e) {
                 if(e instanceof SyntaxError) {
                   console.error('Problem with url response for url ' + featureUrl + ' error ' + e)
-                  res.sendStatus(500)
+                  res.status(200).json({})
                 } else {
                   throw e;
                 }

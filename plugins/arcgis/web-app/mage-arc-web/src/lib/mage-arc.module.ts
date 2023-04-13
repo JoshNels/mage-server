@@ -14,6 +14,7 @@ import { MatTableModule } from '@angular/material/table'
 import { ArcAdminComponent } from './arc-admin/arc-admin.component'
 import { HttpClientModule } from '@angular/common/http'
 import { MageUserModule } from '@ngageoint/mage.web-core-lib/user'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 
@@ -37,6 +38,7 @@ import { MageUserModule } from '@ngageoint/mage.web-core-lib/user'
     MatSelectModule,
     MatTableModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule,
   ],
   exports: [
     ArcAdminComponent

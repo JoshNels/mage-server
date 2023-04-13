@@ -399,9 +399,7 @@
         </mat-error>
       </mat-form-field>
     </div>
-    <div *ngIf="isLoading" class="cssload-container">
-      <div class="cssload-speeding-wheel"></div>
-    </div>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
     <div class="arc-layers" *ngFor="let arcLayer of layers">
       <div class="featureLayer__value">
         {{arcLayer}}
@@ -410,7 +408,7 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
-    <button mat-flat-button color="primary" matDialogClose (click)="onAddLayerUrl(layerUrl.value, layers)">SAVE</button>
+    <button [disabled]="layers.length == 0" mat-flat-button color="primary" matDialogClose (click)="onAddLayerUrl(layerUrl.value, layers)">SAVE</button>
   </mat-dialog-actions>
 </ng-template>
 <ng-template #infoDialog let-data>

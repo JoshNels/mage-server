@@ -28,7 +28,7 @@
         <tr>
           <th>Startup Interval (s)
             <button class="info-button" mat-icon-button
-              (click)="showInfo('Startup Interval', 'Startup interval in seconds to wait for ready feature layer processors')">
+              (click)="showInfo('Startup Interval', 'Startup interval in seconds to wait for feature layer processors to be ready')">
               <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
             </button>
           </th>
@@ -46,7 +46,7 @@
         <tr>
           <th>Batch Size
             <button class="info-button" mat-icon-button
-              (click)="showInfo('Batch Size', 'Maximum observation count process limit during a single time interval')">
+              (click)="showInfo('Batch Size', 'Maximum number of observations to process during a single time interval')">
               <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
             </button>
           </th>
@@ -217,7 +217,7 @@
     <div class="fieldOverrides">
       Field Mappings
       <button class="info-button" mat-icon-button
-        (click)="showInfo('Field Mappings', 'Override mappings between event form fields and ArcGIS attributes')">
+        (click)="showInfo('Field Mappings', 'Override mappings between MAGE event form fields and ArcGIS attributes')">
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
       <table class="fieldOverrides-table">
@@ -266,31 +266,56 @@
           <ng-container *ngIf="hasConcatenation(attribute)">
             <tr>
               <td></td>
-              <td>Concatenation</td>
+              <td>Concatenation
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Concatenation', 'String value concatenation when an observation contains multiple attribute values')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
             </tr>
             <tr>
               <td></td>
               <td></td>
-              <td>Delimiter</td>
+              <td>Delimiter
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Delimiter', 'Delimiter used to combine attribute values')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
               <td>{{getConcatenation(attribute).delimiter}}</td>
             </tr>
             <tr>
               <td></td>
               <td></td>
-              <td>Same Forms</td>
+              <td>Same Forms
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Same Forms', 'Combine attribute values from multiple instances of the same MAGE form')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
               <td>{{getConcatenation(attribute).sameForms}}</td>
             </tr>
             <tr>
               <td></td>
               <td></td>
-              <td>Different Forms</td>
+              <td>Different Forms
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Different Forms', 'Combine attribute values from different MAGE forms')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
               <td>{{getConcatenation(attribute).differentForms}}</td>
             </tr>
           </ng-container>
           <ng-container *ngIf="hasMappings(attribute)">
             <tr>
               <td></td>
-              <td>Mappings</td>
+              <td>Mappings
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Mappings', 'Attribute value translation mappings performed before sending to ArcGIS')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
             </tr>
             <ng-container *ngFor="let mapping of keys(getMappings(attribute))">
               <tr>
@@ -304,7 +329,12 @@
           <ng-container *ngIf="hasDefaults(attribute)">
             <tr>
               <td></td>
-              <td>Defaults</td>
+              <td>Defaults
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Defaults', 'Default values when the attribute is missing or has no value')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
             </tr>
             <ng-container *ngFor="let default of getDefaults(attribute)">
               <tr>
@@ -317,7 +347,12 @@
                   <td></td>
                   <td></td>
                   <td></td>
-                  <td>Conditions</td>
+                  <td>Conditions
+                    <button class="info-button" mat-icon-button
+                      (click)="showInfo('Conditions', 'Conditional attribute equality values when the default applies')">
+                      <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                    </button>
+                  </td>
                 </tr>
                 <ng-container *ngFor="let condition of default.condition!">
                   <ng-container *ngFor="let value of condition.values">
@@ -337,7 +372,12 @@
           <ng-container *ngIf="hasOmit(attribute)">
             <tr>
               <td></td>
-              <td>Omit</td>
+              <td>Omit
+                <button class="info-button" mat-icon-button
+                  (click)="showInfo('Omit', 'Omit the attribute from being sent to ArcGIS')">
+                  <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+                </button>
+              </td>
               <td>{{getOmit(attribute)}}</td>
             </tr>
           </ng-container>

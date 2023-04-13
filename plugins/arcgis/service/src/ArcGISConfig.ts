@@ -115,7 +115,7 @@ export interface AttributeConcatenationConfig {
     sameForms?: boolean
 
     /**
-     * Combine attribute values form different forms.
+     * Combine attribute values from different forms.
      */
     differentForms?: boolean
 

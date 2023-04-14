@@ -309,7 +309,7 @@ export class ObservationProcessor {
     private async processAndScheduleNext() {
         const config = await this.updateConfig();
         if (this._isRunning) {
-            if (this._layerProcessors.length > 0) {
+            if (config.enabled && this._layerProcessors.length > 0) {
                 this._console.info('ArcGIS plugin checking for any pending updates or adds');
                 for (const layerProcessor of this._layerProcessors) {
                     layerProcessor.processPendingUpdates();

@@ -25,6 +25,10 @@ export class ArcAdminComponent implements OnInit {
   private addLayerTemplate: TemplateRef<unknown>
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
+  @ViewChild('editProcessingDialog', { static: true })
+  private editProcessingTemplate: TemplateRef<unknown>
+  @ViewChild('editAttributesDialog', { static: true })
+  private editAttributesTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
@@ -99,11 +103,21 @@ export class ArcAdminComponent implements OnInit {
   }
 
   onEditProcessing() {
-    // TODO
+    this.dialog.open<unknown, unknown, string>(this.editProcessingTemplate)
   }
 
   onEditAttributes() {
+    this.dialog.open<unknown, unknown, string>(this.editAttributesTemplate)
+  }
+
+  setEditField(field: string, value: any) {
     // TODO
+    console.log('Field: ' + field + ', Value: ' + value)
+  }
+
+  saveEdit() {
+    // TODO
+    console.log('Save Edit Processing')
   }
 
   keys(value: any): string[] {

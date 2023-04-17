@@ -425,7 +425,7 @@
     <div class="edit-processing-form">
       <div class="edit-enabled-field">
         <mat-form-field>
-          <mat-select placeholder="Enabled" [(value)]="config.enabled" (selectionChange)="setEditField('enabled', $event.value)">
+          <mat-select placeholder="Enabled" [(value)]="editConfig.enabled" (selectionChange)="setField('enabled', $event.value)">
             <mat-option [value]="true">true</mat-option>
             <mat-option [value]="false">false</mat-option>
           </mat-select>
@@ -438,7 +438,8 @@
       <div class="edit-interval-field">
         <mat-form-field>
           <mat-label>Interval</mat-label>
-          <input type="number" min="0" matInput value="{{config.intervalSeconds}}" (keyup)="setEditField('intervalSeconds', intervalSecondsField.value)" (change)="setEditField('intervalSeconds', intervalSecondsField.value)" #intervalSecondsField />
+          <input type="number" min="0" matInput value="{{editConfig.intervalSeconds}}" 
+          (keyup)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)" (change)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)" #intervalSecondsField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Interval', 'Observation query and processing frequency time interval in seconds')">
@@ -448,7 +449,7 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-button matDialogClose (click)="cancelEdit()">CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="saveEdit()">SAVE</button>
   </mat-dialog-actions>
 </ng-template>
@@ -458,12 +459,12 @@
     <div class="edit-attributes-form">
       <mat-form-field>
         <mat-label>Observation Id Field</mat-label>
-        <input type="text" matInput value="{{config.observationIdField}}" (keyup)="setEditField('observationIdField', observationIdField.value)" #observationIdField />
+        <input type="text" matInput value="{{editConfig.observationIdField}}" (keyup)="setField('observationIdField', observationIdField.value)" #observationIdField />
       </mat-form-field>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-button matDialogClose (click)="cancelEdit()">CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="saveEdit()">SAVE</button>
   </mat-dialog-actions>
 </ng-template>

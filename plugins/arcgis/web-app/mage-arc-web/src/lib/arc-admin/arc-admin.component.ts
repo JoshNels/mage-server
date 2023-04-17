@@ -19,6 +19,7 @@ export class ArcAdminComponent implements OnInit {
   infoTitle: string;
   infoMessage: string;
   isLoading: boolean;
+  editConfig: ArcGISPluginConfig;
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
@@ -32,6 +33,7 @@ export class ArcAdminComponent implements OnInit {
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
+    this.editConfig = defaultArcGISPluginConfig;
     this.layers = new Array<string>();
     this.isLoading = false;
     arcService.fetchArcConfig().subscribe(x => {
@@ -103,21 +105,61 @@ export class ArcAdminComponent implements OnInit {
   }
 
   onEditProcessing() {
+    this.editConfig = this.copyConfig()
     this.dialog.open<unknown, unknown, string>(this.editProcessingTemplate)
   }
 
   onEditAttributes() {
+    this.editConfig = this.copyConfig()
     this.dialog.open<unknown, unknown, string>(this.editAttributesTemplate)
   }
 
-  setEditField(field: string, value: any) {
-    // TODO
-    console.log('Field: ' + field + ', Value: ' + value)
+  setField(field: string, value: any) {
+    if (value != undefined && value.length == 0) {
+      value = undefined
+    }
+    (this.editConfig as any)[field] = value
+    console.log('Editing field: ' + field + ', value: ' + value)
+  }
+
+  setNumberField(field: string, value: any, min: number) {
+    if (value != undefined) {
+      if (value.length == 0) {
+        value = undefined
+      } else {
+        value = Number(value)
+        if (value < min) {
+          value = undefined
+        }
+      }
+    }
+    (this.editConfig as any)[field] = value
+    console.log('Editing field: ' + field + ', value: ' + value)
+  }
+
+  copyConfig(): ArcGISPluginConfig {
+    return JSON.parse(JSON.stringify(this.config))
   }
 
   saveEdit() {
-    // TODO
-    console.log('Save Edit Processing')
+    if (this.editConfig.enabled != undefined) {
+      this.config.enabled = this.editConfig.enabled
+      console.log('Edited enabled: ' + this.config.enabled)
+    }
+    if (this.editConfig.intervalSeconds != undefined) {
+      this.config.intervalSeconds = this.editConfig.intervalSeconds
+      console.log('Edited intervalSeconds: ' + this.config.intervalSeconds)
+    }
+    if (this.editConfig.observationIdField != undefined) {
+      this.config.observationIdField = this.editConfig.observationIdField
+      console.log('Edited observationIdField: ' + this.config.observationIdField)
+    }
+    this.arcService.putArcConfig(this.config)
+    console.log('Saved configuration edit')
+  }
+
+  cancelEdit() {
+    console.log('Canceled configuration edit')
   }
 
   keys(value: any): string[] {

@@ -393,7 +393,7 @@
       <mat-form-field [style.width.%]="100">
         <mat-label>ArcGIS Feature Layer URL</mat-label>
         <input type="text" matInput [formControl]="arcLayerControl" (keyup)="inputChanged(layerUrl.value)"
-          placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl>
+          placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl />
         <mat-error *ngIf="arcLayerControl.hasError('required')">
           URL is <strong>required</strong>
         </mat-error>
@@ -418,4 +418,52 @@
       <mat-label>{{infoMessage}}</mat-label>
     </div>
   </mat-dialog-content>
+</ng-template>
+<ng-template #editProcessingDialog let-data>
+  <h2 matDialogTitle>Processing Configuration</h2>
+  <mat-dialog-content>
+    <div class="edit-processing-form">
+      <div class="edit-enabled-field">
+        <mat-form-field>
+          <mat-select placeholder="Enabled" [(value)]="config.enabled" (selectionChange)="setEditField('enabled', $event.value)">
+            <mat-option [value]="true">true</mat-option>
+            <mat-option [value]="false">false</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button class="info-button" mat-icon-button
+          (click)="showInfo('Enabled', 'Process observations and send to configured ArcGIS feature layers')">
+          <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+        </button>
+      </div>
+      <div class="edit-interval-field">
+        <mat-form-field>
+          <mat-label>Interval</mat-label>
+          <input type="number" min="0" matInput value="{{config.intervalSeconds}}" (keyup)="setEditField('intervalSeconds', intervalSecondsField.value)" (change)="setEditField('intervalSeconds', intervalSecondsField.value)" #intervalSecondsField />
+        </mat-form-field>
+        <button class="info-button" mat-icon-button
+          (click)="showInfo('Interval', 'Observation query and processing frequency time interval in seconds')">
+          <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="saveEdit()">SAVE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #editAttributesDialog let-data>
+  <h2 matDialogTitle>Attributes Configuration</h2>
+  <mat-dialog-content>
+    <div class="edit-attributes-form">
+      <mat-form-field>
+        <mat-label>Observation Id Field</mat-label>
+        <input type="text" matInput value="{{config.observationIdField}}" (keyup)="setEditField('observationIdField', observationIdField.value)" #observationIdField />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="saveEdit()">SAVE</button>
+  </mat-dialog-actions>
 </ng-template>

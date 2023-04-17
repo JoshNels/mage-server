@@ -70,8 +70,15 @@ export class ArcAdminComponent implements OnInit {
 
   onAddLayerUrl(layerUrl: string, layers: string[]) {
     console.log('Adding layer ' + layerUrl)
+    const splitUrl = layerUrl.split('?');
+    const justUrl = splitUrl[0];
+    const params = splitUrl[1];
+    const urlParams = new URLSearchParams(params);
+    const token = urlParams.get('token');
+    console.log('token is ' + token);
     const featureLayer = {
-      url: layerUrl,
+      url: justUrl,
+      token: token,
       layers: []
     } as FeatureServiceConfig;
     for (const aLayer of layers) {

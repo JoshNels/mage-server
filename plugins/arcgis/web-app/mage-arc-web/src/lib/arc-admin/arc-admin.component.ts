@@ -149,33 +149,77 @@ export class ArcAdminComponent implements OnInit {
   }
 
   saveEdit() {
-    if (this.editConfig.enabled != undefined) {
+    if (this.editConfig.enabled != undefined && this.editConfig.enabled != this.config.enabled) {
       this.config.enabled = this.editConfig.enabled
       console.log('Edited enabled: ' + this.config.enabled)
     }
-    if (this.editConfig.intervalSeconds != undefined) {
+    if (this.editConfig.intervalSeconds != undefined && this.editConfig.intervalSeconds != this.config.intervalSeconds) {
       this.config.intervalSeconds = this.editConfig.intervalSeconds
       console.log('Edited intervalSeconds: ' + this.config.intervalSeconds)
     }
-    if (this.editConfig.startupIntervalSeconds != undefined) {
+    if (this.editConfig.startupIntervalSeconds != undefined && this.editConfig.startupIntervalSeconds != this.config.startupIntervalSeconds) {
       this.config.startupIntervalSeconds = this.editConfig.startupIntervalSeconds
       console.log('Edited startupIntervalSeconds: ' + this.config.startupIntervalSeconds)
     }
-    if (this.editConfig.updateIntervalSeconds != undefined) {
+    if (this.editConfig.updateIntervalSeconds != undefined && this.editConfig.updateIntervalSeconds != this.config.updateIntervalSeconds) {
       this.config.updateIntervalSeconds = this.editConfig.updateIntervalSeconds
       console.log('Edited updateIntervalSeconds: ' + this.config.updateIntervalSeconds)
     }
-    if (this.editConfig.batchSize != undefined) {
+    if (this.editConfig.batchSize != undefined && this.editConfig.batchSize != this.config.batchSize) {
       this.config.batchSize = this.editConfig.batchSize
       console.log('Edited batchSize: ' + this.config.batchSize)
     }
-    if (this.editConfig.attachmentModifiedTolerance != undefined) {
+    if (this.editConfig.attachmentModifiedTolerance != undefined && this.editConfig.attachmentModifiedTolerance != this.config.attachmentModifiedTolerance) {
       this.config.attachmentModifiedTolerance = this.editConfig.attachmentModifiedTolerance
       console.log('Edited attachmentModifiedTolerance: ' + this.config.attachmentModifiedTolerance)
     }
-    if (this.editConfig.observationIdField != undefined) {
+    if (this.editConfig.observationIdField != undefined && this.editConfig.observationIdField != this.config.observationIdField) {
       this.config.observationIdField = this.editConfig.observationIdField
       console.log('Edited observationIdField: ' + this.config.observationIdField)
+    }
+    if (this.editConfig.idSeparator != undefined && this.editConfig.idSeparator != this.config.idSeparator) {
+      this.config.idSeparator = this.editConfig.idSeparator
+      console.log('Edited idSeparator: ' + this.config.idSeparator)
+    }
+    if (this.editConfig.eventIdField != this.config.eventIdField) {
+      this.config.eventIdField = this.editConfig.eventIdField
+      console.log('Edited eventIdField: ' + this.config.eventIdField)
+    }
+    if (this.editConfig.lastEditedDateField != this.config.lastEditedDateField) {
+      this.config.lastEditedDateField = this.editConfig.lastEditedDateField
+      console.log('Edited lastEditedDateField: ' + this.config.lastEditedDateField)
+    }
+    if (this.editConfig.eventNameField != this.config.eventNameField) {
+      this.config.eventNameField = this.editConfig.eventNameField
+      console.log('Edited eventNameField: ' + this.config.eventNameField)
+    }
+    if (this.editConfig.userIdField != this.config.userIdField) {
+      this.config.userIdField = this.editConfig.userIdField
+      console.log('Edited userIdField: ' + this.config.userIdField)
+    }
+    if (this.editConfig.usernameField != this.config.usernameField) {
+      this.config.usernameField = this.editConfig.usernameField
+      console.log('Edited usernameField: ' + this.config.usernameField)
+    }
+    if (this.editConfig.userDisplayNameField != this.config.userDisplayNameField) {
+      this.config.userDisplayNameField = this.editConfig.userDisplayNameField
+      console.log('Edited userDisplayNameField: ' + this.config.userDisplayNameField)
+    }
+    if (this.editConfig.deviceIdField != this.config.deviceIdField) {
+      this.config.deviceIdField = this.editConfig.deviceIdField
+      console.log('Edited deviceIdField: ' + this.config.deviceIdField)
+    }
+    if (this.editConfig.createdAtField != this.config.createdAtField) {
+      this.config.createdAtField = this.editConfig.createdAtField
+      console.log('Edited createdAtField: ' + this.config.createdAtField)
+    }
+    if (this.editConfig.lastModifiedField != this.config.lastModifiedField) {
+      this.config.lastModifiedField = this.editConfig.lastModifiedField
+      console.log('Edited lastModifiedField: ' + this.config.lastModifiedField)
+    }
+    if (this.editConfig.geometryType != this.config.geometryType) {
+      this.config.geometryType = this.editConfig.geometryType
+      console.log('Edited geometryType: ' + this.config.geometryType)
     }
     this.arcService.putArcConfig(this.config)
     console.log('Saved configuration edit')

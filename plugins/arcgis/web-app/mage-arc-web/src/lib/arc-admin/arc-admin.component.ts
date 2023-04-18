@@ -157,6 +157,22 @@ export class ArcAdminComponent implements OnInit {
       this.config.intervalSeconds = this.editConfig.intervalSeconds
       console.log('Edited intervalSeconds: ' + this.config.intervalSeconds)
     }
+    if (this.editConfig.startupIntervalSeconds != undefined) {
+      this.config.startupIntervalSeconds = this.editConfig.startupIntervalSeconds
+      console.log('Edited startupIntervalSeconds: ' + this.config.startupIntervalSeconds)
+    }
+    if (this.editConfig.updateIntervalSeconds != undefined) {
+      this.config.updateIntervalSeconds = this.editConfig.updateIntervalSeconds
+      console.log('Edited updateIntervalSeconds: ' + this.config.updateIntervalSeconds)
+    }
+    if (this.editConfig.batchSize != undefined) {
+      this.config.batchSize = this.editConfig.batchSize
+      console.log('Edited batchSize: ' + this.config.batchSize)
+    }
+    if (this.editConfig.attachmentModifiedTolerance != undefined) {
+      this.config.attachmentModifiedTolerance = this.editConfig.attachmentModifiedTolerance
+      console.log('Edited attachmentModifiedTolerance: ' + this.config.attachmentModifiedTolerance)
+    }
     if (this.editConfig.observationIdField != undefined) {
       this.config.observationIdField = this.editConfig.observationIdField
       console.log('Edited observationIdField: ' + this.config.observationIdField)

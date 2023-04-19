@@ -220,6 +220,10 @@
         (click)="showInfo('Field Mappings', 'Override mappings between MAGE event form fields and ArcGIS attributes')">
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
+      <button class="edit-button" mat-icon-button
+        (click)="editFieldMappings = !editFieldMappings">
+        <mat-icon class="edit-icon" [inline]="true">{{editFieldMappings ? 'highlight_off' : 'edit'}}</mat-icon>
+      </button>
       <table class="fieldOverrides-table">
         <tr>
           <th>Event</th>
@@ -229,22 +233,76 @@
         </tr>
         <ng-container *ngFor="let event of keys(config.fieldAttributes)">
           <tr>
-            <td>{{event}}</td>
+            <td>{{event}}
+              <ng-container *ngIf="editFieldMappings">
+                <button class="delete-button" mat-icon-button
+                  (click)="showInfo('TODO', 'Delete event')">
+                  <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                </button>
+              </ng-container>
+            </td>
           </tr>
           <ng-container *ngFor="let form of keys(config.fieldAttributes[event])">
             <tr>
               <td></td>
-              <td>{{form}}</td>
+              <td>{{form}}
+                <ng-container *ngIf="editFieldMappings">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showInfo('TODO', 'Delete form')">
+                    <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
             <ng-container *ngFor="let field of keys(config.fieldAttributes[event][form])">
               <tr>
                 <td></td>
                 <td></td>
-                <td>{{field}}</td>
+                <td>{{field}}
+                  <ng-container *ngIf="editFieldMappings">
+                    <button class="delete-button" mat-icon-button
+                      (click)="showInfo('TODO', 'Delete field')">
+                      <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                    </button>
+                  </ng-container>
+                </td>
                 <td>{{config.fieldAttributes[event][form][field]}}</td>
               </tr>
             </ng-container>
+            <ng-container *ngIf="editFieldMappings">
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <button class="add-button" mat-icon-button
+                    (click)="showInfo('TODO', 'Add field')">
+                    <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
           </ng-container>
+          <ng-container *ngIf="editFieldMappings">
+            <tr>
+              <td></td>
+              <td>
+                <button class="add-button" mat-icon-button
+                  (click)="showInfo('TODO', 'Add form')">
+                  <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="editFieldMappings">
+          <tr>
+            <td>
+              <button class="add-button" mat-icon-button
+                (click)="showInfo('TODO', 'Add event')">
+                <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+              </button>
+            </td>
+          </tr>
         </ng-container>
       </table>
     </div>

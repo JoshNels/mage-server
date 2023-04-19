@@ -20,6 +20,7 @@ export class ArcAdminComponent implements OnInit {
   infoMessage: string;
   isLoading: boolean;
   editConfig: ArcGISPluginConfig;
+  editFieldMappings: boolean;
 
   arcLayerControl = new FormControl('', [Validators.required])
   @ViewChild('addLayerDialog', { static: true })
@@ -36,6 +37,7 @@ export class ArcAdminComponent implements OnInit {
     this.editConfig = defaultArcGISPluginConfig;
     this.layers = new Array<string>();
     this.isLoading = false;
+    this.editFieldMappings = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })

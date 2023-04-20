@@ -16,6 +16,10 @@ export class ArcAdminComponent implements OnInit {
   infoTitle: string;
   infoMessage: string;
   editConfig: ArcGISPluginConfig;
+  editFieldMappings: boolean;
+  editType: string;
+  editObject: any;
+  editName: string;
 
 
   @ViewChild('infoDialog', { static: true })
@@ -24,10 +28,17 @@ export class ArcAdminComponent implements OnInit {
   private editProcessingTemplate: TemplateRef<unknown>
   @ViewChild('editAttributesDialog', { static: true })
   private editAttributesTemplate: TemplateRef<unknown>
+  @ViewChild('deleteFieldDialog', { static: true })
+  private deleteFieldTemplate: TemplateRef<unknown>
+  @ViewChild('addFieldDialog', { static: true })
+  private addFieldTemplate: TemplateRef<unknown>
+  @ViewChild('addFieldValueDialog', { static: true })
+  private addFieldValueTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
     this.editConfig = defaultArcGISPluginConfig;
+    this.editFieldMappings = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })
@@ -258,6 +269,50 @@ export class ArcAdminComponent implements OnInit {
     this.infoTitle = title
     this.infoMessage = message
     this.dialog.open<unknown, unknown, string>(this.infoTemplate)
+  }
+
+  showDeleteField(type: string, object: any, name: string) {
+    this.editType = type;
+    this.editObject = object;
+    this.editName = name;
+    this.dialog.open<unknown, unknown, string>(this.deleteFieldTemplate)
+  }
+
+  deleteField() {
+    if (this.editObject != undefined) {
+      delete this.editObject[this.editName]
+      this.arcService.putArcConfig(this.config)
+    }
+  }
+
+  showAddField(type: string, object: any) {
+    this.editType = type;
+    this.editObject = object;
+    this.dialog.open<unknown, unknown, string>(this.addFieldTemplate)
+  }
+
+  addField(name: string) {
+    if (this.editObject == undefined) {
+      if (this.editType == 'Event') {
+        this.config.fieldAttributes = {}
+        this.editObject = this.config.fieldAttributes
+      }
+    }
+    if (this.editObject[name] == undefined) {
+      this.editObject[name] = {}
+      this.arcService.putArcConfig(this.config)
+    }
+  }
+
+  showAddFieldValue(type: string, object: any) {
+    this.editType = type;
+    this.editObject = object;
+    this.dialog.open<unknown, unknown, string>(this.addFieldValueTemplate)
+  }
+
+  addFieldValue(name: string, value: any) {
+    this.editObject[name] = value
+    this.arcService.putArcConfig(this.config)
   }
 
 }

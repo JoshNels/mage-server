@@ -190,6 +190,10 @@
         (click)="showInfo('Field Mappings', 'Override mappings between MAGE event form fields and ArcGIS attributes')">
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
+      <button class="lock-button" mat-icon-button
+        (click)="editFieldMappings = !editFieldMappings">
+        <mat-icon class="lock-icon" [inline]="true">{{editFieldMappings ? 'lock_open' : 'lock'}}</mat-icon>
+      </button>
       <table class="fieldOverrides-table">
         <tr>
           <th>Event</th>
@@ -199,22 +203,76 @@
         </tr>
         <ng-container *ngFor="let event of keys(config.fieldAttributes)">
           <tr>
-            <td>{{event}}</td>
+            <td>{{event}}
+              <ng-container *ngIf="editFieldMappings">
+                <button class="delete-button" mat-icon-button
+                  (click)="showDeleteField('Event', config.fieldAttributes, event)">
+                  <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                </button>
+              </ng-container>
+            </td>
           </tr>
           <ng-container *ngFor="let form of keys(config.fieldAttributes[event])">
             <tr>
               <td></td>
-              <td>{{form}}</td>
+              <td>{{form}}
+                <ng-container *ngIf="editFieldMappings">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showDeleteField('Form', config.fieldAttributes[event], form)">
+                    <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
             <ng-container *ngFor="let field of keys(config.fieldAttributes[event][form])">
               <tr>
                 <td></td>
                 <td></td>
-                <td>{{field}}</td>
+                <td>{{field}}
+                  <ng-container *ngIf="editFieldMappings">
+                    <button class="delete-button" mat-icon-button
+                      (click)="showDeleteField('Field', config.fieldAttributes[event][form], field)">
+                      <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                    </button>
+                  </ng-container>
+                </td>
                 <td>{{config.fieldAttributes[event][form][field]}}</td>
               </tr>
             </ng-container>
+            <ng-container *ngIf="editFieldMappings">
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <button class="add-button" mat-icon-button
+                    (click)="showAddFieldValue('Field', config.fieldAttributes[event][form])">
+                    <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
           </ng-container>
+          <ng-container *ngIf="editFieldMappings">
+            <tr>
+              <td></td>
+              <td>
+                <button class="add-button" mat-icon-button
+                  (click)="showAddField('Form', config.fieldAttributes[event])">
+                  <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="editFieldMappings">
+          <tr>
+            <td>
+              <button class="add-button" mat-icon-button
+                (click)="showAddField('Event', config.fieldAttributes)">
+                <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+              </button>
+            </td>
+          </tr>
         </ng-container>
       </table>
     </div>
@@ -592,5 +650,48 @@
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose (click)="cancelEdit()">CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="saveEdit()">SAVE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #deleteFieldDialog let-data>
+  <h3 matDialogTitle>Delete {{editType}}: {{editName}}?</h3>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="deleteField()">DELETE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #addFieldDialog let-data>
+  <mat-dialog-content>
+    <div class="add-field-form">
+      <mat-form-field [style.width.%]="100">
+        <mat-label>{{editType}}</mat-label>
+        <input type="text" matInput #addFieldField />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="addField(addFieldField.value)">ADD</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #addFieldValueDialog let-data>
+  <mat-dialog-content>
+    <div class="add-field-value-form">
+      <div class="add-field-field">
+        <mat-form-field [style.width.%]="100">
+          <mat-label>{{editType}}</mat-label>
+          <input type="text" matInput #addFieldField />
+        </mat-form-field>
+      </div>
+      <div class="add-value-field">
+        <mat-form-field [style.width.%]="100">
+          <mat-label>{{ editType == 'Field' ? 'Attribute' : 'Value' }}</mat-label>
+          <input type="text" matInput #addValueField />
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="addFieldValue(addFieldField.value, addValueField.value)">ADD</button>
   </mat-dialog-actions>
 </ng-template>

@@ -2,7 +2,8 @@
   <h1>ArcGIS Configuration</h1>
   <section class="arc-processing">
     <header>
-      <h2>Processing <button class="edit-button" mat-icon-button (click)="onEditProcessing()"><mat-icon>edit_outline</mat-icon></button></h2>
+      <h2>Processing <button class="edit-button" mat-icon-button
+          (click)="onEditProcessing()"><mat-icon>edit_outline</mat-icon></button></h2>
       <p class="subheading">MAGE ArcGIS plugin processing settings.</p>
     </header>
     <div class="processing">
@@ -64,42 +65,11 @@
       </table>
     </div>
   </section>
-  <section class="arc-service">
-    <header>
-      <h2>Feature Layers</h2>
-      <p class="subheading">Add ArcGIS feature service urls and layers to sychronize MAGE data to.</p>
-    </header>
-    <div>
-      <button mat-button mat-stroked-button color="primary" aria-label="Add ArcGIS feature layer"
-        (click)="onAddLayer()">ADD ARCGIS LAYER</button>
-    </div>
-    <div class="arcLayers" *ngIf="!config.featureServices.length">
-      <div class="arcLayer">
-        There are no ArcGIS feature layers currently being synchronized.
-      </div>
-    </div>
-    <div class="arcLayers" *ngFor="let arcLayer of config.featureServices">
-      <ng-container>
-        <div class="arcLayer">
-          <div class="arcLayer__value">
-            {{arcLayer.url}}
-          </div>
-          <div class="arcLayer__action">
-            <button class="mat-hint" mat-icon-button aria-label="Delete ArcGIS layer"
-              (click)="onDeleteLayer(arcLayer.url)"><mat-icon>delete_outline</mat-icon></button>
-          </div>
-        </div>
-        <div class="featureLayers" *ngFor="let featureLayer of arcLayer.layers">
-          <div class="featureLayer__value">
-            {{featureLayer.layer}}
-          </div>
-        </div>
-      </ng-container>
-    </div>
-  </section>
+  <arc-layer></arc-layer>
   <section class="arc-fields">
     <header>
-      <h2>Attributes <button class="edit-button" mat-icon-button (click)="onEditAttributes()"><mat-icon>edit_outline</mat-icon></button></h2>
+      <h2>Attributes <button class="edit-button" mat-icon-button
+          (click)="onEditAttributes()"><mat-icon>edit_outline</mat-icon></button></h2>
       <p class="subheading">MAGE Field to ArcGIS Attribute mappings.</p>
     </header>
     <div class="attributes">
@@ -386,31 +356,6 @@
     </div>
   </section>
 </div>
-<ng-template #addLayerDialog let-data>
-  <h2 matDialogTitle>Add ArcGIS Layer</h2>
-  <mat-dialog-content>
-    <div class="arc-layer-form">
-      <mat-form-field [style.width.%]="100">
-        <mat-label>ArcGIS Feature Layer URL</mat-label>
-        <input type="text" matInput [formControl]="arcLayerControl" (keyup)="inputChanged(layerUrl.value)"
-          placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" #layerUrl />
-        <mat-error *ngIf="arcLayerControl.hasError('required')">
-          URL is <strong>required</strong>
-        </mat-error>
-      </mat-form-field>
-    </div>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
-    <div class="arc-layers" *ngFor="let arcLayer of layers">
-      <div class="featureLayer__value">
-        {{arcLayer}}
-      </div>
-    </div>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-button matDialogClose>CANCEL</button>
-    <button [disabled]="layers.length == 0" mat-flat-button color="primary" matDialogClose (click)="onAddLayerUrl(layerUrl.value, layers)">SAVE</button>
-  </mat-dialog-actions>
-</ng-template>
 <ng-template #infoDialog let-data>
   <h3 matDialogTitle>{{infoTitle}}</h3>
   <mat-dialog-content>
@@ -425,7 +370,8 @@
     <div class="edit-processing-form">
       <div class="edit-enabled-field">
         <mat-form-field [style.width.%]="90">
-          <mat-select placeholder="Enabled" [(value)]="editConfig.enabled" (selectionChange)="setField('enabled', $event.value)">
+          <mat-select placeholder="Enabled" [(value)]="editConfig.enabled"
+            (selectionChange)="setField('enabled', $event.value)">
             <mat-option [value]="true">true</mat-option>
             <mat-option [value]="false">false</mat-option>
           </mat-select>
@@ -438,9 +384,9 @@
       <div class="edit-interval-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Interval</mat-label>
-          <input type="number" min="0" matInput value="{{editConfig.intervalSeconds}}" 
-          (keyup)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)"
-          (change)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)" #intervalSecondsField />
+          <input type="number" min="0" matInput value="{{editConfig.intervalSeconds}}"
+            (keyup)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)"
+            (change)="setNumberField('intervalSeconds', intervalSecondsField.value, 0)" #intervalSecondsField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Interval', 'Observation query and processing frequency time interval in seconds')">
@@ -450,9 +396,10 @@
       <div class="edit-startup-interval-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Startup Interval</mat-label>
-          <input type="number" min="0" matInput value="{{editConfig.startupIntervalSeconds}}" 
-          (keyup)="setNumberField('startupIntervalSeconds', startupIntervalSecondsField.value, 0)"
-          (change)="setNumberField('startupIntervalSeconds', startupIntervalSecondsField.value, 0)" #startupIntervalSecondsField />
+          <input type="number" min="0" matInput value="{{editConfig.startupIntervalSeconds}}"
+            (keyup)="setNumberField('startupIntervalSeconds', startupIntervalSecondsField.value, 0)"
+            (change)="setNumberField('startupIntervalSeconds', startupIntervalSecondsField.value, 0)"
+            #startupIntervalSecondsField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Startup Interval', 'Startup interval in seconds to wait for feature layer processors to be ready')">
@@ -462,9 +409,10 @@
       <div class="edit-update-interval-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Update Interval</mat-label>
-          <input type="number" min="0" matInput value="{{editConfig.updateIntervalSeconds}}" 
-          (keyup)="setNumberField('updateIntervalSeconds', updateIntervalSecondsField.value, 0)"
-          (change)="setNumberField('updateIntervalSeconds', updateIntervalSecondsField.value, 0)" #updateIntervalSecondsField />
+          <input type="number" min="0" matInput value="{{editConfig.updateIntervalSeconds}}"
+            (keyup)="setNumberField('updateIntervalSeconds', updateIntervalSecondsField.value, 0)"
+            (change)="setNumberField('updateIntervalSeconds', updateIntervalSecondsField.value, 0)"
+            #updateIntervalSecondsField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Update Interval', 'Processing wait time interval in seconds when pending observation updates exist')">
@@ -474,9 +422,9 @@
       <div class="batch-size-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Batch Size</mat-label>
-          <input type="number" min="1" matInput value="{{editConfig.batchSize}}" 
-          (keyup)="setNumberField('batchSize', batchSizeField.value, 1)"
-          (change)="setNumberField('batchSize', batchSizeField.value, 1)" #batchSizeField />
+          <input type="number" min="1" matInput value="{{editConfig.batchSize}}"
+            (keyup)="setNumberField('batchSize', batchSizeField.value, 1)"
+            (change)="setNumberField('batchSize', batchSizeField.value, 1)" #batchSizeField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Batch Size', 'Maximum number of observations to process during a single time interval')">
@@ -486,9 +434,10 @@
       <div class="attachment-modified-tolerance-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Attachment Tolerance</mat-label>
-          <input type="number" min="0" matInput value="{{editConfig.attachmentModifiedTolerance}}" 
-          (keyup)="setNumberField('attachmentModifiedTolerance', attachmentModifiedToleranceField.value, 0)"
-          (change)="setNumberField('attachmentModifiedTolerance', attachmentModifiedToleranceField.value, 0)" #attachmentModifiedToleranceField />
+          <input type="number" min="0" matInput value="{{editConfig.attachmentModifiedTolerance}}"
+            (keyup)="setNumberField('attachmentModifiedTolerance', attachmentModifiedToleranceField.value, 0)"
+            (change)="setNumberField('attachmentModifiedTolerance', attachmentModifiedToleranceField.value, 0)"
+            #attachmentModifiedToleranceField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Attachment Tolerance', 'Time tolerance in milliseconds to consider an attachment as modified compared to the observation')">
@@ -509,7 +458,8 @@
       <div class="observation-id-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Observation Id Field</mat-label>
-          <input type="text" matInput value="{{editConfig.observationIdField}}" (keyup)="setField('observationIdField', observationIdField.value)" #observationIdField />
+          <input type="text" matInput value="{{editConfig.observationIdField}}"
+            (keyup)="setField('observationIdField', observationIdField.value)" #observationIdField />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Observation Id Field', 'The ArcGIS layer text field attribute name to store the MAGE observation id')">
@@ -519,7 +469,8 @@
       <div class="id-separator-field">
         <mat-form-field [style.width.%]="90">
           <mat-label>Id Separator</mat-label>
-          <input type="text" matInput value="{{editConfig.idSeparator}}" (keyup)="setField('idSeparator', idSeparator.value)" #idSeparator />
+          <input type="text" matInput value="{{editConfig.idSeparator}}"
+            (keyup)="setField('idSeparator', idSeparator.value)" #idSeparator />
         </mat-form-field>
         <button class="info-button" mat-icon-button
           (click)="showInfo('Id Separator', 'When event id field is not configured, the separator combining observation ids and event ids in the observation id field')">
@@ -530,7 +481,8 @@
     <div class="event-id-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Event Id Field</mat-label>
-        <input type="text" matInput value="{{editConfig.eventIdField}}" (keyup)="setField('eventIdField', eventIdField.value)" #eventIdField />
+        <input type="text" matInput value="{{editConfig.eventIdField}}"
+          (keyup)="setField('eventIdField', eventIdField.value)" #eventIdField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Event Id Field', 'The ArcGIS layer integer field attribute name to store the MAGE event id')">
@@ -540,7 +492,8 @@
     <div class="last-edited-date-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Last Edited Date Field</mat-label>
-        <input type="text" matInput value="{{editConfig.lastEditedDateField}}" (keyup)="setField('lastEditedDateField', lastEditedDateField.value)" #lastEditedDateField />
+        <input type="text" matInput value="{{editConfig.lastEditedDateField}}"
+          (keyup)="setField('lastEditedDateField', lastEditedDateField.value)" #lastEditedDateField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Last Edited Date Field', 'The last edited date field attribute name on the ArcGIS layer')">
@@ -550,7 +503,8 @@
     <div class="event-name-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Event Name Field</mat-label>
-        <input type="text" matInput value="{{editConfig.eventNameField}}" (keyup)="setField('eventNameField', eventNameField.value)" #eventNameField />
+        <input type="text" matInput value="{{editConfig.eventNameField}}"
+          (keyup)="setField('eventNameField', eventNameField.value)" #eventNameField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Event Name Field', 'The ArcGIS layer text field attribute name to store the MAGE event name')">
@@ -560,7 +514,8 @@
     <div class="user-id-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>User Id Field</mat-label>
-        <input type="text" matInput value="{{editConfig.userIdField}}" (keyup)="setField('userIdField', userIdField.value)" #userIdField />
+        <input type="text" matInput value="{{editConfig.userIdField}}"
+          (keyup)="setField('userIdField', userIdField.value)" #userIdField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('User Id Field', 'The ArcGIS layer text field attribute name to store the MAGE user id')">
@@ -570,7 +525,8 @@
     <div class="username-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Username Field</mat-label>
-        <input type="text" matInput value="{{editConfig.usernameField}}" (keyup)="setField('usernameField', usernameField.value)" #usernameField />
+        <input type="text" matInput value="{{editConfig.usernameField}}"
+          (keyup)="setField('usernameField', usernameField.value)" #usernameField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Username Field', 'The ArcGIS layer text field attribute name to store the MAGE username')">
@@ -580,7 +536,8 @@
     <div class="user-display-name-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>User Display Name Field</mat-label>
-        <input type="text" matInput value="{{editConfig.userDisplayNameField}}" (keyup)="setField('userDisplayNameField', userDisplayNameField.value)" #userDisplayNameField />
+        <input type="text" matInput value="{{editConfig.userDisplayNameField}}"
+          (keyup)="setField('userDisplayNameField', userDisplayNameField.value)" #userDisplayNameField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('User Display Name Field', 'The ArcGIS layer text field attribute name to store the MAGE user display name')">
@@ -590,7 +547,8 @@
     <div class="device-id-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Device Id Field</mat-label>
-        <input type="text" matInput value="{{editConfig.deviceIdField}}" (keyup)="setField('deviceIdField', deviceIdField.value)" #deviceIdField />
+        <input type="text" matInput value="{{editConfig.deviceIdField}}"
+          (keyup)="setField('deviceIdField', deviceIdField.value)" #deviceIdField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Device Id Field', 'The ArcGIS layer text field attribute name to store the MAGE device id')">
@@ -600,7 +558,8 @@
     <div class="created-at-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Created At Field</mat-label>
-        <input type="text" matInput value="{{editConfig.createdAtField}}" (keyup)="setField('createdAtField', createdAtField.value)" #createdAtField />
+        <input type="text" matInput value="{{editConfig.createdAtField}}"
+          (keyup)="setField('createdAtField', createdAtField.value)" #createdAtField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Created At Field', 'The ArcGIS layer date time field attribute name to store the MAGE created at date')">
@@ -610,7 +569,8 @@
     <div class="last-modified-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Last Modified Field</mat-label>
-        <input type="text" matInput value="{{editConfig.lastModifiedField}}" (keyup)="setField('lastModifiedField', lastModifiedField.value)" #lastModifiedField />
+        <input type="text" matInput value="{{editConfig.lastModifiedField}}"
+          (keyup)="setField('lastModifiedField', lastModifiedField.value)" #lastModifiedField />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Last Modified Field', 'The ArcGIS layer date time field attribute name to store the MAGE last modified date (may be the same as last edited date field if editable)')">
@@ -620,7 +580,8 @@
     <div class="geometry-type-field">
       <mat-form-field [style.width.%]="90">
         <mat-label>Geometry Type Field</mat-label>
-        <input type="text" matInput value="{{editConfig.geometryType}}" (keyup)="setField('geometryType', geometryType.value)" #geometryType />
+        <input type="text" matInput value="{{editConfig.geometryType}}"
+          (keyup)="setField('geometryType', geometryType.value)" #geometryType />
       </mat-form-field>
       <button class="info-button" mat-icon-button
         (click)="showInfo('Geometry Type Field', 'The ArcGIS layer text field attribute name to store the Esri geometry type')">

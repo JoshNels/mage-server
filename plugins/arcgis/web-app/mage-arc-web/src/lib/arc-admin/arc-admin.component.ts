@@ -1,7 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material/dialog'
-import { FeatureServiceConfig, AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig } from '../ArcGISConfig';
+import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 
@@ -13,17 +12,12 @@ import { ArcService } from '../arc.service'
 export class ArcAdminComponent implements OnInit {
 
   config: ArcGISPluginConfig;
-  private currentUrl: string;
-  private timeoutId: number;
-  layers: string[];
+
   infoTitle: string;
   infoMessage: string;
-  isLoading: boolean;
   editConfig: ArcGISPluginConfig;
 
-  arcLayerControl = new FormControl('', [Validators.required])
-  @ViewChild('addLayerDialog', { static: true })
-  private addLayerTemplate: TemplateRef<unknown>
+
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
   @ViewChild('editProcessingDialog', { static: true })
@@ -34,67 +28,12 @@ export class ArcAdminComponent implements OnInit {
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
     this.editConfig = defaultArcGISPluginConfig;
-    this.layers = new Array<string>();
-    this.isLoading = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
     })
   }
 
   ngOnInit(): void {
-  }
-
-  onAddLayer() {
-    this.arcLayerControl.setValue('')
-    this.layers = []
-    this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
-  }
-
-  inputChanged(layerUrl: string) {
-    console.log('Input changed ' + layerUrl);
-    this.currentUrl = layerUrl;
-    if (this.timeoutId !== undefined) {
-      window.clearTimeout(this.timeoutId);
-    }
-    this.timeoutId = window.setTimeout(() => this.fetchLayers(this.currentUrl), 1000);
-  }
-
-  fetchLayers(currentUrl: string) {
-    console.log('Fetching layers for ' + currentUrl);
-    this.isLoading = true;
-    this.layers = []
-    this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
-      console.log('arclayer response ' + x);
-      if (x.layers !== undefined) {
-        for (const layer of x.layers) {
-          this.layers.push(layer.name);
-        }
-      }
-      this.isLoading = false;
-    })
-  }
-
-  onAddLayerUrl(layerUrl: string, layers: string[]) {
-    console.log('Adding layer ' + layerUrl)
-    const splitUrl = layerUrl.split('?');
-    const justUrl = splitUrl[0];
-    const params = splitUrl[1];
-    const urlParams = new URLSearchParams(params);
-    const token = urlParams.get('token');
-    console.log('token is ' + token);
-    const featureLayer = {
-      url: justUrl,
-      token: token,
-      layers: []
-    } as FeatureServiceConfig;
-    for (const aLayer of layers) {
-      const layerConfig = {
-        layer: aLayer
-      }
-      featureLayer.layers.push(layerConfig);
-    }
-    this.config.featureServices.push(featureLayer);
-    this.arcService.putArcConfig(this.config);
   }
 
   onDeleteLayer(layerUrl: string) {

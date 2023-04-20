@@ -32,8 +32,7 @@ export class ArcLayerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.arcLayerControl.setValue('')
-    this.layers = []
+    
   }
 
   inputChanged(layerUrl: string) {
@@ -61,6 +60,8 @@ export class ArcLayerComponent implements OnInit {
   }
 
   onAddLayer() {
+    this.arcLayerControl.setValue('')
+    this.layers = []
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 

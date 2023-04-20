@@ -164,12 +164,24 @@ section {
   width: inherit;
 }
 
+.lock-icon {
+  vertical-align: middle;
+}
+
+.lock-button {
+  opacity: 0.8;
+  font-size: inherit;
+  height: inherit;
+  line-height: inherit;
+  width: inherit;
+}
+
 .add-icon {
   vertical-align: middle;
 }
 
 .add-button {
-  opacity: 0.5;
+  opacity: 0.8;
   font-size: inherit;
   height: inherit;
   line-height: inherit;
@@ -181,7 +193,7 @@ section {
 }
 
 .delete-button {
-  opacity: 0.5;
+  opacity: 0.8;
   font-size: inherit;
   height: inherit;
   line-height: inherit;

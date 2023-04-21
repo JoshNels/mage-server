@@ -336,7 +336,14 @@
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
               </td>
-              <td>{{getConcatenation(attribute).delimiter}}</td>
+              <td>{{getConcatenation(attribute).delimiter}}
+                <ng-container *ngIf="editAttributes">
+                  <button class="add-button" mat-icon-button
+                    (click)="showEditField('delimiter', getConcatenation(attribute), getConcatenation(attribute).delimiter)">
+                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
             <tr>
               <td></td>
@@ -381,8 +388,34 @@
               <tr>
                 <td></td>
                 <td></td>
-                <td>{{mapping}}</td>
-                <td>{{getMappings(attribute)[mapping]}}</td>
+                <td>{{mapping}}
+                  <ng-container *ngIf="editAttributes">
+                    <button class="delete-button" mat-icon-button
+                      (click)="showDeleteField('Mapping', getMappings(attribute), mapping)">
+                      <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                    </button>
+                  </ng-container>
+                </td>
+                <td>{{getMappings(attribute)[mapping]}}
+                  <ng-container *ngIf="editAttributes">
+                    <button class="add-button" mat-icon-button
+                      (click)="showEditField(mapping, getMappings(attribute), getMappings(attribute)[mapping])">
+                      <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    </button>
+                  </ng-container>
+                </td>
+              </tr>
+            </ng-container>
+            <ng-container *ngIf="editAttributes">
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <button class="add-button" mat-icon-button
+                    (click)="showAddFieldValue('Mapping', getMappings(attribute))">
+                    <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                  </button>
+                </td>
               </tr>
             </ng-container>
           </ng-container>

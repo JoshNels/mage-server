@@ -2,7 +2,7 @@
   <h1>ArcGIS Configuration</h1>
   <section class="arc-processing">
     <header>
-      <h2>Processing <button class="edit-button" mat-icon-button (click)="onEditProcessing()"><mat-icon>edit_outline</mat-icon></button></h2>
+      <h2>Processing <button class="edit-button" mat-icon-button (click)="onEditProcessing()"><mat-icon>edit</mat-icon></button></h2>
       <p class="subheading">MAGE ArcGIS plugin processing settings.</p>
     </header>
     <div class="processing">
@@ -99,7 +99,7 @@
   </section>
   <section class="arc-fields">
     <header>
-      <h2>Attributes <button class="edit-button" mat-icon-button (click)="onEditAttributes()"><mat-icon>edit_outline</mat-icon></button></h2>
+      <h2>Attributes <button class="edit-button" mat-icon-button (click)="onEditAttributes()"><mat-icon>edit</mat-icon></button></h2>
       <p class="subheading">MAGE Field to ArcGIS Attribute mappings.</p>
     </header>
     <div class="attributes">
@@ -237,7 +237,7 @@
               <ng-container *ngIf="editFieldMappings">
                 <button class="delete-button" mat-icon-button
                   (click)="showDeleteField('Event', config.fieldAttributes, event)">
-                  <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                  <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                 </button>
               </ng-container>
             </td>
@@ -249,7 +249,7 @@
                 <ng-container *ngIf="editFieldMappings">
                   <button class="delete-button" mat-icon-button
                     (click)="showDeleteField('Form', config.fieldAttributes[event], form)">
-                    <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                    <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                   </button>
                 </ng-container>
               </td>
@@ -262,11 +262,18 @@
                   <ng-container *ngIf="editFieldMappings">
                     <button class="delete-button" mat-icon-button
                       (click)="showDeleteField('Field', config.fieldAttributes[event][form], field)">
-                      <mat-icon class="delete-icon" [inline]="true">delete</mat-icon>
+                      <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                     </button>
                   </ng-container>
                 </td>
-                <td>{{config.fieldAttributes[event][form][field]}}</td>
+                <td>{{config.fieldAttributes[event][form][field]}}
+                  <ng-container *ngIf="editFieldMappings">
+                    <button class="add-button" mat-icon-button
+                      (click)="showEditField(field, config.fieldAttributes[event][form], config.fieldAttributes[event][form][field])">
+                      <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    </button>
+                  </ng-container>
+                </td>
               </tr>
             </ng-container>
             <ng-container *ngIf="editFieldMappings">
@@ -312,6 +319,10 @@
         (click)="showInfo('Attribute Settings', 'Attribute settings including concatenation, value mappings, defaults, and omissions')">
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
+      <button class="lock-button" mat-icon-button
+        (click)="editAttributes = !editAttributes">
+        <mat-icon class="lock-icon" [inline]="true">{{editAttributes ? 'lock_open' : 'lock'}}</mat-icon>
+      </button>
       <table class="attributeConfigurations-table">
         <tr>
           <th>Attribute</th>
@@ -319,7 +330,18 @@
         </tr>
         <ng-container *ngFor="let attribute of keys(config.attributes)">
           <tr>
-            <td>{{attribute}}</td>
+            <td>{{attribute}}
+              <ng-container *ngIf="editAttributes">
+                <button class="add-button" mat-icon-button
+                  (click)="showEditAttributeConfig(attribute)">
+                  <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                </button>
+                <button class="delete-button" mat-icon-button
+                  (click)="showDeleteField('Attribute', config.attributes, attribute)">
+                  <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                </button>
+              </ng-container>
+            </td>
           </tr>
           <ng-container *ngIf="hasConcatenation(attribute)">
             <tr>
@@ -329,6 +351,12 @@
                   (click)="showInfo('Concatenation', 'String value concatenation when an observation contains multiple attribute values')">
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
+                <ng-container *ngIf="editAttributes">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showDeleteField(attribute + ' setting', getAttributeConfig(attribute), 'concatenation')">
+                    <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                  </button>
+                </ng-container>
               </td>
             </tr>
             <tr>
@@ -373,6 +401,12 @@
                   (click)="showInfo('Mappings', 'Attribute value translation mappings performed before sending to ArcGIS')">
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
+                <ng-container *ngIf="editAttributes">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showDeleteField(attribute + ' setting', getAttributeConfig(attribute), 'mappings')">
+                    <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                  </button>
+                </ng-container>
               </td>
             </tr>
             <ng-container *ngFor="let mapping of keys(getMappings(attribute))">
@@ -392,6 +426,12 @@
                   (click)="showInfo('Defaults', 'Default values when the attribute is missing or has no value')">
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
+                <ng-container *ngIf="editAttributes">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showDeleteField(attribute + ' setting', getAttributeConfig(attribute), 'defaults')">
+                    <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                  </button>
+                </ng-container>
               </td>
             </tr>
             <ng-container *ngFor="let default of getDefaults(attribute)">
@@ -435,10 +475,26 @@
                   (click)="showInfo('Omit', 'Omit the attribute from being sent to ArcGIS')">
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
+                <ng-container *ngIf="editAttributes">
+                  <button class="delete-button" mat-icon-button
+                    (click)="showDeleteField(attribute + ' setting', getAttributeConfig(attribute), 'omit')">
+                    <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                  </button>
+                </ng-container>
               </td>
               <td>{{getOmit(attribute)}}</td>
             </tr>
           </ng-container>
+        </ng-container>
+        <ng-container *ngIf="editAttributes">
+          <tr>
+            <td>
+              <button class="add-button" mat-icon-button
+                (click)="showAddField('Attribute', config.attributes)">
+                <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+              </button>
+            </td>
+          </tr>
         </ng-container>
       </table>
     </div>
@@ -692,7 +748,7 @@
   </mat-dialog-actions>
 </ng-template>
 <ng-template #deleteFieldDialog let-data>
-  <h3 matDialogTitle>Delete {{editType}}: {{editName}}?</h3>
+  <h3 matDialogTitle>Delete {{editType}}? {{editName}}</h3>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="deleteField()">DELETE</button>
@@ -732,5 +788,40 @@
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="addFieldValue(addFieldField.value, addValueField.value)">ADD</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #editFieldDialog let-data>
+  <mat-dialog-content>
+    <div class="edit-field-form">
+      <mat-form-field [style.width.%]="100">
+        <mat-label>{{editType}}</mat-label>
+        <input type="text" matInput value="{{editName}}" #editFieldField />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="editField(editFieldField.value)">UPDATE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #editAttributeConfigDialog let-data>
+  <h2 matDialogTitle>{{editName}} settings</h2>
+  <mat-dialog-content>
+    <div class="concatenation-checkbox">
+      <input type="checkbox" [checked]="hasConcatenation(editName)" #concatenationCheckbox /> Concatenation
+    </div>
+    <div class="mappings-checkbox">
+      <input type="checkbox" [checked]="hasMappings(editName)" #mappingsCheckbox /> Mappings
+    </div>
+    <div class="defaults-checkbox">
+      <input type="checkbox" [checked]="hasDefaults(editName)" #defaultsCheckbox /> Defaults
+    </div>
+    <div class="omit-checkbox">
+      <input type="checkbox" [checked]="hasOmit(editName)" #omitCheckbox /> Omit
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="editAttributeConfig(concatenationCheckbox.checked,mappingsCheckbox.checked,defaultsCheckbox.checked,omitCheckbox.checked)">UPDATE</button>
   </mat-dialog-actions>
 </ng-template>

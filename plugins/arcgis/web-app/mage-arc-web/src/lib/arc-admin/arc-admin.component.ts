@@ -17,6 +17,7 @@ export class ArcAdminComponent implements OnInit {
   infoMessage: string;
   editConfig: ArcGISPluginConfig;
   editFieldMappings: boolean;
+  editAttributes: boolean;
   editType: string;
   editObject: any;
   editName: string;
@@ -34,6 +35,10 @@ export class ArcAdminComponent implements OnInit {
   private addFieldTemplate: TemplateRef<unknown>
   @ViewChild('addFieldValueDialog', { static: true })
   private addFieldValueTemplate: TemplateRef<unknown>
+  @ViewChild('editFieldDialog', { static: true })
+  private editFieldTemplate: TemplateRef<unknown>
+  @ViewChild('editAttributeConfigDialog', { static: true })
+  private editAttributeConfigTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
@@ -189,7 +194,15 @@ export class ArcAdminComponent implements OnInit {
     return keys
   }
 
-  attributeConfig(attribute: string): AttributeConfig | undefined {
+  hasAttributeConfig(attribute: string): boolean {
+    return this.attributeConfig(attribute) != undefined
+  }
+
+  getAttributeConfig(attribute: string): AttributeConfig {
+    return this.attributeConfig(attribute)!
+  }
+
+  private attributeConfig(attribute: string): AttributeConfig | undefined {
     let attributeConfig = undefined
     if (this.config.attributes) {
       attributeConfig = this.config.attributes[attribute]
@@ -296,6 +309,9 @@ export class ArcAdminComponent implements OnInit {
       if (this.editType == 'Event') {
         this.config.fieldAttributes = {}
         this.editObject = this.config.fieldAttributes
+      } else if (this.editType == 'Attribute') {
+        this.config.attributes = {}
+        this.editObject = this.config.attributes
       }
     }
     if (this.editObject[name] == undefined) {
@@ -313,6 +329,70 @@ export class ArcAdminComponent implements OnInit {
   addFieldValue(name: string, value: any) {
     this.editObject[name] = value
     this.arcService.putArcConfig(this.config)
+  }
+
+  showEditField(field: string, object: any, value: any) {
+    this.editType = field;
+    this.editObject = object;
+    this.editName = value;
+    this.dialog.open<unknown, unknown, string>(this.editFieldTemplate)
+  }
+
+  editField(value: any) {
+    this.editObject[this.editType] = value
+    this.arcService.putArcConfig(this.config)
+  }
+
+  showEditAttributeConfig(attribute: string) {
+    this.editName = attribute
+    this.dialog.open<unknown, unknown, string>(this.editAttributeConfigTemplate)
+  }
+
+  editAttributeConfig(concatenation: boolean, mappings: boolean, defaults: boolean, omit: boolean) {
+
+    const attributeConfig = this.attributeConfig(this.editName)
+
+    if (attributeConfig != undefined) {
+
+      const hasConcatenation = this.hasConcatenation(this.editName)
+      if (concatenation) {
+        if (!hasConcatenation) {
+          attributeConfig.concatenation = { delimiter: ', ', sameForms: true, differentForms: true }
+        }
+      } else if (hasConcatenation) {
+        attributeConfig.concatenation = undefined
+      }
+
+      const hasMappings = this.hasMappings(this.editName)
+      if (mappings) {
+        if (!hasMappings) {
+          attributeConfig.mappings = {}
+        }
+      } else if (hasMappings) {
+        attributeConfig.mappings = undefined
+      }
+
+      const hasDefaults = this.hasDefaults(this.editName)
+      if (defaults) {
+        if (!hasDefaults) {
+          attributeConfig.defaults = []
+        }
+      } else if (hasDefaults) {
+        attributeConfig.defaults = undefined
+      }
+
+      const hasOmit = this.hasOmit(this.editName)
+      if (omit) {
+        if (!hasOmit) {
+          attributeConfig.omit = true
+        }
+      } else if (hasOmit) {
+        attributeConfig.omit = undefined
+      }
+
+      this.arcService.putArcConfig(this.config)
+    }
+
   }
 
 }

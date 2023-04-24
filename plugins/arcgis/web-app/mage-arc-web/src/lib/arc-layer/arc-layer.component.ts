@@ -4,6 +4,7 @@ import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginCo
 import { ArcService } from '../arc.service'
 import { FeatureServiceConfig } from '../ArcGISConfig';
 import { MatDialog } from '@angular/material/dialog'
+import { ArcLayerSelectable } from './ArcLayerSelectable';
 
 @Component({
   selector: 'arc-layer',
@@ -13,7 +14,7 @@ import { MatDialog } from '@angular/material/dialog'
 export class ArcLayerComponent implements OnInit {
 
   config: ArcGISPluginConfig;
-  layers: string[];
+  layers: ArcLayerSelectable[];
   arcLayerControl = new FormControl('', [Validators.required])
   isLoading: boolean;
   private currentUrl: string;
@@ -24,7 +25,7 @@ export class ArcLayerComponent implements OnInit {
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
-    this.layers = new Array<string>();
+    this.layers = new Array<ArcLayerSelectable>();
     this.isLoading = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
@@ -32,7 +33,7 @@ export class ArcLayerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
+
   }
 
   inputChanged(layerUrl: string) {
@@ -52,7 +53,8 @@ export class ArcLayerComponent implements OnInit {
       console.log('arclayer response ' + x);
       if (x.layers !== undefined) {
         for (const layer of x.layers) {
-          this.layers.push(layer.name);
+          const selectableLayer = new ArcLayerSelectable(layer.name);
+          this.layers.push(selectableLayer);
         }
       }
       this.isLoading = false;
@@ -79,7 +81,7 @@ export class ArcLayerComponent implements OnInit {
     this.arcService.putArcConfig(this.config);
   }
 
-  onAddLayerUrl(layerUrl: string, layers: string[]) {
+  onAddLayerUrl(layerUrl: string, layers: ArcLayerSelectable[]) {
     console.log('Adding layer ' + layerUrl)
     const splitUrl = layerUrl.split('?');
     const justUrl = splitUrl[0];
@@ -93,10 +95,12 @@ export class ArcLayerComponent implements OnInit {
       layers: []
     } as FeatureServiceConfig;
     for (const aLayer of layers) {
-      const layerConfig = {
-        layer: aLayer
+      if (aLayer.isSelected) {
+        const layerConfig = {
+          layer: aLayer.name
+        }
+        featureLayer.layers.push(layerConfig);
       }
-      featureLayer.layers.push(layerConfig);
     }
     this.config.featureServices.push(featureLayer);
     this.arcService.putArcConfig(this.config);

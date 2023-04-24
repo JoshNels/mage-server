@@ -49,7 +49,8 @@
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <div class="arc-layers" *ngFor="let arcLayer of layers">
       <div class="featureLayer__value">
-        {{arcLayer}}
+        <input type="checkbox" [checked]="arcLayer.isSelected" (change)="arcLayer.isSelected = !arcLayer.isSelected" />
+        {{arcLayer.name}}
       </div>
     </div>
   </mat-dialog-content>

@@ -36,6 +36,23 @@ export class ArcLayerComponent implements OnInit {
 
   }
 
+  selectedChanged(arcLayer: ArcLayerSelectable) {
+    arcLayer.isSelected = !arcLayer.isSelected
+  }
+
+  isSaveDisabled(): boolean {
+    let isDisabled = true;
+
+    for (const layer of this.layers) {
+      if (layer.isSelected) {
+        isDisabled = false;
+        break;
+      }
+    }
+
+    return isDisabled;
+  }
+
   inputChanged(layerUrl: string) {
     console.log('Input changed ' + layerUrl);
     this.currentUrl = layerUrl;

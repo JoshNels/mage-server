@@ -38,6 +38,10 @@ export class ArcLayerComponent implements OnInit {
 
   onEditLayer(arcLayerUrl: string) {
     console.log('Editing layer ' + arcLayerUrl)
+    this.arcLayerControl.setValue(arcLayerUrl)
+    this.layers = []
+    this.fetchLayers(arcLayerUrl)
+    this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 
   selectedChanged(arcLayer: ArcLayerSelectable) {

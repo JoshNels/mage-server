@@ -43,7 +43,7 @@ export interface FeatureLayerConfig {
     /**
      * The layer name.
      */
-    layer: string
+    layer: string | number
 
     /**
      * The geometry type for new layers

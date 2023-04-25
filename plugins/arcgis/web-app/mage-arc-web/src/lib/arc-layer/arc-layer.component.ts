@@ -42,7 +42,7 @@ export class ArcLayerComponent implements OnInit {
     this.layers = []
     let selectedLayers = new Array<string>()
     for (const layer of arcService.layers) {
-      selectedLayers.push(layer.layer)
+      selectedLayers.push(String(layer.layer))
     }
     this.fetchLayers(arcService.url, selectedLayers)
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)

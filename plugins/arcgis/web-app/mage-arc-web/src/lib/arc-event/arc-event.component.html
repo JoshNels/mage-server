@@ -1,0 +1,50 @@
+<div class="arc-event">
+  <section class="arc-event-sync">
+    <header>
+      <h2>Events and Synchronization</h2>
+      <p class="subheading">Change the layers each individual event synchronizes its data to.</p>
+    </header>
+    <div class="arcEvents" *ngIf="!model.events.length">
+      <div class="arcEvent">
+        There are no events synchronizing to ArcGIS feature services.
+      </div>
+    </div>
+    <div class="arcEvents" *ngFor="let event of model.events">
+      <ng-container>
+        <div class="arcEvent">
+          <div class="arcEvent__value">
+            {{event.name}}
+          </div>
+          <div class="arcEvent__edit">
+            <button class="edit-button" mat-icon-button (click)="onEditEvent(event)"><mat-icon>edit</mat-icon></button>
+          </div>
+        </div>
+        <div class="featureLayers" *ngFor="let featureLayer of event.layers">
+          <div class="featureLayer__value">
+            {{featureLayer}}
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+</div>
+<ng-template #syncLayerDialog let-data>
+  <h2 matDialogTitle>Add ArcGIS Layer</h2>
+  <mat-dialog-content>
+    <div class="arc-layer-form">
+      Event Name Goes Here
+    </div>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <div class="arc-layers" *ngFor="let arcLayer of layers">
+      <div class="featureLayer__value">
+        <input type="checkbox" [checked]="arcLayer.isSelected" (change)="selectedChanged(arcLayer)" />
+        {{arcLayer.name}}
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button [disabled]="isSaveDisabled()" mat-flat-button color="primary" matDialogClose
+      (click)="saveChanges()">SAVE</button>
+  </mat-dialog-actions>
+</ng-template>

@@ -15,11 +15,13 @@ import { ArcAdminComponent } from './arc-admin/arc-admin.component'
 import { HttpClientModule } from '@angular/common/http'
 import { MageUserModule } from '@ngageoint/mage.web-core-lib/user'
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ArcLayerComponent } from '../public-api';
+import { ArcLayerComponent } from './arc-layer/arc-layer.component';
+import { ArcEventComponent } from './arc-event/arc-event.component';
 
 
 @NgModule({
   declarations: [
+    ArcEventComponent,
     ArcLayerComponent,
     ArcAdminComponent
   ],
@@ -43,7 +45,8 @@ import { ArcLayerComponent } from '../public-api';
   ],
   exports: [
     ArcAdminComponent,
-    ArcLayerComponent
+    ArcLayerComponent,
+    ArcEventComponent
   ]
 })
 export class MageArcModule { }

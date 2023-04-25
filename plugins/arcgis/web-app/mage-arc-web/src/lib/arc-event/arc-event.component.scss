@@ -1,0 +1,57 @@
+.arc-layer-form {
+    display: flex;
+    flex-direction: column;
+    min-width: 950px;
+}
+
+section {
+    >* {
+        margin-inline-start: 1em;
+    }
+
+    header {
+        margin-inline-start: 0;
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin-block-end: 0;
+        }
+
+        .subheading {
+            margin-block-start: 0;
+            opacity: 0.5;
+        }
+
+        margin-block-end: 2em;
+    }
+
+    margin-block-start: 2em;
+    margin-block-end: 2em;
+}
+
+.arcEvent {
+    margin-block-start: 1em;
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    max-width: 600px;
+}
+
+.arcEvent__value {
+    grid-column-start: 1;
+}
+
+.arcEvent__edit {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+    text-align: end;
+}
+
+.featureLayers {
+    display: grid;
+    opacity: 0.5;
+    font-size: 0.9em;
+}

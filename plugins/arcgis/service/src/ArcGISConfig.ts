@@ -41,9 +41,9 @@ export interface FeatureServiceConfig {
 export interface FeatureLayerConfig {
 
     /**
-     * The layer id or name.
+     * The layer name.
      */
-    layer: number|string
+    layer: string
 
     /**
      * The geometry type for new layers

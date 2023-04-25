@@ -36,11 +36,15 @@ export class ArcLayerComponent implements OnInit {
 
   }
 
-  onEditLayer(arcLayerUrl: string) {
-    console.log('Editing layer ' + arcLayerUrl)
-    this.arcLayerControl.setValue(arcLayerUrl)
+  onEditLayer(arcService: FeatureServiceConfig) {
+    console.log('Editing layer ' + arcService.url)
+    this.arcLayerControl.setValue(arcService.url)
     this.layers = []
-    this.fetchLayers(arcLayerUrl)
+    let selectedLayers = new Array<string>()
+    for (const layer of arcService.layers) {
+      selectedLayers.push(layer.layer)
+    }
+    this.fetchLayers(arcService.url, selectedLayers)
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 
@@ -67,10 +71,10 @@ export class ArcLayerComponent implements OnInit {
     if (this.timeoutId !== undefined) {
       window.clearTimeout(this.timeoutId);
     }
-    this.timeoutId = window.setTimeout(() => this.fetchLayers(this.currentUrl), 1000);
+    this.timeoutId = window.setTimeout(() => this.fetchLayers(this.currentUrl, []), 1000);
   }
 
-  fetchLayers(currentUrl: string) {
+  fetchLayers(currentUrl: string, selectedLayers: string[]) {
     console.log('Fetching layers for ' + currentUrl);
     this.isLoading = true;
     this.layers = []
@@ -79,6 +83,9 @@ export class ArcLayerComponent implements OnInit {
       if (x.layers !== undefined) {
         for (const layer of x.layers) {
           const selectableLayer = new ArcLayerSelectable(layer.name);
+          if (selectedLayers.length > 0) {
+            selectableLayer.isSelected = selectedLayers.indexOf(layer.name) >= 0;
+          }
           this.layers.push(selectableLayer);
         }
       }

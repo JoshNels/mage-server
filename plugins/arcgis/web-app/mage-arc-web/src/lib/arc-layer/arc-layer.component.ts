@@ -36,6 +36,10 @@ export class ArcLayerComponent implements OnInit {
 
   }
 
+  onEditLayer(arcLayerUrl: string) {
+    console.log('Editing layer ' + arcLayerUrl)
+  }
+
   selectedChanged(arcLayer: ArcLayerSelectable) {
     arcLayer.isSelected = !arcLayer.isSelected
   }

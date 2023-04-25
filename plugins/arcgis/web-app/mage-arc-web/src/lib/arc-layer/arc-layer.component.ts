@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
-import { FeatureServiceConfig } from '../ArcGISConfig';
+import { FeatureLayerConfig, FeatureServiceConfig } from '../ArcGISConfig';
 import { MatDialog } from '@angular/material/dialog'
 import { ArcLayerSelectable } from './ArcLayerSelectable';
 
@@ -114,27 +114,48 @@ export class ArcLayerComponent implements OnInit {
   }
 
   onAddLayerUrl(layerUrl: string, layers: ArcLayerSelectable[]) {
-    console.log('Adding layer ' + layerUrl)
-    const splitUrl = layerUrl.split('?');
-    const justUrl = splitUrl[0];
-    const params = splitUrl[1];
-    const urlParams = new URLSearchParams(params);
-    const token = urlParams.get('token');
-    console.log('token is ' + token);
-    const featureLayer = {
-      url: justUrl,
-      token: token,
-      layers: []
-    } as FeatureServiceConfig;
-    for (const aLayer of layers) {
-      if (aLayer.isSelected) {
-        const layerConfig = {
-          layer: aLayer.name
-        }
-        featureLayer.layers.push(layerConfig);
+    let serviceConfigToEdit = null;
+    for (const service of this.config.featureServices) {
+      if (service.url == layerUrl) {
+        serviceConfigToEdit = service;
       }
     }
-    this.config.featureServices.push(featureLayer);
+
+    if (serviceConfigToEdit == null) {
+      console.log('Adding layer ' + layerUrl)
+      const splitUrl = layerUrl.split('?');
+      const justUrl = splitUrl[0];
+      const params = splitUrl[1];
+      const urlParams = new URLSearchParams(params);
+      const token = urlParams.get('token');
+      console.log('token is ' + token);
+      const featureLayer = {
+        url: justUrl,
+        token: token,
+        layers: []
+      } as FeatureServiceConfig;
+      for (const aLayer of layers) {
+        if (aLayer.isSelected) {
+          const layerConfig = {
+            layer: aLayer.name
+          }
+          featureLayer.layers.push(layerConfig);
+        }
+      }
+      this.config.featureServices.push(featureLayer);
+    } else {
+      console.log('Saving edited layer ' + layerUrl)
+      serviceConfigToEdit.layers = new Array<FeatureLayerConfig>();
+      for (const aLayer of layers) {
+        if (aLayer.isSelected) {
+          const layerConfig = {
+            layer: aLayer.name
+          }
+          serviceConfigToEdit.layers.push(layerConfig);
+        }
+      }
+    }
+
     this.arcService.putArcConfig(this.config);
   }
 }

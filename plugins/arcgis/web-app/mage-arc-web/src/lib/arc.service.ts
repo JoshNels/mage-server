@@ -31,7 +31,7 @@ export class ArcService {
   }
 
   fetchEvents() {
-    return this.http.get<EventsResult[]>('${apiBaseUrl}/events')
+    return this.http.get<EventsResult[]>(`${apiBaseUrl}/events?populate=false&projection={"name":true}`)
   }
 
   putArcConfig(config: ArcGISPluginConfig) {

@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { ArcEventsModel } from './ArcEventsModel';
 import { ArcEvent } from './ArcEvent';
 import { ArcLayerSelectable } from '../arc-layer/ArcLayerSelectable';
+import { EventsResult } from '../EventsResult';
 
 
 @Component({
@@ -27,11 +28,20 @@ export class ArcEventComponent implements OnInit {
     this.model = new ArcEventsModel();
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
-    })
+    });
+    arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
   ngOnInit(): void {
 
+  }
+
+  handleEventResults(x: EventsResult[]) {
+    let activeEventMessage = 'Actives events: ';
+    for (const event of x) {
+      activeEventMessage += event.name + ' ';
+    }
+    console.log(activeEventMessage);
   }
 
   onEditEvent(event: ArcEvent) {
@@ -42,7 +52,7 @@ export class ArcEventComponent implements OnInit {
     console.log('Selection changed for ' + layer.name);
   }
 
-  isSaveDisabled() : boolean {
+  isSaveDisabled(): boolean {
     return false;
   }
 

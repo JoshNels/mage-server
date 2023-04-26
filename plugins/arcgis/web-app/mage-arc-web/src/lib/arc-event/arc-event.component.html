@@ -2,11 +2,11 @@
   <section class="arc-event-sync">
     <header>
       <h2>Events and Synchronization</h2>
-      <p class="subheading">Change the layers each individual event synchronizes its data to.</p>
+      <p class="subheading">Change the ArcGIS layers each MAGE event sends its observations to.</p>
     </header>
     <div class="arcEvents" *ngIf="!model.events.length">
       <div class="arcEvent">
-        There are no events synchronizing to ArcGIS feature services.
+        There are no events synchronizing to ArcGIS layers.
       </div>
     </div>
     <div class="arcEvents" *ngFor="let event of model.events">

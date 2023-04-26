@@ -28,8 +28,8 @@ export class ArcEventComponent implements OnInit {
     this.model = new ArcEventsModel();
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
+      arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
     });
-    arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
   ngOnInit(): void {
@@ -37,9 +37,22 @@ export class ArcEventComponent implements OnInit {
   }
 
   handleEventResults(x: EventsResult[]) {
-    let activeEventMessage = 'Actives events: ';
+    let activeEventMessage = 'Active events: ';
     for (const event of x) {
       activeEventMessage += event.name + ' ';
+      let eventsLayers = new Array<string>();
+      for (const featureServiceConfig of this.config.featureServices) {
+        for (const arcLayer of featureServiceConfig.layers) {
+          if (arcLayer.events == undefined
+            || arcLayer.events == null
+            || arcLayer.events.length == 0
+            || arcLayer.events.indexOf(event.name) >= 0) {
+            eventsLayers.push(String(arcLayer.layer));
+          }
+        }
+      }
+      const arcEvent = new ArcEvent(event.name, eventsLayers);
+      this.model.events.push(arcEvent);
     }
     console.log(activeEventMessage);
   }

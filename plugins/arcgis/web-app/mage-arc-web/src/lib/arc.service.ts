@@ -3,8 +3,10 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ArcGISPluginConfig } from './ArcGISPluginConfig'
 import { FeatureServiceResult } from './FeatureServiceResult'
+import { EventsResult } from './EventsResult'
 
 export const baseUrl = '/plugins/@ngageoint/mage.arcgis'
+export const apiBaseUrl = '/api'
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +28,10 @@ export class ArcService {
 
   fetchArcLayers(featureUrl: string) {
     return this.http.get<FeatureServiceResult>(`${baseUrl}/arcgisLayers?featureUrl=${featureUrl}`)
+  }
+
+  fetchEvents() {
+    return this.http.get<EventsResult[]>('${apiBaseUrl}/events')
   }
 
   putArcConfig(config: ArcGISPluginConfig) {

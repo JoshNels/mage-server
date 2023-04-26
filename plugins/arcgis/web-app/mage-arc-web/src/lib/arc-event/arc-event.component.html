@@ -28,13 +28,9 @@
     </div>
   </section>
 </div>
-<ng-template #syncLayerDialog let-data>
-  <h2 matDialogTitle>Add ArcGIS Layer</h2>
+<ng-template #editEventDialog let-data>
+  <h2 matDialogTitle>ArcGIS Layers that MAGE Event Named {{currentEditingEvent}} is Synchronizing</h2>
   <mat-dialog-content>
-    <div class="arc-layer-form">
-      Event Name Goes Here
-    </div>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
     <div class="arc-layers" *ngFor="let arcLayer of layers">
       <div class="featureLayer__value">
         <input type="checkbox" [checked]="arcLayer.isSelected" (change)="selectedChanged(arcLayer)" />

@@ -18,10 +18,11 @@ export class ArcEventComponent implements OnInit {
   config: ArcGISPluginConfig;
   model: ArcEventsModel;
   isLoading: boolean;
+  currentEditingEvent: string
   layers: ArcLayerSelectable[];
 
-  @ViewChild('syncLayerDialog', { static: true })
-  private syncLayerTemplate: TemplateRef<unknown>
+  @ViewChild('editEventDialog', { static: true })
+  private editEventTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
@@ -59,6 +60,19 @@ export class ArcEventComponent implements OnInit {
 
   onEditEvent(event: ArcEvent) {
     console.log('Editing event synchronization for event ' + event.name);
+    this.currentEditingEvent = event.name;
+    this.layers = new Array<ArcLayerSelectable>();
+
+    for (const serviceConfig of this.config.featureServices) {
+      for (const layerConfig of serviceConfig.layers) {
+        const configLayerName = String(layerConfig.layer);
+        const selectableLayer = new ArcLayerSelectable(configLayerName);
+        selectableLayer.isSelected = event.layers.indexOf(configLayerName) >= 0;
+        this.layers.push(selectableLayer);
+      }
+    }
+
+    this.dialog.open<unknown, unknown, string>(this.editEventTemplate)
   }
 
   selectedChanged(layer: ArcLayerSelectable) {

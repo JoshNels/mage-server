@@ -18,7 +18,7 @@ export class ArcEventComponent implements OnInit {
   config: ArcGISPluginConfig;
   model: ArcEventsModel;
   isLoading: boolean;
-  currentEditingEvent: string
+  currentEditingEvent: ArcEvent;
   layers: ArcLayerSelectable[];
 
   @ViewChild('editEventDialog', { static: true })
@@ -60,7 +60,7 @@ export class ArcEventComponent implements OnInit {
 
   onEditEvent(event: ArcEvent) {
     console.log('Editing event synchronization for event ' + event.name);
-    this.currentEditingEvent = event.name;
+    this.currentEditingEvent = event;
     this.layers = new Array<ArcLayerSelectable>();
 
     for (const serviceConfig of this.config.featureServices) {
@@ -77,13 +77,29 @@ export class ArcEventComponent implements OnInit {
 
   selectedChanged(layer: ArcLayerSelectable) {
     console.log('Selection changed for ' + layer.name);
-  }
-
-  isSaveDisabled(): boolean {
-    return false;
+    layer.isSelected = !layer.isSelected;
   }
 
   saveChanges() {
     console.log('Saving changes to event sync');
+    for(const layer of this.layers) {
+      for(const featureService of this.config.featureServices) {
+        for(const configLayer of featureService.layers) {
+          if(configLayer.layer == layer.name) {
+            if(configLayer.events == undefined || configLayer.events == null) {
+              configLayer.events = new Array<string>();
+            }
+            const indexOf = configLayer.events.indexOf(this.currentEditingEvent.name);
+            if(layer.isSelected && indexOf < 0) {
+              configLayer.events.push(this.currentEditingEvent.name);
+            } else if(!layer.isSelected && indexOf >= 0) {
+              configLayer.events.splice(indexOf);
+            }
+          }
+        }
+      }
+    }
+    
+    this.arcService.putArcConfig(this.config);
   }
 }

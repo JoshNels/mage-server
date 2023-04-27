@@ -46,7 +46,6 @@ export class ArcEventComponent implements OnInit {
         for (const arcLayer of featureServiceConfig.layers) {
           if (arcLayer.events == undefined
             || arcLayer.events == null
-            || arcLayer.events.length == 0
             || arcLayer.events.indexOf(event.name) >= 0) {
             eventsLayers.push(String(arcLayer.layer));
           }

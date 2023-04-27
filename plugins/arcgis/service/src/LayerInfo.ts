@@ -40,8 +40,13 @@ export class LayerInfo {
     constructor(url: string, events: string[], layerInfo: LayerInfoResult, token?: string) {
         this.url = url
         this.token = token
-        for(const event of events) {
-            this.events.add(event);
+        if (events != undefined && events != null && events.length == 0) {
+            this.events.add('nothing to sync')
+        }
+        if (events != undefined || events != null) {
+            for (const event of events) {
+                this.events.add(event);
+            }
         }
         this.geometryType = layerInfo.geometryType
         for (const field of layerInfo.fields) {

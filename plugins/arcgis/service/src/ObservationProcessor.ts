@@ -258,7 +258,9 @@ export class ObservationProcessor {
                         }
                     }
                 }
-                featureLayer.events = eventNames
+                if (eventNames.length > 0) {
+                    featureLayer.events = eventNames
+                }
 
                 const layer = serviceLayers.get(featureLayer.layer)
 

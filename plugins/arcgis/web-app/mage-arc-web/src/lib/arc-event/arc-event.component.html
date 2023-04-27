@@ -19,6 +19,11 @@
             <button class="edit-button" mat-icon-button (click)="onEditEvent(event)"><mat-icon>edit</mat-icon></button>
           </div>
         </div>
+        <div class="featureLayers" *ngIf="!event.layers.length">
+          <div class="featureLayer_value">
+            This event is not synchronizing to any ArcGIS layers.
+          </div>
+        </div>
         <div class="featureLayers" *ngFor="let featureLayer of event.layers">
           <div class="featureLayer__value">
             {{featureLayer}}

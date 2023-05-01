@@ -286,16 +286,21 @@ export class ArcAdminComponent implements OnInit {
     this.dialog.open<unknown, unknown, string>(this.infoTemplate)
   }
 
-  showDeleteField(type: string, object: any, name: string) {
+  showDeleteField(type: string, object: any, name: string, value: string) {
     this.editType = type;
     this.editObject = object;
     this.editName = name;
+    this.editValue = value;
     this.dialog.open<unknown, unknown, string>(this.deleteFieldTemplate)
   }
 
   deleteField() {
     if (this.editObject != undefined) {
-      delete this.editObject[this.editName]
+      if (this.editType == 'Default') {
+        this.editObject.defaults.splice(this.editValue, 1)
+      } else {
+        delete this.editObject[this.editValue]
+      }
       this.arcService.putArcConfig(this.config)
     }
   }
@@ -316,7 +321,15 @@ export class ArcAdminComponent implements OnInit {
         this.editObject = this.config.attributes
       }
     }
-    if (this.editObject[name] == undefined) {
+    if (this.editType == 'Default') {
+      if (this.editObject.defaults == undefined) {
+        this.editObject.defaults = []
+      }
+      const attributeDefault = {} as AttributeDefaultConfig
+      attributeDefault.value = name
+      this.editObject.defaults.push(attributeDefault)
+      this.arcService.putArcConfig(this.config)
+    } else if (this.editObject[name] == undefined) {
       this.editObject[name] = {}
       this.arcService.putArcConfig(this.config)
     }

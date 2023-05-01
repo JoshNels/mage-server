@@ -238,7 +238,7 @@
                 <td>{{config.fieldAttributes[event][form][field]}}
                   <ng-container *ngIf="editFieldMappings">
                     <button class="add-button" mat-icon-button
-                      (click)="showEditField(field, config.fieldAttributes[event][form], config.fieldAttributes[event][form][field])">
+                      (click)="showEditField(field, field, config.fieldAttributes[event][form], config.fieldAttributes[event][form][field])">
                       <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                     </button>
                   </ng-container>
@@ -340,7 +340,7 @@
               <td>{{getConcatenation(attribute).delimiter}}
                 <ng-container *ngIf="editAttributes">
                   <button class="add-button" mat-icon-button
-                    (click)="showEditField('delimiter', getConcatenation(attribute), getConcatenation(attribute).delimiter)">
+                    (click)="showEditField('Delimiter', 'delimiter', getConcatenation(attribute), getConcatenation(attribute).delimiter)">
                     <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
@@ -355,7 +355,14 @@
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
               </td>
-              <td>{{getConcatenation(attribute).sameForms}}</td>
+              <td>{{getConcatenation(attribute).sameForms}}
+                <ng-container *ngIf="editAttributes">
+                  <button class="add-button" mat-icon-button
+                    (click)="showEditBooleanField('Same Forms', 'sameForms', getConcatenation(attribute), getConcatenation(attribute).sameForms)">
+                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
             <tr>
               <td></td>
@@ -366,7 +373,14 @@
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
               </td>
-              <td>{{getConcatenation(attribute).differentForms}}</td>
+              <td>{{getConcatenation(attribute).differentForms}}
+                <ng-container *ngIf="editAttributes">
+                  <button class="add-button" mat-icon-button
+                    (click)="showEditBooleanField('Different Forms', 'differentForms', getConcatenation(attribute), getConcatenation(attribute).differentForms)">
+                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
           </ng-container>
           <ng-container *ngIf="hasMappings(attribute)">
@@ -400,7 +414,7 @@
                 <td>{{getMappings(attribute)[mapping]}}
                   <ng-container *ngIf="editAttributes">
                     <button class="add-button" mat-icon-button
-                      (click)="showEditField(mapping, getMappings(attribute), getMappings(attribute)[mapping])">
+                      (click)="showEditField(mapping, mapping, getMappings(attribute), getMappings(attribute)[mapping])">
                       <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                     </button>
                   </ng-container>
@@ -484,7 +498,14 @@
                   </button>
                 </ng-container>
               </td>
-              <td>{{getOmit(attribute)}}</td>
+              <td>{{getOmit(attribute)}}
+                <ng-container *ngIf="editAttributes">
+                  <button class="add-button" mat-icon-button
+                    (click)="showEditBooleanField('Omit', 'omit', getAttributeConfig(attribute), getOmit(attribute))">
+                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                  </button>
+                </ng-container>
+              </td>
             </tr>
           </ng-container>
         </ng-container>
@@ -787,14 +808,30 @@
   <mat-dialog-content>
     <div class="edit-field-form">
       <mat-form-field [style.width.%]="100">
-        <mat-label>{{editType}}</mat-label>
-        <input type="text" matInput value="{{editName}}" #editFieldField />
+        <mat-label>{{editName}}</mat-label>
+        <input type="text" matInput value="{{editValue}}" #editFieldField />
       </mat-form-field>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="editField(editFieldField.value)">UPDATE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #editBooleanFieldDialog let-data>
+  <mat-dialog-content>
+    <div class="edit-boolean-field-form">
+      <mat-form-field [style.width.%]="100">
+        <mat-select [placeholder]="editName" [(value)]="editValue" #editBooleanFieldField >
+          <mat-option [value]="true">true</mat-option>
+          <mat-option [value]="false">false</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="editField(editBooleanFieldField.value)">UPDATE</button>
   </mat-dialog-actions>
 </ng-template>
 <ng-template #editAttributeConfigDialog let-data>

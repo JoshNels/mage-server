@@ -21,7 +21,7 @@ export class ArcAdminComponent implements OnInit {
   editType: string;
   editObject: any;
   editName: string;
-
+  editValue: any;
 
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
@@ -37,6 +37,8 @@ export class ArcAdminComponent implements OnInit {
   private addFieldValueTemplate: TemplateRef<unknown>
   @ViewChild('editFieldDialog', { static: true })
   private editFieldTemplate: TemplateRef<unknown>
+  @ViewChild('editBooleanFieldDialog', { static: true })
+  private editBooleanFieldTemplate: TemplateRef<unknown>
   @ViewChild('editAttributeConfigDialog', { static: true })
   private editAttributeConfigTemplate: TemplateRef<unknown>
 
@@ -331,16 +333,25 @@ export class ArcAdminComponent implements OnInit {
     this.arcService.putArcConfig(this.config)
   }
 
-  showEditField(field: string, object: any, value: any) {
+  showEditField(name: string, field: string, object: any, value: any) {
+    this.editName = name;
     this.editType = field;
     this.editObject = object;
-    this.editName = value;
+    this.editValue = value;
     this.dialog.open<unknown, unknown, string>(this.editFieldTemplate)
   }
 
   editField(value: any) {
     this.editObject[this.editType] = value
     this.arcService.putArcConfig(this.config)
+  }
+
+  showEditBooleanField(name: string, field: string, object: any, value: any) {
+    this.editName = name;
+    this.editType = field;
+    this.editObject = object;
+    this.editValue = value;
+    this.dialog.open<unknown, unknown, string>(this.editBooleanFieldTemplate)
   }
 
   showEditAttributeConfig(attribute: string) {

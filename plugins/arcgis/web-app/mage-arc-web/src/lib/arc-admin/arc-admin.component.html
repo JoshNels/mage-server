@@ -190,7 +190,7 @@
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
       <button class="lock-button" mat-icon-button
-        (click)="editFieldMappings = !editFieldMappings">
+        (click)="updateFieldMappings(editFieldMappings); editFieldMappings = !editFieldMappings">
         <mat-icon class="lock-icon" [inline]="true">{{editFieldMappings ? 'lock_open' : 'lock'}}</mat-icon>
       </button>
       <table class="fieldOverrides-table">
@@ -289,7 +289,7 @@
         <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
       </button>
       <button class="lock-button" mat-icon-button
-        (click)="editAttributes = !editAttributes">
+        (click)="updateAttributeSettings(editAttributes); editAttributes = !editAttributes">
         <mat-icon class="lock-icon" [inline]="true">{{editAttributes ? 'lock_open' : 'lock'}}</mat-icon>
       </button>
       <table class="attributeConfigurations-table">
@@ -450,18 +450,18 @@
                 </ng-container>
               </td>
             </tr>
-            <ng-container *ngFor="let default of getDefaults(attribute); index as i">
+            <ng-container *ngFor="let default of getDefaults(attribute); index as defaultIndex">
               <tr>
                 <td></td>
                 <td></td>
                 <td>{{default.value}}
                   <ng-container *ngIf="editAttributes">
                     <button class="add-button" mat-icon-button
-                      (click)="showEditField(attribute + ' Default', 'value', getDefaults(attribute)[i], default.value)">
+                      (click)="showEditField(attribute + ' Default', 'value', getDefaults(attribute)[defaultIndex], default.value)">
                       <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                     </button>
                     <button class="delete-button" mat-icon-button
-                      (click)="showDeleteField('Default', getAttributeConfig(attribute), default.value, i)">
+                      (click)="showDeleteField('Default', getDefaults(attribute), default.value, defaultIndex)">
                       <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                     </button>
                   </ng-container>
@@ -477,19 +477,59 @@
                       (click)="showInfo('Conditions', 'Conditional attribute equality values when the default applies')">
                       <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                     </button>
+                    <ng-container *ngIf="default.condition != undefined && editAttributes">
+                      <button class="delete-button" mat-icon-button
+                        (click)="showDeleteField('Conditions', default, default.value, 'condition')">
+                        <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                      </button>
+                    </ng-container>
                   </td>
                 </tr>
               </ng-container>
               <ng-container *ngIf="default.condition != undefined">
-                <ng-container *ngFor="let condition of default.condition!">
-                  <ng-container *ngFor="let value of condition.values; index as j">
+                <ng-container *ngFor="let condition of default.condition!; index as conditionIndex">
+                  <ng-container *ngFor="let value of condition.values; index as valueIndex">
                     <tr>
                       <td></td>
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td>{{ j == 0 ? condition.attribute : '' }}</td>
-                      <td>{{value}}</td>
+                      <ng-container *ngIf="valueIndex == 0">
+                        <td>{{ condition.attribute }}
+                          <ng-container *ngIf="editAttributes">
+                            <button class="delete-button" mat-icon-button
+                              (click)="showDeleteField('Condition', default.condition, condition.attribute, conditionIndex)">
+                              <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                            </button>
+                          </ng-container>
+                        </td>
+                      </ng-container>
+                      <ng-container *ngIf="valueIndex > 0">
+                        <td></td>
+                      </ng-container>
+                      <td>{{value}}
+                        <ng-container *ngIf="editAttributes && condition.values.length > 1">
+                          <button class="delete-button" mat-icon-button
+                            (click)="showDeleteField('Condition Value', condition.values, value, valueIndex)">
+                            <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                          </button>
+                        </ng-container>
+                      </td>
+                    </tr>
+                  </ng-container>
+                  <ng-container *ngIf="editAttributes">
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>
+                        <button class="add-button" mat-icon-button
+                          (click)="showAddField('Condition Value', condition.values)">
+                          <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
+                        </button>
+                      </td>
                     </tr>
                   </ng-container>
                 </ng-container>
@@ -502,7 +542,7 @@
                   <td></td>
                   <td>
                     <button class="add-button" mat-icon-button
-                      (click)="showAddFieldValue('Condition', default)">
+                      (click)="showAddFieldValue('Condition Attribute', default)">
                       <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
                     </button>
                   </td>

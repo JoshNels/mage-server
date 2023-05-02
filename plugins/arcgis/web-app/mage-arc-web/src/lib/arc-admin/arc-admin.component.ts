@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog'
-import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig } from '../ArcGISConfig';
+import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, AttributeValueConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 
@@ -65,7 +65,7 @@ export class ArcAdminComponent implements OnInit {
     if (index < this.config.featureServices.length) {
       this.config.featureServices.splice(index, 1);
     }
-    this.arcService.putArcConfig(this.config);
+    this.saveConfig();
   }
 
   onEditProcessing() {
@@ -178,7 +178,7 @@ export class ArcAdminComponent implements OnInit {
       this.config.geometryType = this.editConfig.geometryType
       console.log('Edited geometryType: ' + this.config.geometryType)
     }
-    this.arcService.putArcConfig(this.config)
+    this.saveConfig()
     console.log('Saved configuration edit')
   }
 
@@ -296,12 +296,12 @@ export class ArcAdminComponent implements OnInit {
 
   deleteField() {
     if (this.editObject != undefined) {
-      if (this.editType == 'Default') {
-        this.editObject.defaults.splice(this.editValue, 1)
+      if (Array.isArray(this.editObject)) {
+        this.editObject.splice(this.editValue, 1)
       } else {
         delete this.editObject[this.editValue]
       }
-      this.arcService.putArcConfig(this.config)
+      this.updateConfigForDeletion()
     }
   }
 
@@ -328,10 +328,13 @@ export class ArcAdminComponent implements OnInit {
       const attributeDefault = {} as AttributeDefaultConfig
       attributeDefault.value = name
       this.editObject.defaults.push(attributeDefault)
-      this.arcService.putArcConfig(this.config)
+      this.saveConfig()
+    } else if (Array.isArray(this.editObject)) {
+      this.editObject.push(name)
+      this.saveConfig()
     } else if (this.editObject[name] == undefined) {
       this.editObject[name] = {}
-      this.arcService.putArcConfig(this.config)
+      this.saveConfig()
     }
   }
 
@@ -342,8 +345,18 @@ export class ArcAdminComponent implements OnInit {
   }
 
   addFieldValue(name: string, value: any) {
-    this.editObject[name] = value
-    this.arcService.putArcConfig(this.config)
+    if (this.editType == 'Condition Attribute') {
+      if (this.editObject.condition == undefined) {
+        this.editObject.condition = []
+      }
+      const attributeValue = {} as AttributeValueConfig
+      attributeValue.attribute = name
+      attributeValue.values = [value]
+      this.editObject.condition.push(attributeValue)
+    } else {
+      this.editObject[name] = value
+    }
+    this.saveConfig()
   }
 
   showEditField(name: string, field: string, object: any, value: any) {
@@ -356,7 +369,7 @@ export class ArcAdminComponent implements OnInit {
 
   editField(value: any) {
     this.editObject[this.editType] = value
-    this.arcService.putArcConfig(this.config)
+    this.saveConfig()
   }
 
   showEditBooleanField(name: string, field: string, object: any, value: any) {
@@ -414,7 +427,89 @@ export class ArcAdminComponent implements OnInit {
         attributeConfig.omit = undefined
       }
 
-      this.arcService.putArcConfig(this.config)
+      this.saveConfig()
+    }
+
+  }
+
+  updateFieldMappings(update: boolean) {
+    if (update) {
+      this.cleanFieldMappings(true)
+      this.saveConfig()
+    }
+  }
+
+  updateAttributeSettings(update: boolean) {
+    if (update) {
+      this.cleanAttributeSettings(true)
+      this.saveConfig()
+    }
+  }
+
+  private saveConfig() {
+    this.arcService.putArcConfig(this.config)
+  }
+
+  private updateConfigForDeletion() {
+    this.cleanFieldMappings(false)
+    this.cleanAttributeSettings(false)
+    this.saveConfig()
+  }
+
+  private cleanFieldMappings(finalize: boolean) {
+
+    if (finalize && this.config.fieldAttributes != undefined) {
+      for (const event of Object.keys(this.config.fieldAttributes)) {
+        for (const form of Object.keys(this.config.fieldAttributes[event])) {
+          const fields = this.config.fieldAttributes[event][form]
+          if (Object.keys(fields).length == 0) {
+            delete this.config.fieldAttributes[event][form]
+          }
+        }
+        if (Object.keys(this.config.fieldAttributes[event]).length == 0) {
+          delete this.config.fieldAttributes[event]
+        }
+      }
+      if (Object.keys(this.config.fieldAttributes).length == 0) {
+        delete this.config.fieldAttributes
+      }
+    }
+
+  }
+
+  private cleanAttributeSettings(finalize: boolean) {
+
+    if (this.config.attributes != undefined) {
+      for (const attributeConfig of Object.values(this.config.attributes)) {
+
+        if (finalize && attributeConfig.mappings != undefined && Object.keys(attributeConfig.mappings).length == 0) {
+          delete attributeConfig.mappings
+        }
+
+        if (attributeConfig.defaults != undefined) {
+          for (const attributeDefault of attributeConfig.defaults) {
+            if (attributeDefault.condition != undefined) {
+              for (let i = attributeDefault.condition.length - 1; i >= 0; i--) {
+                const attributeValueConfig = attributeDefault.condition[i]
+                if (attributeValueConfig.values.length == 0) {
+                  attributeDefault.condition.splice(i, 1)
+                }
+              }
+              if (attributeDefault.condition.length == 0) {
+                delete attributeDefault.condition
+              }
+            }
+          }
+          if (finalize && attributeConfig.defaults.length == 0) {
+            delete attributeConfig.defaults
+          }
+        }
+
+        if (finalize && attributeConfig.omit != undefined && !attributeConfig.omit) {
+          delete attributeConfig.omit
+        }
+
+      }
     }
 
   }

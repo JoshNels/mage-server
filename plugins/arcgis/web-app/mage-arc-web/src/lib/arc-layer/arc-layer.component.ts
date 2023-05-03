@@ -17,11 +17,13 @@ export class ArcLayerComponent implements OnInit {
   layers: ArcLayerSelectable[];
   arcLayerControl = new FormControl('', [Validators.required])
   isLoading: boolean;
-  private currentUrl: string;
+  currentUrl: string;
   private timeoutId: number;
 
   @ViewChild('addLayerDialog', { static: true })
   private addLayerTemplate: TemplateRef<unknown>
+  @ViewChild('deleteLayerDialog', { static: true })
+  private deleteLayerTemplate: TemplateRef<unknown>
 
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
@@ -99,10 +101,15 @@ export class ArcLayerComponent implements OnInit {
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 
-  onDeleteLayer(layerUrl: string) {
+  showDeleteLayer(layerUrl: string) {
+    this.currentUrl = layerUrl
+    this.dialog.open<unknown, unknown, string>(this.deleteLayerTemplate)
+  }
+
+  onDeleteLayer() {
     let index = 0;
     for (const featureServiceConfig of this.config.featureServices) {
-      if (featureServiceConfig.url == layerUrl) {
+      if (featureServiceConfig.url == this.currentUrl) {
         break;
       }
       index++;

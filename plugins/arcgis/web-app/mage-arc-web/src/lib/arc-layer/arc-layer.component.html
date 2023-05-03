@@ -24,7 +24,7 @@
           </div>
           <div class="arcLayer__action">
             <button class="delete-button" mat-icon-button aria-label="Delete ArcGIS layer"
-              (click)="onDeleteLayer(arcLayer.url)"><mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon></button>
+              (click)="showDeleteLayer(arcLayer.url)"><mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon></button>
           </div>
         </div>
         <div class="featureLayers" *ngFor="let featureLayer of arcLayer.layers">
@@ -61,5 +61,15 @@
     <button mat-button matDialogClose>CANCEL</button>
     <button [disabled]="isSaveDisabled()" mat-flat-button color="primary" matDialogClose
       (click)="onAddLayerUrl(layerUrl.value, layers)">SAVE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #deleteLayerDialog let-data>
+  <h3 matDialogTitle>Delete layer?</h3>
+  <div class="deleteArcLayer__value">
+    {{currentUrl}}
+  </div>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="onDeleteLayer()">DELETE</button>
   </mat-dialog-actions>
 </ng-template>

@@ -16,7 +16,7 @@
             {{event.name}}
           </div>
           <div class="arcEvent__edit">
-            <button class="edit-button" mat-icon-button (click)="onEditEvent(event)"><mat-icon>edit</mat-icon></button>
+            <button class="edit-button" mat-icon-button (click)="onEditEvent(event)"><mat-icon class="edit-icon" [inline]="true">edit</mat-icon></button>
           </div>
         </div>
         <div class="featureLayers" *ngIf="!event.layers.length">

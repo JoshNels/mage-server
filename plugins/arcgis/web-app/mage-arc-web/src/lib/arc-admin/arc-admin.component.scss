@@ -124,10 +124,6 @@ section {
   }
 }
 
-.edit-button {
-  vertical-align: middle;
-}
-
 .info-icon {
   vertical-align: middle;
 }
@@ -145,6 +141,7 @@ section {
 }
 
 .edit-button {
+  opacity: 0.7;
   font-size: inherit;
   height: inherit;
   line-height: inherit;

@@ -355,10 +355,10 @@
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
               </td>
-              <td>{{getConcatenation(attribute).sameForms}}
+              <td>{{getSameForms(attribute)}}
                 <ng-container *ngIf="editAttributes">
                   <button class="add-button" mat-icon-button
-                    (click)="showEditBooleanField('Same Forms', 'sameForms', getConcatenation(attribute), getConcatenation(attribute).sameForms)">
+                    (click)="showEditBooleanField('Same Forms', 'sameForms', getConcatenation(attribute), getSameForms(attribute))">
                     <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
@@ -373,10 +373,10 @@
                   <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                 </button>
               </td>
-              <td>{{getConcatenation(attribute).differentForms}}
+              <td>{{getDifferentForms(attribute)}}
                 <ng-container *ngIf="editAttributes">
                   <button class="add-button" mat-icon-button
-                    (click)="showEditBooleanField('Different Forms', 'differentForms', getConcatenation(attribute), getConcatenation(attribute).differentForms)">
+                    (click)="showEditBooleanField('Different Forms', 'differentForms', getConcatenation(attribute), getDifferentForms(attribute))">
                     <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>

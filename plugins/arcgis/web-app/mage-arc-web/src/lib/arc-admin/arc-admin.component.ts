@@ -220,6 +220,16 @@ export class ArcAdminComponent implements OnInit {
     return this.concatenation(attribute)!
   }
 
+  getSameForms(attribute: string): boolean {
+    const concatenation = this.getConcatenation(attribute)
+    return concatenation.sameForms == undefined || concatenation.sameForms
+  }
+
+  getDifferentForms(attribute: string): boolean {
+    const concatenation = this.getConcatenation(attribute)
+    return concatenation.differentForms == undefined || concatenation.differentForms
+  }
+
   private concatenation(attribute: string): AttributeConcatenationConfig | undefined {
     let concat = undefined
     const attributeConfig = this.attributeConfig(attribute)
@@ -394,7 +404,7 @@ export class ArcAdminComponent implements OnInit {
       const hasConcatenation = this.hasConcatenation(this.editName)
       if (concatenation) {
         if (!hasConcatenation) {
-          attributeConfig.concatenation = { delimiter: ', ', sameForms: true, differentForms: true }
+          attributeConfig.concatenation = { delimiter: ', ' }
         }
       } else if (hasConcatenation) {
         attributeConfig.concatenation = undefined
@@ -480,7 +490,20 @@ export class ArcAdminComponent implements OnInit {
   private cleanAttributeSettings(finalize: boolean) {
 
     if (this.config.attributes != undefined) {
-      for (const attributeConfig of Object.values(this.config.attributes)) {
+      for (const attributesEntry of Object.entries(this.config.attributes)) {
+        const attribute = attributesEntry[0]
+        const attributeConfig = attributesEntry[1]
+
+        if (finalize && attributeConfig.concatenation != undefined) {
+          if (attributeConfig.concatenation.sameForms != undefined
+            && attributeConfig.concatenation.sameForms) {
+              delete attributeConfig.concatenation.sameForms
+          }
+          if (attributeConfig.concatenation.differentForms != undefined
+            && attributeConfig.concatenation.differentForms) {
+              delete attributeConfig.concatenation.differentForms
+          }
+        }
 
         if (finalize && attributeConfig.mappings != undefined && Object.keys(attributeConfig.mappings).length == 0) {
           delete attributeConfig.mappings
@@ -509,6 +532,17 @@ export class ArcAdminComponent implements OnInit {
           delete attributeConfig.omit
         }
 
+        if (finalize
+          && attributeConfig.concatenation == undefined
+          && attributeConfig.mappings == undefined
+          && attributeConfig.defaults == undefined
+          && attributeConfig.omit == undefined) {
+            delete this.config.attributes[attribute]
+        }
+
+      }
+      if (Object.keys(this.config.attributes).length == 0) {
+        delete this.config.attributes
       }
     }
 

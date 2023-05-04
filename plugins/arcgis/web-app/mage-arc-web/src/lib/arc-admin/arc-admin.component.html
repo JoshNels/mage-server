@@ -841,7 +841,11 @@
   </mat-dialog-actions>
 </ng-template>
 <ng-template #deleteFieldDialog let-data>
-  <h3 matDialogTitle>Delete {{editType}}? {{editName}}</h3>
+  <h3 matDialogTitle>Delete {{editType}}?</h3>
+  <div>
+    {{editName}}
+  </div>
+  <br>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
     <button mat-flat-button color="primary" matDialogClose (click)="deleteField()">DELETE</button>

@@ -378,8 +378,25 @@ export class ArcAdminComponent implements OnInit {
   }
 
   editField(value: any) {
-    this.editObject[this.editType] = value
-    this.saveConfig()
+    if (value != this.editValue) {
+      const editObjectValue = this.editObject[this.editType]
+      const existingValue = editObjectValue[this.editValue]
+      if (existingValue != undefined) {
+        const newValue: any = {}
+        for (const valueEntry of Object.entries(editObjectValue)) {
+          const existingKey = valueEntry[0]
+          const existingValue: any = valueEntry[1]
+          if (existingKey == this.editValue) {
+            newValue[value] = existingValue
+          } else if(existingKey != value) {
+            newValue[existingKey] = existingValue
+          }
+        }
+        value = newValue
+      }
+      this.editObject[this.editType] = value
+      this.saveConfig()
+    }
   }
 
   showEditBooleanField(name: string, field: string, object: any, value: any) {
@@ -388,6 +405,11 @@ export class ArcAdminComponent implements OnInit {
     this.editObject = object;
     this.editValue = value;
     this.dialog.open<unknown, unknown, string>(this.editBooleanFieldTemplate)
+  }
+
+  editBooleanField(value: any) {
+    this.editObject[this.editType] = value
+    this.saveConfig()
   }
 
   showEditAttributeConfig(attribute: string) {

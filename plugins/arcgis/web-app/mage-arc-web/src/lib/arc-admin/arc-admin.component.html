@@ -204,8 +204,12 @@
           <tr>
             <td>{{event}}
               <ng-container *ngIf="editFieldMappings">
+                <button class="edit-button" mat-icon-button
+                  (click)="showEditField('Event', 'fieldAttributes', config, event)">
+                  <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                </button>
                 <button class="delete-button" mat-icon-button
-                  (click)="showDeleteField('Event', config.fieldAttributes, event, event)">
+                  (click)="showDeleteField('event', config.fieldAttributes, event, event)">
                   <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                 </button>
               </ng-container>
@@ -216,8 +220,12 @@
               <td></td>
               <td>{{form}}
                 <ng-container *ngIf="editFieldMappings">
+                  <button class="edit-button" mat-icon-button
+                    (click)="showEditField('Form', event, config.fieldAttributes, form)">
+                    <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                  </button>
                   <button class="delete-button" mat-icon-button
-                    (click)="showDeleteField('Form', config.fieldAttributes[event], form, form)">
+                    (click)="showDeleteField('form', config.fieldAttributes[event], form, form)">
                     <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                   </button>
                 </ng-container>
@@ -229,17 +237,21 @@
                 <td></td>
                 <td>{{field}}
                   <ng-container *ngIf="editFieldMappings">
+                    <button class="edit-button" mat-icon-button
+                      (click)="showEditField('Field', form, config.fieldAttributes[event], field)">
+                      <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                    </button>
                     <button class="delete-button" mat-icon-button
-                      (click)="showDeleteField('Field', config.fieldAttributes[event][form], field, field)">
+                      (click)="showDeleteField('field', config.fieldAttributes[event][form], field, field)">
                       <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                     </button>
                   </ng-container>
                 </td>
                 <td>{{config.fieldAttributes[event][form][field]}}
                   <ng-container *ngIf="editFieldMappings">
-                    <button class="add-button" mat-icon-button
+                    <button class="edit-button" mat-icon-button
                       (click)="showEditField(field, field, config.fieldAttributes[event][form], config.fieldAttributes[event][form][field])">
-                      <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                      <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                     </button>
                   </ng-container>
                 </td>
@@ -301,12 +313,16 @@
           <tr>
             <td>{{attribute}}
               <ng-container *ngIf="editAttributes">
-                <button class="add-button" mat-icon-button
+                <button class="edit-button" mat-icon-button
+                  (click)="showEditField('Attribute', 'attributes', config, attribute)">
+                  <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                </button>
+                <button class="edit-button" mat-icon-button
                   (click)="showEditAttributeConfig(attribute)">
-                  <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                  <mat-icon class="edit-icon" [inline]="true">edit_attributes</mat-icon>
                 </button>
                 <button class="delete-button" mat-icon-button
-                  (click)="showDeleteField('Attribute', config.attributes, attribute, attribute)">
+                  (click)="showDeleteField('attribute', config.attributes, attribute, attribute)">
                   <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                 </button>
               </ng-container>
@@ -339,9 +355,9 @@
               </td>
               <td>{{getConcatenation(attribute).delimiter}}
                 <ng-container *ngIf="editAttributes">
-                  <button class="add-button" mat-icon-button
+                  <button class="edit-button" mat-icon-button
                     (click)="showEditField('Delimiter', 'delimiter', getConcatenation(attribute), getConcatenation(attribute).delimiter)">
-                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
               </td>
@@ -357,9 +373,9 @@
               </td>
               <td>{{getSameForms(attribute)}}
                 <ng-container *ngIf="editAttributes">
-                  <button class="add-button" mat-icon-button
+                  <button class="edit-button" mat-icon-button
                     (click)="showEditBooleanField('Same Forms', 'sameForms', getConcatenation(attribute), getSameForms(attribute))">
-                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
               </td>
@@ -375,9 +391,9 @@
               </td>
               <td>{{getDifferentForms(attribute)}}
                 <ng-container *ngIf="editAttributes">
-                  <button class="add-button" mat-icon-button
+                  <button class="edit-button" mat-icon-button
                     (click)="showEditBooleanField('Different Forms', 'differentForms', getConcatenation(attribute), getDifferentForms(attribute))">
-                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
               </td>
@@ -405,17 +421,21 @@
                 <td></td>
                 <td>{{mapping}}
                   <ng-container *ngIf="editAttributes">
+                    <button class="edit-button" mat-icon-button
+                      (click)="showEditField('Mapping', 'mappings', getAttributeConfig(attribute), mapping)">
+                      <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                    </button>
                     <button class="delete-button" mat-icon-button
-                      (click)="showDeleteField('Mapping', getMappings(attribute), mapping, mapping)">
+                      (click)="showDeleteField(attribute + ' mapping', getMappings(attribute), mapping, mapping)">
                       <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                     </button>
                   </ng-container>
                 </td>
                 <td>{{getMappings(attribute)[mapping]}}
                   <ng-container *ngIf="editAttributes">
-                    <button class="add-button" mat-icon-button
+                    <button class="edit-button" mat-icon-button
                       (click)="showEditField(mapping, mapping, getMappings(attribute), getMappings(attribute)[mapping])">
-                      <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                      <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                     </button>
                   </ng-container>
                 </td>
@@ -456,12 +476,12 @@
                 <td></td>
                 <td>{{default.value}}
                   <ng-container *ngIf="editAttributes">
-                    <button class="add-button" mat-icon-button
+                    <button class="edit-button" mat-icon-button
                       (click)="showEditField(attribute + ' Default', 'value', getDefaults(attribute)[defaultIndex], default.value)">
-                      <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                      <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                     </button>
                     <button class="delete-button" mat-icon-button
-                      (click)="showDeleteField('Default', getDefaults(attribute), default.value, defaultIndex)">
+                      (click)="showDeleteField(attribute + ' default', getDefaults(attribute), default.value, defaultIndex)">
                       <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                     </button>
                   </ng-container>
@@ -474,12 +494,12 @@
                   <td></td>
                   <td>Conditions
                     <button class="info-button" mat-icon-button
-                      (click)="showInfo('Conditions', 'Conditional attribute equality values when the default applies')">
+                      (click)="showInfo('Conditions', 'Conditional equality values matched against each configured attribute before applying the default')">
                       <mat-icon class="info-icon" [inline]="true">info_outline</mat-icon>
                     </button>
                     <ng-container *ngIf="default.condition != undefined && editAttributes">
                       <button class="delete-button" mat-icon-button
-                        (click)="showDeleteField('Conditions', default, default.value, 'condition')">
+                        (click)="showDeleteField(attribute + ' default conditions', default, default.value, 'condition')">
                         <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                       </button>
                     </ng-container>
@@ -497,8 +517,12 @@
                       <ng-container *ngIf="valueIndex == 0">
                         <td>{{ condition.attribute }}
                           <ng-container *ngIf="editAttributes">
+                            <button class="edit-button" mat-icon-button
+                              (click)="showEditField('Condition Attribute', 'attribute', condition, condition.attribute)">
+                              <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
+                            </button>
                             <button class="delete-button" mat-icon-button
-                              (click)="showDeleteField('Condition', default.condition, condition.attribute, conditionIndex)">
+                              (click)="showDeleteField(attribute + ' default ' + default.value + ' condition attribute', default.condition, condition.attribute, conditionIndex)">
                               <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
                             </button>
                           </ng-container>
@@ -508,11 +532,17 @@
                         <td></td>
                       </ng-container>
                       <td>{{value}}
-                        <ng-container *ngIf="editAttributes && condition.values.length > 1">
-                          <button class="delete-button" mat-icon-button
-                            (click)="showDeleteField('Condition Value', condition.values, value, valueIndex)">
-                            <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                        <ng-container *ngIf="editAttributes">
+                          <button class="edit-button" mat-icon-button
+                            (click)="showEditField('Condition Value', valueIndex, condition.values, value)">
+                            <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                           </button>
+                          <ng-container *ngIf="condition.values.length > 1">
+                            <button class="delete-button" mat-icon-button
+                              (click)="showDeleteField(attribute + ' default ' + default.value + ' condition ' + condition.attribute + ' value', condition.values, value, valueIndex)">
+                              <mat-icon class="delete-icon" [inline]="true">delete_outline</mat-icon>
+                            </button>
+                          </ng-container>
                         </ng-container>
                       </td>
                     </tr>
@@ -579,9 +609,9 @@
               </td>
               <td>{{getOmit(attribute)}}
                 <ng-container *ngIf="editAttributes">
-                  <button class="add-button" mat-icon-button
+                  <button class="edit-button" mat-icon-button
                     (click)="showEditBooleanField('Omit', 'omit', getAttributeConfig(attribute), getOmit(attribute))">
-                    <mat-icon class="add-icon" [inline]="true">edit</mat-icon>
+                    <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                   </button>
                 </ng-container>
               </td>
@@ -914,7 +944,7 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
-    <button mat-flat-button color="primary" matDialogClose (click)="editField(editBooleanFieldField.value)">UPDATE</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="editBooleanField(editBooleanFieldField.value)">UPDATE</button>
   </mat-dialog-actions>
 </ng-template>
 <ng-template #editAttributeConfigDialog let-data>

@@ -41,26 +41,32 @@ export class ArcEventComponent implements OnInit {
     let activeEventMessage = 'Active events: ';
     for (const event of x) {
       activeEventMessage += event.name + ' ';
-      let eventsLayers = new Array<string>();
-      for (const featureServiceConfig of this.config.featureServices) {
-        for (const arcLayer of featureServiceConfig.layers) {
-          if (arcLayer.events == undefined
-            || arcLayer.events == null
-            || arcLayer.events.indexOf(event.name) >= 0) {
-            eventsLayers.push(String(arcLayer.layer));
-          }
-        }
-      }
+      let eventsLayers = this.eventLayers(event.name)
       const arcEvent = new ArcEvent(event.name, eventsLayers);
       this.model.events.push(arcEvent);
     }
     console.log(activeEventMessage);
   }
 
+  private eventLayers(event: string): string[] {
+    const eventsLayers = [];
+    for (const featureServiceConfig of this.config.featureServices) {
+      for (const arcLayer of featureServiceConfig.layers) {
+        if (arcLayer.events == undefined
+          || arcLayer.events == null
+          || arcLayer.events.length == 0
+          || arcLayer.events.indexOf(event) >= 0) {
+          eventsLayers.push(String(arcLayer.layer));
+        }
+      }
+    }
+    return eventsLayers
+  }
+
   onEditEvent(event: ArcEvent) {
     console.log('Editing event synchronization for event ' + event.name);
     this.currentEditingEvent = event;
-    this.layers = new Array<ArcLayerSelectable>();
+    this.layers = [];
 
     for (const serviceConfig of this.config.featureServices) {
       for (const layerConfig of serviceConfig.layers) {
@@ -81,22 +87,48 @@ export class ArcEventComponent implements OnInit {
 
   saveChanges() {
     console.log('Saving changes to event sync');
-    for(const layer of this.layers) {
-      for(const featureService of this.config.featureServices) {
-        for(const configLayer of featureService.layers) {
-          if(configLayer.layer == layer.name) {
-            if(configLayer.events == undefined || configLayer.events == null) {
-              configLayer.events = new Array<string>();
+    for (const layer of this.layers) {
+      for (const featureService of this.config.featureServices) {
+        for (let layerIndex = 0; layerIndex < featureService.layers.length; layerIndex++) {
+          const configLayer = featureService.layers[layerIndex]
+          if (configLayer.layer == layer.name) {
+
+            let events = null
+            if (configLayer.events != undefined
+              && configLayer.events != null
+              && configLayer.events.length > 0) {
+                events = configLayer.events
             }
-            const indexOf = configLayer.events.indexOf(this.currentEditingEvent.name);
-            if(layer.isSelected && indexOf < 0) {
-              configLayer.events.push(this.currentEditingEvent.name);
-            } else if(!layer.isSelected && indexOf >= 0) {
-              configLayer.events.splice(indexOf);
+
+            let indexOf = -1
+            if (events != null) {
+              indexOf = events.indexOf(this.currentEditingEvent.name);
             }
+
+            if (layer.isSelected) {
+              if (events != null && indexOf < 0) {
+                events.push(this.currentEditingEvent.name);
+              }
+            } else {
+              if (events == null) {
+                configLayer.events = []
+                for (const event of this.model.events) {
+                  if (event.name != this.currentEditingEvent.name) {
+                    configLayer.events.push(event.name)
+                  }
+                }
+              } else if (indexOf >= 0) {
+                events.splice(indexOf, 1);
+                if (events.length == 0) {
+                  featureService.layers.splice(layerIndex, 1)
+                }
+              }
+            }
+
           }
         }
       }
+      this.currentEditingEvent.layers = this.eventLayers(this.currentEditingEvent.name)
     }
     
     this.arcService.putArcConfig(this.config);

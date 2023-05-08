@@ -1,7 +1,7 @@
 <div class="arc-event">
   <section class="arc-event-sync">
     <header>
-      <h2>Events and Synchronization</h2>
+      <h2>Events</h2>
       <p class="subheading">Change the ArcGIS layers each MAGE event sends its observations to.</p>
     </header>
     <div class="arcEvents" *ngIf="!model.events.length">
@@ -34,7 +34,7 @@
   </section>
 </div>
 <ng-template #editEventDialog let-data>
-  <h2 matDialogTitle>ArcGIS Layers that MAGE Event Named {{currentEditingEvent.name}} is Synchronizing</h2>
+  <h2 matDialogTitle>ArcGIS layers that MAGE event named {{currentEditingEvent.name}} is synchronizing</h2>
   <mat-dialog-content>
     <div class="arc-layers" *ngFor="let arcLayer of layers">
       <div class="featureLayer__value">

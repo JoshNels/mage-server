@@ -42,7 +42,9 @@ export class ArcLayerComponent implements OnInit {
   onEditLayer(arcService: FeatureServiceConfig) {
     console.log('Editing layer ' + arcService.url + ', token: ' + arcService.token)
     this.arcLayerControl.setValue(arcService.url)
-    this.arcTokenControl.setValue(arcService.token)
+    if (arcService.token != null) {
+      this.arcTokenControl.setValue(arcService.token)
+    }
     this.currentUrl = this.addToken(arcService.url, arcService.token)
     this.layers = []
     let selectedLayers = new Array<string>()
@@ -179,9 +181,9 @@ export class ArcLayerComponent implements OnInit {
       const index = url.indexOf('?')
       let separator = ''
       if (index == -1) {
-          separator = '?'
-      } else if (index < url.length - 1){
-          separator = '&'
+        separator = '?'
+      } else if (index < url.length - 1) {
+        separator = '&'
       }
       newUrl += separator + 'token=' + token
     }

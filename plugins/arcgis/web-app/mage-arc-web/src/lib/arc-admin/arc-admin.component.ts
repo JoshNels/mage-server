@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, AttributeValueConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
+import { EventsResult } from '../EventsResult';
 
 @Component({
   selector: 'arc-admin',
@@ -22,6 +23,8 @@ export class ArcAdminComponent implements OnInit {
   editObject: any;
   editName: string;
   editValue: any;
+  editOptions: any[];
+  events: string[];
 
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
@@ -35,6 +38,8 @@ export class ArcAdminComponent implements OnInit {
   private addFieldTemplate: TemplateRef<unknown>
   @ViewChild('addFieldValueDialog', { static: true })
   private addFieldValueTemplate: TemplateRef<unknown>
+  @ViewChild('selectFieldDialog', { static: true })
+  private selectFieldTemplate: TemplateRef<unknown>
   @ViewChild('editFieldDialog', { static: true })
   private editFieldTemplate: TemplateRef<unknown>
   @ViewChild('editBooleanFieldDialog', { static: true })
@@ -48,10 +53,18 @@ export class ArcAdminComponent implements OnInit {
     this.editFieldMappings = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
+      arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
     })
   }
 
   ngOnInit(): void {
+  }
+
+  handleEventResults(x: EventsResult[]) {
+    this.events = []
+    for (const result of x) {
+      this.events.push(result.name)
+    }
   }
 
   onDeleteLayer(layerUrl: string) {
@@ -290,6 +303,16 @@ export class ArcAdminComponent implements OnInit {
     return omit
   }
 
+  availableFieldMappingEvents(): string[] {
+    const available: string[] = []
+    for (const event of this.events) {
+      if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined) {
+        available.push(event)
+      }
+    }
+    return available
+  }
+
   showInfo(title: string, message: string) {
     this.infoTitle = title
     this.infoMessage = message
@@ -367,6 +390,13 @@ export class ArcAdminComponent implements OnInit {
       this.editObject[name] = value
     }
     this.saveConfig()
+  }
+
+  showSelectField(type: string, object: any, options: any[]) {
+    this.editType = type;
+    this.editObject = object;
+    this.editOptions = options;
+    this.dialog.open<unknown, unknown, string>(this.selectFieldTemplate)
   }
 
   showEditField(name: string, field: string, object: any, value: any) {

@@ -16,8 +16,9 @@ export class ArcLayerComponent implements OnInit {
   config: ArcGISPluginConfig;
   layers: ArcLayerSelectable[];
   arcLayerControl = new FormControl('', [Validators.required])
+  arcTokenControl = new FormControl('')
   isLoading: boolean;
-  currentUrl: string;
+  currentUrl?: string;
   private timeoutId: number;
 
   @ViewChild('addLayerDialog', { static: true })
@@ -39,14 +40,16 @@ export class ArcLayerComponent implements OnInit {
   }
 
   onEditLayer(arcService: FeatureServiceConfig) {
-    console.log('Editing layer ' + arcService.url)
+    console.log('Editing layer ' + arcService.url + ', token: ' + arcService.token)
     this.arcLayerControl.setValue(arcService.url)
+    this.arcTokenControl.setValue(arcService.token)
+    this.currentUrl = this.addToken(arcService.url, arcService.token)
     this.layers = []
     let selectedLayers = new Array<string>()
     for (const layer of arcService.layers) {
       selectedLayers.push(String(layer.layer))
     }
-    this.fetchLayers(arcService.url, selectedLayers)
+    this.fetchLayers(this.currentUrl, selectedLayers)
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
 
@@ -67,26 +70,28 @@ export class ArcLayerComponent implements OnInit {
     return isDisabled;
   }
 
-  inputChanged(layerUrl: string) {
-    console.log('Input changed ' + layerUrl);
-    this.currentUrl = layerUrl;
+  inputChanged(layerUrl: string, token?: string) {
+    const url = this.addToken(layerUrl, token);
+    console.log('Input changed ' + url);
     if (this.timeoutId !== undefined) {
       window.clearTimeout(this.timeoutId);
     }
-    this.timeoutId = window.setTimeout(() => this.fetchLayers(this.currentUrl, []), 1000);
+    this.timeoutId = window.setTimeout(() => this.fetchLayers(url, []), 1000);
   }
 
-  fetchLayers(currentUrl: string, selectedLayers: string[]) {
-    console.log('Fetching layers for ' + currentUrl);
+  fetchLayers(url: string, selectedLayers: string[]) {
+    console.log('Fetching layers for ' + url);
     this.isLoading = true;
     this.layers = []
-    this.arcService.fetchArcLayers(currentUrl).subscribe(x => {
+    this.arcService.fetchArcLayers(url).subscribe(x => {
       console.log('arclayer response ' + x);
       if (x.layers !== undefined) {
         for (const layer of x.layers) {
           const selectableLayer = new ArcLayerSelectable(layer.name);
           if (selectedLayers.length > 0) {
             selectableLayer.isSelected = selectedLayers.indexOf(layer.name) >= 0;
+          } else {
+            selectableLayer.isSelected = false
           }
           this.layers.push(selectableLayer);
         }
@@ -96,7 +101,9 @@ export class ArcLayerComponent implements OnInit {
   }
 
   onAddLayer() {
+    this.currentUrl = undefined
     this.arcLayerControl.setValue('')
+    this.arcTokenControl.setValue('')
     this.layers = []
     this.dialog.open<unknown, unknown, string>(this.addLayerTemplate)
   }
@@ -165,4 +172,20 @@ export class ArcLayerComponent implements OnInit {
 
     this.arcService.putArcConfig(this.config);
   }
+
+  private addToken(url: string, token?: string) {
+    let newUrl = url
+    if (token != null && token.length > 0) {
+      const index = url.indexOf('?')
+      let separator = ''
+      if (index == -1) {
+          separator = '?'
+      } else if (index < url.length - 1){
+          separator = '&'
+      }
+      newUrl += separator + 'token=' + token
+    }
+    return newUrl
+  }
+
 }

@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { ArcEventsModel } from './ArcEventsModel';
 import { ArcEvent } from './ArcEvent';
 import { ArcLayerSelectable } from '../arc-layer/ArcLayerSelectable';
-import { EventsResult } from '../EventsResult';
+import { EventResult } from '../EventsResult';
 
 
 @Component({
@@ -37,7 +37,7 @@ export class ArcEventComponent implements OnInit {
 
   }
 
-  handleEventResults(x: EventsResult[]) {
+  handleEventResults(x: EventResult[]) {
     let activeEventMessage = 'Active events: ';
     for (const event of x) {
       activeEventMessage += event.name + ' ';

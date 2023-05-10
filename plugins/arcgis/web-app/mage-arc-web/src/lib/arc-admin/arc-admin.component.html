@@ -205,7 +205,7 @@
             <td>{{event}}
               <ng-container *ngIf="editFieldMappings">
                 <button class="edit-button" mat-icon-button
-                  (click)="showEditField('Event', 'fieldAttributes', config, event)">
+                  (click)="showEditFieldAuto('Event', 'fieldAttributes', config, event, selectableEvents())">
                   <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                 </button>
                 <button class="delete-button" mat-icon-button
@@ -221,7 +221,7 @@
               <td>{{form}}
                 <ng-container *ngIf="editFieldMappings">
                   <button class="edit-button" mat-icon-button
-                    (click)="showEditField('Form', event, config.fieldAttributes, form)">
+                    (click)="showEditFieldAuto('Form', event, config.fieldAttributes, form, selectableForms(event))">
                     <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                   </button>
                   <button class="delete-button" mat-icon-button
@@ -238,7 +238,7 @@
                 <td>{{field}}
                   <ng-container *ngIf="editFieldMappings">
                     <button class="edit-button" mat-icon-button
-                      (click)="showEditField('Field', form, config.fieldAttributes[event], field)">
+                      (click)="showEditFieldAuto('Field', form, config.fieldAttributes[event], field, selectableFields(event, form))">
                       <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                     </button>
                     <button class="delete-button" mat-icon-button
@@ -263,7 +263,7 @@
                 <td></td>
                 <td>
                   <button class="add-button" mat-icon-button
-                    (click)="showAddFieldValue('Field', config.fieldAttributes[event][form])">
+                    (click)="showAddFieldAutoValue('Field', config.fieldAttributes[event][form], selectableFields(event, form))">
                     <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
                   </button>
                 </td>
@@ -275,7 +275,7 @@
               <td></td>
               <td>
                 <button class="add-button" mat-icon-button
-                  (click)="showAddField('Form', config.fieldAttributes[event])">
+                  (click)="showAddFieldAuto('Form', config.fieldAttributes[event], selectableForms(event))">
                   <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
                 </button>
               </td>
@@ -286,7 +286,7 @@
           <tr>
             <td>
               <button class="add-button" mat-icon-button
-                (click)="showSelectField('Event', config.fieldAttributes, availableFieldMappingEvents())">
+                (click)="showAddFieldAuto('Event', config.fieldAttributes, selectableEvents())">
                 <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
               </button>
             </td>
@@ -904,7 +904,7 @@
           <input type="text" matInput #addFieldField />
         </mat-form-field>
       </div>
-      <div class="add-value-field">
+      <div class="add-field-value">
         <mat-form-field [style.width.%]="100">
           <mat-label>{{ editType == 'Field' ? 'Attribute' : 'Value' }}</mat-label>
           <input type="text" matInput #addValueField />
@@ -917,21 +917,50 @@
     <button mat-flat-button color="primary" matDialogClose (click)="addFieldValue(addFieldField.value, addValueField.value)">ADD</button>
   </mat-dialog-actions>
 </ng-template>
-<ng-template #selectFieldDialog let-data>
-  <mat-dialog-content>
-    <div class="select-field-form">
+<ng-template #addFieldAutoDialog let-data>
+  <mat-dialog-content cdkFocusInitial>
+    <div class="add-field-auto-form">
       <mat-form-field [style.width.%]="100">
-        <mat-select [placeholder]="editType" #selectFieldField >
+        <mat-label>{{editType}}</mat-label>
+        <input type="text" matInput [matAutocomplete]="auto" #addFieldField />
+        <mat-autocomplete #auto="matAutocomplete">
           <mat-option *ngFor="let option of editOptions" [value]="option">
             {{option}}
           </mat-option>
-        </mat-select>
+        </mat-autocomplete>
       </mat-form-field>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button matDialogClose>CANCEL</button>
-    <button mat-flat-button color="primary" matDialogClose (click)="addField(selectFieldField.value)">ADD</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="addField(addFieldField.value)">ADD</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #addFieldAutoValueDialog let-data>
+  <mat-dialog-content cdkFocusInitial>
+    <div class="add-field-auto-value-form">
+      <div class="add-field-auto-field">
+        <mat-form-field [style.width.%]="100">
+          <mat-label>{{editType}}</mat-label>
+          <input type="text" matInput [matAutocomplete]="auto" #addFieldField />
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of editOptions" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div class="add-field-auto-value">
+        <mat-form-field [style.width.%]="100">
+          <mat-label>{{ editType == 'Field' ? 'Attribute' : 'Value' }}</mat-label>
+          <input type="text" matInput #addValueField />
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="addFieldValue(addFieldField.value, addValueField.value)">ADD</button>
   </mat-dialog-actions>
 </ng-template>
 <ng-template #editFieldDialog let-data>
@@ -940,6 +969,25 @@
       <mat-form-field [style.width.%]="100">
         <mat-label>{{editName}}</mat-label>
         <input type="text" matInput value="{{editValue}}" #editFieldField />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button matDialogClose>CANCEL</button>
+    <button mat-flat-button color="primary" matDialogClose (click)="editField(editFieldField.value)">UPDATE</button>
+  </mat-dialog-actions>
+</ng-template>
+<ng-template #editFieldAutoDialog let-data>
+  <mat-dialog-content cdkFocusInitial>
+    <div class="edit-field-auto-form">
+      <mat-form-field [style.width.%]="100">
+        <mat-label>{{editName}}</mat-label>
+        <input type="text" matInput value="{{editValue}}" [matAutocomplete]="auto" #editFieldField />
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let option of editOptions" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
     </div>
   </mat-dialog-content>

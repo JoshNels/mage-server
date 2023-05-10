@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ArcGISPluginConfig } from './ArcGISPluginConfig'
 import { FeatureServiceResult } from './FeatureServiceResult'
-import { EventsResult } from './EventsResult'
+import { EventResult } from './EventsResult'
 
 export const baseUrl = '/plugins/@ngageoint/mage.arcgis'
 export const apiBaseUrl = '/api'
@@ -31,7 +31,11 @@ export class ArcService {
   }
 
   fetchEvents() {
-    return this.http.get<EventsResult[]>(`${apiBaseUrl}/events?populate=false&projection={"name":true}`)
+    return this.http.get<EventResult[]>(`${apiBaseUrl}/events?populate=false&projection={"name":true}`)
+  }
+
+  fetchPopulatedEvents() {
+    return this.http.get<EventResult[]>(`${apiBaseUrl}/events`)
   }
 
   putArcConfig(config: ArcGISPluginConfig) {

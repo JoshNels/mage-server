@@ -5,8 +5,8 @@ import { MatDialog } from '@angular/material/dialog'
 import { ArcEventsModel } from './ArcEventsModel';
 import { ArcEvent } from './ArcEvent';
 import { ArcLayerSelectable } from '../arc-layer/ArcLayerSelectable';
-import { EventsResult } from '../EventsResult';
 import { Observable, Subscription } from 'rxjs';
+import { EventResult } from '../EventsResult';
 
 
 @Component({
@@ -43,10 +43,10 @@ export class ArcEventComponent implements OnInit {
   }
 
   handleConfigChanged() {
-    let eventResults = new Array<EventsResult>();
+    let eventResults = new Array<EventResult>();
     if (this.model.events.length > 0) {
       for (const arcEvent of this.model.events) {
-        const result = new EventsResult();
+        const result = new EventResult();
         result.name = arcEvent.name;
         eventResults.push(result);
       }
@@ -56,7 +56,7 @@ export class ArcEventComponent implements OnInit {
     }
   }
 
-  handleEventResults(x: EventsResult[]) {
+  handleEventResults(x: EventResult[]) {
     let activeEventMessage = 'Active events: ';
     for (const event of x) {
       activeEventMessage += event.name + ' ';

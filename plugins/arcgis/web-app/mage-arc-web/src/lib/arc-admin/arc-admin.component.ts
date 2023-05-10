@@ -3,8 +3,8 @@ import { MatDialog } from '@angular/material/dialog'
 import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, AttributeValueConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
-import { EventsResult } from '../EventsResult';
 import { Subject } from 'rxjs';
+import { EventResult } from '../EventsResult';
 
 @Component({
   selector: 'arc-admin',
@@ -26,7 +26,7 @@ export class ArcAdminComponent implements OnInit {
   editName: string;
   editValue: any;
   editOptions: any[];
-  events: string[];
+  events: any = {};
 
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
@@ -40,10 +40,14 @@ export class ArcAdminComponent implements OnInit {
   private addFieldTemplate: TemplateRef<unknown>
   @ViewChild('addFieldValueDialog', { static: true })
   private addFieldValueTemplate: TemplateRef<unknown>
-  @ViewChild('selectFieldDialog', { static: true })
-  private selectFieldTemplate: TemplateRef<unknown>
+  @ViewChild('addFieldAutoDialog', { static: true })
+  private addFieldAutoTemplate: TemplateRef<unknown>
+  @ViewChild('addFieldAutoValueDialog', { static: true })
+  private addFieldAutoValueTemplate: TemplateRef<unknown>
   @ViewChild('editFieldDialog', { static: true })
   private editFieldTemplate: TemplateRef<unknown>
+  @ViewChild('editFieldAutoDialog', { static: true })
+  private editFieldAutoTemplate: TemplateRef<unknown>
   @ViewChild('editBooleanFieldDialog', { static: true })
   private editBooleanFieldTemplate: TemplateRef<unknown>
   @ViewChild('editAttributeConfigDialog', { static: true })
@@ -55,7 +59,7 @@ export class ArcAdminComponent implements OnInit {
     this.editFieldMappings = false;
     arcService.fetchArcConfig().subscribe(x => {
       this.config = x;
-      arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
+      arcService.fetchPopulatedEvents().subscribe(x => this.handleEventResults(x));
     })
   }
 
@@ -67,11 +71,20 @@ export class ArcAdminComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  handleEventResults(x: EventsResult[]) {
-    this.events = []
-    for (const result of x) {
-      this.events.push(result.name)
+  handleEventResults(x: EventResult[]) {
+    const eventResults: any = {}
+    for (const event of x) {
+      const forms: any = {}
+      for (const form of event.forms) {
+        const fields: string[] = []
+        for (const field of form.fields) {
+          fields.push(field.title)
+        }
+        forms[form.name] = fields
+      }
+      eventResults[event.name] = forms
     }
+    this.events = eventResults
   }
 
   onDeleteLayer(layerUrl: string) {
@@ -310,14 +323,45 @@ export class ArcAdminComponent implements OnInit {
     return omit
   }
 
-  availableFieldMappingEvents(): string[] {
-    const available: string[] = []
-    for (const event of this.events) {
+  selectableEvents(): string[] {
+    const events: string[] = []
+    for (const event of Object.keys(this.events)) {
       if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined) {
-        available.push(event)
+        events.push(event)
       }
     }
-    return available
+    return events
+  }
+
+  selectableForms(event: string): string[] {
+    const forms: string[] = []
+    const eventForms = this.events[event]
+    if (eventForms != undefined) {
+      for (const form of Object.keys(eventForms)) {
+        if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined
+          || this.config.fieldAttributes[event][form] == undefined) {
+          forms.push(form)
+        }
+      }
+    }
+    return forms
+  }
+
+  selectableFields(event: string, form: string): string[] {
+    const fields: string[] = []
+    const eventForms = this.events[event]
+    if (eventForms != undefined) {
+      const eventFormFields = eventForms[form]
+      if (eventFormFields != undefined) {
+        for (const field of eventFormFields) {
+          if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined
+            || this.config.fieldAttributes[event][form] == undefined || this.config.fieldAttributes[event][form][field] == undefined) {
+              fields.push(field)
+          }
+        }
+      }
+    }
+    return fields
   }
 
   showInfo(title: string, message: string) {
@@ -399,11 +443,18 @@ export class ArcAdminComponent implements OnInit {
     this.saveConfig()
   }
 
-  showSelectField(type: string, object: any, options: any[]) {
+  showAddFieldAuto(type: string, object: any, options: any[]) {
     this.editType = type;
     this.editObject = object;
     this.editOptions = options;
-    this.dialog.open<unknown, unknown, string>(this.selectFieldTemplate)
+    this.dialog.open<unknown, unknown, string>(this.addFieldAutoTemplate)
+  }
+
+  showAddFieldAutoValue(type: string, object: any, options: any[]) {
+    this.editType = type;
+    this.editObject = object;
+    this.editOptions = options;
+    this.dialog.open<unknown, unknown, string>(this.addFieldAutoValueTemplate)
   }
 
   showEditField(name: string, field: string, object: any, value: any) {
@@ -434,6 +485,22 @@ export class ArcAdminComponent implements OnInit {
       this.editObject[this.editType] = value
       this.saveConfig()
     }
+  }
+
+  showEditFieldAuto(name: string, field: string, object: any, value: any, options: any[]) {
+    this.editName = name;
+    this.editType = field;
+    this.editObject = object;
+    this.editValue = value;
+    const index = options.indexOf(value);
+    if (index != 0) {
+      if (index > 0) {
+        options.splice(index, 1);
+      }
+      options.unshift(value);
+    }
+    this.editOptions = options;
+    this.dialog.open<unknown, unknown, string>(this.editFieldAutoTemplate)
   }
 
   showEditBooleanField(name: string, field: string, object: any, value: any) {

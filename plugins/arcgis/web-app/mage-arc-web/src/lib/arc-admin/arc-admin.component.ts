@@ -57,6 +57,10 @@ export class ArcAdminComponent implements OnInit {
     })
   }
 
+  configChanged(config: ArcGISPluginConfig) {
+    this.config = config;
+  }
+
   ngOnInit(): void {
   }
 

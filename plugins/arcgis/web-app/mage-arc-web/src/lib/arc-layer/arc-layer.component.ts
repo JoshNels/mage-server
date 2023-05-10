@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms'
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
@@ -13,7 +13,9 @@ import { ArcLayerSelectable } from './ArcLayerSelectable';
 })
 export class ArcLayerComponent implements OnInit {
 
-  config: ArcGISPluginConfig;
+  @Input('config') config: ArcGISPluginConfig;
+  @Output() configChanged = new EventEmitter<ArcGISPluginConfig>();
+
   layers: ArcLayerSelectable[];
   arcLayerControl = new FormControl('', [Validators.required])
   arcTokenControl = new FormControl('')
@@ -30,9 +32,6 @@ export class ArcLayerComponent implements OnInit {
     this.config = defaultArcGISPluginConfig;
     this.layers = new Array<ArcLayerSelectable>();
     this.isLoading = false;
-    arcService.fetchArcConfig().subscribe(x => {
-      this.config = x;
-    })
   }
 
   ngOnInit(): void {
@@ -172,6 +171,7 @@ export class ArcLayerComponent implements OnInit {
       }
     }
 
+    this.configChanged.emit(this.config);
     this.arcService.putArcConfig(this.config);
   }
 

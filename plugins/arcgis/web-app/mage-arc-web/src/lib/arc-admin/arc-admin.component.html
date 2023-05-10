@@ -64,7 +64,7 @@
       </table>
     </div>
   </section>
-  <arc-layer></arc-layer>
+  <arc-layer [config]=config (configChanged)=configChanged($event)></arc-layer>
   <arc-event></arc-event>
   <section class="arc-fields">
     <header>

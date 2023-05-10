@@ -4,6 +4,7 @@ import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, 
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 import { EventsResult } from '../EventsResult';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'arc-admin',
@@ -13,6 +14,7 @@ import { EventsResult } from '../EventsResult';
 export class ArcAdminComponent implements OnInit {
 
   config: ArcGISPluginConfig;
+  configChangedNotifier: Subject<void> = new Subject<void>();
 
   infoTitle: string;
   infoMessage: string;
@@ -59,6 +61,7 @@ export class ArcAdminComponent implements OnInit {
 
   configChanged(config: ArcGISPluginConfig) {
     this.config = config;
+    this.configChangedNotifier.next();
   }
 
   ngOnInit(): void {

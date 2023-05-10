@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 import { MatDialog } from '@angular/material/dialog'
@@ -6,6 +6,7 @@ import { ArcEventsModel } from './ArcEventsModel';
 import { ArcEvent } from './ArcEvent';
 import { ArcLayerSelectable } from '../arc-layer/ArcLayerSelectable';
 import { EventsResult } from '../EventsResult';
+import { Observable, Subscription } from 'rxjs';
 
 
 @Component({
@@ -15,7 +16,14 @@ import { EventsResult } from '../EventsResult';
 })
 export class ArcEventComponent implements OnInit {
 
-  config: ArcGISPluginConfig;
+  private eventsSubscription: Subscription;
+
+  @Input('config') config: ArcGISPluginConfig;
+
+  @Input() configChangedNotifier: Observable<void>;
+
+  @Output() configChanged = new EventEmitter<ArcGISPluginConfig>();
+
   model: ArcEventsModel;
   isLoading: boolean;
   currentEditingEvent: ArcEvent;
@@ -27,14 +35,25 @@ export class ArcEventComponent implements OnInit {
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
     this.model = new ArcEventsModel();
-    arcService.fetchArcConfig().subscribe(x => {
-      this.config = x;
-      arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
-    });
+    arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
   ngOnInit(): void {
+    this.eventsSubscription = this.configChangedNotifier.subscribe(() => this.handleConfigChanged());
+  }
 
+  handleConfigChanged() {
+    let eventResults = new Array<EventsResult>();
+    if (this.model.events.length > 0) {
+      for (const arcEvent of this.model.events) {
+        const result = new EventsResult();
+        result.name = arcEvent.name;
+        eventResults.push(result);
+      }
+
+      this.model.events.splice(0, this.model.events.length);
+      this.handleEventResults(eventResults);
+    }
   }
 
   handleEventResults(x: EventsResult[]) {
@@ -97,7 +116,7 @@ export class ArcEventComponent implements OnInit {
             if (configLayer.events != undefined
               && configLayer.events != null
               && configLayer.events.length > 0) {
-                events = configLayer.events
+              events = configLayer.events
             }
 
             let indexOf = -1
@@ -130,7 +149,8 @@ export class ArcEventComponent implements OnInit {
       }
       this.currentEditingEvent.layers = this.eventLayers(this.currentEditingEvent.name)
     }
-    
+
+    this.configChanged.emit(this.config);
     this.arcService.putArcConfig(this.config);
   }
 }

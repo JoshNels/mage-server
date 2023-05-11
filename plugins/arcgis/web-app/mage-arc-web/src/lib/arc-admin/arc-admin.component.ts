@@ -327,6 +327,7 @@ export class ArcAdminComponent implements OnInit {
         events.push(event)
       }
     }
+    this.sortArray(events)
     return events
   }
 
@@ -341,6 +342,7 @@ export class ArcAdminComponent implements OnInit {
         }
       }
     }
+    this.sortArray(forms)
     return forms
   }
 
@@ -358,7 +360,14 @@ export class ArcAdminComponent implements OnInit {
         }
       }
     }
+    this.sortArray(fields)
     return fields
+  }
+
+  private sortArray(array: string[]) {
+    array.sort((a, b) => {
+      return a.toLowerCase() < b.toLowerCase() ? -1 : 1
+    })
   }
 
   showInfo(title: string, message: string) {

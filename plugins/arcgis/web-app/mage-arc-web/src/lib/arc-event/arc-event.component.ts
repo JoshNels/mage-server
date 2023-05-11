@@ -73,7 +73,6 @@ export class ArcEventComponent implements OnInit {
       for (const arcLayer of featureServiceConfig.layers) {
         if (arcLayer.events == undefined
           || arcLayer.events == null
-          || arcLayer.events.length == 0
           || arcLayer.events.indexOf(event) >= 0) {
           eventsLayers.push(String(arcLayer.layer));
         }
@@ -127,6 +126,10 @@ export class ArcEventComponent implements OnInit {
             if (layer.isSelected) {
               if (events != null && indexOf < 0) {
                 events.push(this.currentEditingEvent.name);
+              } else if (events == null) {
+                events = [];
+                events.push(this.currentEditingEvent.name);
+                configLayer.events = events;
               }
             } else {
               if (events == null) {
@@ -138,9 +141,6 @@ export class ArcEventComponent implements OnInit {
                 }
               } else if (indexOf >= 0) {
                 events.splice(indexOf, 1);
-                if (events.length == 0) {
-                  featureService.layers.splice(layerIndex, 1)
-                }
               }
             }
 

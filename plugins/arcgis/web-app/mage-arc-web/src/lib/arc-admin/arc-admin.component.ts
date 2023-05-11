@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog'
 import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, AttributeValueConfig } from '../ArcGISConfig';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
+import { Subject } from 'rxjs';
 import { EventResult } from '../EventsResult';
 
 @Component({
@@ -13,6 +14,7 @@ import { EventResult } from '../EventsResult';
 export class ArcAdminComponent implements OnInit {
 
   config: ArcGISPluginConfig;
+  configChangedNotifier: Subject<void> = new Subject<void>();
 
   infoTitle: string;
   infoMessage: string;
@@ -63,6 +65,7 @@ export class ArcAdminComponent implements OnInit {
 
   configChanged(config: ArcGISPluginConfig) {
     this.config = config;
+    this.configChangedNotifier.next();
   }
 
   ngOnInit(): void {

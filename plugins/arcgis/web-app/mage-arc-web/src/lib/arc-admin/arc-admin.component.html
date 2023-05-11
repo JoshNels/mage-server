@@ -65,7 +65,7 @@
     </div>
   </section>
   <arc-layer [config]=config (configChanged)=configChanged($event)></arc-layer>
-  <arc-event></arc-event>
+  <arc-event [config]=config (configChanged)=configChanged($event) [configChangedNotifier]=configChangedNotifier.asObservable()></arc-event>
   <section class="arc-fields">
     <header>
       <h2>Attributes <button class="edit-button" mat-icon-button (click)="onEditAttributes()"><mat-icon>edit</mat-icon></button></h2>

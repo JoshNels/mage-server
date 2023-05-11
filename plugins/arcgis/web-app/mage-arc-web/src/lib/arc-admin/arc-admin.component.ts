@@ -326,7 +326,7 @@ export class ArcAdminComponent implements OnInit {
   selectableEvents(): string[] {
     const events: string[] = []
     for (const event of Object.keys(this.events)) {
-      if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined) {
+      if (this.eventMappings(event) == undefined) {
         events.push(event)
       }
     }
@@ -339,8 +339,7 @@ export class ArcAdminComponent implements OnInit {
     const eventForms = this.events[event]
     if (eventForms != undefined) {
       for (const form of Object.keys(eventForms)) {
-        if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined
-          || this.config.fieldAttributes[event][form] == undefined) {
+        if (this.formMappings(event, form) == undefined) {
           forms.push(form)
         }
       }
@@ -356,8 +355,7 @@ export class ArcAdminComponent implements OnInit {
       const eventFormFields = eventForms[form]
       if (eventFormFields != undefined) {
         for (const field of eventFormFields) {
-          if (this.config.fieldAttributes == undefined || this.config.fieldAttributes[event] == undefined
-            || this.config.fieldAttributes[event][form] == undefined || this.config.fieldAttributes[event][form][field] == undefined) {
+          if (this.fieldMapping(event, form, field) == undefined) {
               fields.push(field)
           }
         }
@@ -367,10 +365,110 @@ export class ArcAdminComponent implements OnInit {
     return fields
   }
 
+  selectableAttributes(): string[] {
+
+    const exclude = new Set<string>()
+    if (this.config.attributes != undefined) {
+      for (const attribute of Object.keys(this.config.attributes)) {
+        exclude.add(attribute)
+      }
+    }
+
+    return this.getSelectableAttributes(exclude)
+  }
+
+  selectableConditionAttributes(attribute: string, conditions: AttributeValueConfig[]): string[] {
+
+    const exclude = new Set<string>()
+    exclude.add(attribute)
+    for (const condition of conditions) {
+      exclude.add(condition.attribute)
+    }
+
+    return this.getSelectableAttributes(exclude)
+  }
+
+  private getSelectableAttributes(exclude: Set<string>): string[] {
+
+    const attributes: string[] = []
+
+    this.addAttribute(this.config.eventNameField, attributes, exclude)
+    this.addAttribute(this.config.userIdField, attributes, exclude)
+    this.addAttribute(this.config.usernameField, attributes, exclude)
+    this.addAttribute(this.config.userDisplayNameField, attributes, exclude)
+    this.addAttribute(this.config.deviceIdField, attributes, exclude)
+    this.addAttribute(this.config.createdAtField, attributes, exclude)
+    this.addAttribute(this.config.lastModifiedField, attributes, exclude)
+    this.addAttribute(this.config.geometryType, attributes, exclude)
+
+    if (this.config.fieldAttributes != undefined) {
+      for (const formMappings of Object.values(this.config.fieldAttributes)) {
+        for (const fieldMappings of Object.values(formMappings as any)) {
+          for (const attribute of Object.values(fieldMappings as any)) {
+            this.addAttribute(attribute as string, attributes, exclude)
+          }
+        }
+      }
+    }
+
+    for (const event of Object.keys(this.events)) {
+      for (const form of Object.keys(this.events[event])) {
+        for (const field of this.events[event][form]) {
+          if (this.fieldMapping(event, form, field) == undefined) {
+            this.addAttribute(field, attributes, exclude)
+          }
+        }
+      }
+    }
+
+    this.sortArray(attributes)
+    return attributes
+  }
+
+  private addAttribute(attribute: string | undefined, attributes: string[], unique: Set<string>) {
+    if (attribute != undefined) {
+      const attributeAdd = this.replaceSpaces(attribute)
+      if (!unique.has(attributeAdd)) {
+        attributes.push(attributeAdd)
+        unique.add(attributeAdd)
+      }
+    }
+  }
+
+  private eventMappings(event: string): any {
+    let events = undefined
+    if (this.config.fieldAttributes != undefined) {
+      events = this.config.fieldAttributes[event]
+    }
+    return events
+  }
+
+  private formMappings(event: string, form: string): any {
+    let forms = undefined
+    let events = this.eventMappings(event)
+    if (events != undefined) {
+      forms = events[form]
+    }
+    return forms
+  }
+
+  private fieldMapping(event: string, form: string, field: string): string {
+    let attribute = undefined
+    let forms = this.formMappings(event, form)
+    if (forms != undefined) {
+      attribute = forms[field]
+    }
+    return attribute
+  }
+
   private sortArray(array: string[]) {
     array.sort((a, b) => {
       return a.toLowerCase() < b.toLowerCase() ? -1 : 1
     })
+  }
+
+  private replaceSpaces(name: string): string {
+    return name.replace(/ /g, '_')
   }
 
   showInfo(title: string, message: string) {

@@ -314,7 +314,7 @@
             <td>{{attribute}}
               <ng-container *ngIf="editAttributes">
                 <button class="edit-button" mat-icon-button
-                  (click)="showEditField('Attribute', 'attributes', config, attribute)">
+                  (click)="showEditFieldAuto('Attribute', 'attributes', config, attribute, selectableAttributes())">
                   <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                 </button>
                 <button class="edit-button" mat-icon-button
@@ -518,7 +518,7 @@
                         <td>{{ condition.attribute }}
                           <ng-container *ngIf="editAttributes">
                             <button class="edit-button" mat-icon-button
-                              (click)="showEditField('Condition Attribute', 'attribute', condition, condition.attribute)">
+                              (click)="showEditFieldAuto('Condition Attribute', 'attribute', condition, condition.attribute, selectableConditionAttributes(attribute, default.condition))">
                               <mat-icon class="edit-icon" [inline]="true">edit</mat-icon>
                             </button>
                             <button class="delete-button" mat-icon-button
@@ -572,7 +572,7 @@
                   <td></td>
                   <td>
                     <button class="add-button" mat-icon-button
-                      (click)="showAddFieldValue('Condition Attribute', default)">
+                      (click)="showAddFieldAutoValue('Condition Attribute', default, selectableConditionAttributes(attribute, default.condition))">
                       <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
                     </button>
                   </td>
@@ -622,7 +622,7 @@
           <tr>
             <td>
               <button class="add-button" mat-icon-button
-                (click)="showAddField('Attribute', config.attributes)">
+                (click)="showAddFieldAuto('Attribute', config.attributes, selectableAttributes())">
                 <mat-icon class="add-icon" [inline]="true">add_box</mat-icon>
               </button>
             </td>

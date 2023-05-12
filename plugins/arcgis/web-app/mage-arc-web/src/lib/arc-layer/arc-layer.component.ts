@@ -41,9 +41,7 @@ export class ArcLayerComponent implements OnInit {
   onEditLayer(arcService: FeatureServiceConfig) {
     console.log('Editing layer ' + arcService.url + ', token: ' + arcService.token)
     this.arcLayerControl.setValue(arcService.url)
-    if (arcService.token != null) {
-      this.arcTokenControl.setValue(arcService.token)
-    }
+    this.arcTokenControl.setValue(arcService.token != null ? arcService.token : '')
     this.currentUrl = this.addToken(arcService.url, arcService.token)
     this.layers = []
     let selectedLayers = new Array<string>()

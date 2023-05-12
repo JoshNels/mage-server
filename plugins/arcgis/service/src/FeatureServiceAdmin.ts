@@ -148,9 +148,9 @@ export class FeatureServiceAdmin {
      */
     private async layerEvents(layer: FeatureLayerConfig, eventRepo: MageEventRepository): Promise<MageEvent[]> {
 
-        const layerEvents: Set<string> = new Set()
-        if (layer.events != null && layer.events.length > 0) {
-            for (const layerEvent of layerEvents) {
+        const layerEvents: Set<number|string> = new Set()
+        if (layer.events != null) {
+            for (const layerEvent of layer.events) {
                 layerEvents.add(layerEvent)
             }
         }
@@ -164,7 +164,7 @@ export class FeatureServiceAdmin {
 
         const events: MageEvent[] = []
         for (const mageEvent of mageEvents) {
-            if (layerEvents.size == 0 || layerEvents.has(mageEvent.name)) {
+            if (layerEvents.size == 0 || layerEvents.has(mageEvent.name) || layerEvents.has(mageEvent.id)) {
                 const event = await eventRepo.findById(mageEvent.id)
                 if (event != null) {
                     events.push(event)

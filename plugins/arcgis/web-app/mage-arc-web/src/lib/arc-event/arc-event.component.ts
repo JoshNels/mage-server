@@ -71,8 +71,7 @@ export class ArcEventComponent implements OnInit {
     const eventsLayers = [];
     for (const featureServiceConfig of this.config.featureServices) {
       for (const arcLayer of featureServiceConfig.layers) {
-        if (arcLayer.events == undefined
-          || arcLayer.events == null
+        if (arcLayer.events == null
           || arcLayer.events.indexOf(event) >= 0) {
           eventsLayers.push(String(arcLayer.layer));
         }
@@ -107,40 +106,27 @@ export class ArcEventComponent implements OnInit {
     console.log('Saving changes to event sync');
     for (const layer of this.layers) {
       for (const featureService of this.config.featureServices) {
-        for (let layerIndex = 0; layerIndex < featureService.layers.length; layerIndex++) {
-          const configLayer = featureService.layers[layerIndex]
+        for (const configLayer of featureService.layers) {
           if (configLayer.layer == layer.name) {
 
-            let events = null
-            if (configLayer.events != undefined
-              && configLayer.events != null
-              && configLayer.events.length > 0) {
-              events = configLayer.events
-            }
-
-            let indexOf = -1
-            if (events != null) {
-              indexOf = events.indexOf(this.currentEditingEvent.name);
-            }
-
             if (layer.isSelected) {
-              if (events != null && indexOf < 0) {
-                events.push(this.currentEditingEvent.name);
-              } else if (events == null) {
-                events = [];
-                events.push(this.currentEditingEvent.name);
-                configLayer.events = events;
+              // Only add the event if layer events are specified and do not contain the event
+              if (configLayer.events != null
+                && configLayer.events.indexOf(this.currentEditingEvent.name) == -1) {
+                configLayer.events.push(this.currentEditingEvent.name);
+              }
+            } else if (configLayer.events != null) {
+              const indexOf = configLayer.events.indexOf(this.currentEditingEvent.name);
+              if (indexOf >= 0) {
+                configLayer.events.splice(indexOf, 1);
               }
             } else {
-              if (events == null) {
-                configLayer.events = []
-                for (const event of this.model.events) {
-                  if (event.name != this.currentEditingEvent.name) {
-                    configLayer.events.push(event.name)
-                  }
+              // Specify all other events to remove the event from the layer
+              configLayer.events = []
+              for (const event of this.model.events) {
+                if (event.name != this.currentEditingEvent.name) {
+                  configLayer.events.push(event.name)
                 }
-              } else if (indexOf >= 0) {
-                events.splice(indexOf, 1);
               }
             }
 

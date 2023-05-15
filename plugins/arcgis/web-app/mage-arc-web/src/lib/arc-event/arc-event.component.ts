@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
+import { FeatureServiceConfig } from "../ArcGISConfig"
 import { ArcService } from '../arc.service'
 import { MatDialog } from '@angular/material/dialog'
 import { ArcEventsModel } from './ArcEventsModel';
 import { ArcEvent } from './ArcEvent';
-import { ArcLayerSelectable } from '../arc-layer/ArcLayerSelectable';
+import { ArcEventLayer } from './ArcEventLayer';
 import { Observable, Subscription } from 'rxjs';
 import { EventResult } from '../EventsResult';
 
@@ -27,7 +28,8 @@ export class ArcEventComponent implements OnInit {
   model: ArcEventsModel;
   isLoading: boolean;
   currentEditingEvent: ArcEvent;
-  layers: ArcLayerSelectable[];
+  layers: ArcEventLayer[];
+  private layersCount: Map<string, Map<string, Set<string>>>
 
   @ViewChild('editEventDialog', { static: true })
   private editEventTemplate: TemplateRef<unknown>
@@ -35,6 +37,7 @@ export class ArcEventComponent implements OnInit {
   constructor(private arcService: ArcService, private dialog: MatDialog) {
     this.config = defaultArcGISPluginConfig;
     this.model = new ArcEventsModel();
+    this.layersCount = new Map();
     arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
@@ -58,6 +61,7 @@ export class ArcEventComponent implements OnInit {
 
   handleEventResults(x: EventResult[]) {
     let activeEventMessage = 'Active events: ';
+    this.updateLayersCount();
     for (const event of x) {
       activeEventMessage += event.name + ' ';
       let eventsLayers = this.eventLayers(event.name)
@@ -67,13 +71,17 @@ export class ArcEventComponent implements OnInit {
     console.log(activeEventMessage);
   }
 
-  private eventLayers(event: string): string[] {
+  private eventLayers(event: string): ArcEventLayer[] {
     const eventsLayers = [];
-    for (const featureServiceConfig of this.config.featureServices) {
-      for (const arcLayer of featureServiceConfig.layers) {
-        if (arcLayer.events == null
-          || arcLayer.events.indexOf(event) >= 0) {
-          eventsLayers.push(String(arcLayer.layer));
+    for (const featureService of this.config.featureServices) {
+      const domain = this.domain(featureService);
+      const service = this.service(featureService);
+      for (const featureLayer of featureService.layers) {
+        if (featureLayer.events == null
+          || featureLayer.events.indexOf(event) >= 0) {
+          const layer = String(featureLayer.layer);
+          const eventLayer = new ArcEventLayer(domain, service, layer);
+          eventsLayers.push(eventLayer);
         }
       }
     }
@@ -84,12 +92,18 @@ export class ArcEventComponent implements OnInit {
     console.log('Editing event synchronization for event ' + event.name);
     this.currentEditingEvent = event;
     this.layers = [];
+    this.updateLayersCount();
 
-    for (const serviceConfig of this.config.featureServices) {
-      for (const layerConfig of serviceConfig.layers) {
-        const configLayerName = String(layerConfig.layer);
-        const selectableLayer = new ArcLayerSelectable(configLayerName);
-        selectableLayer.isSelected = event.layers.indexOf(configLayerName) >= 0;
+    for (const featureService of this.config.featureServices) {
+      const domain = this.domain(featureService);
+      const service = this.service(featureService);
+      for (const featureLayer of featureService.layers) {
+        const layer = String(featureLayer.layer);
+        const selectableLayer = new ArcEventLayer(domain, service, layer);
+        const index = event.layers.findIndex((element) => {
+          return element.name === layer && element.domain === domain && element.service === service;
+        })
+        selectableLayer.isSelected = index >= 0;
         this.layers.push(selectableLayer);
       }
     }
@@ -97,46 +111,115 @@ export class ArcEventComponent implements OnInit {
     this.dialog.open<unknown, unknown, string>(this.editEventTemplate)
   }
 
-  selectedChanged(layer: ArcLayerSelectable) {
+  private updateLayersCount() {
+    const counts = new Map();
+    for (const featureService of this.config.featureServices) {
+      const domain = this.domain(featureService);
+      const service = this.service(featureService);
+      for (const featureLayer of featureService.layers) {
+        const layer = String(featureLayer.layer);
+        let serviceMap = counts.get(layer);
+        if (serviceMap == null) {
+          serviceMap = new Map();
+          counts.set(layer, serviceMap);
+        }
+        let domainSet = serviceMap.get(service);
+        if (domainSet == null) {
+          domainSet = new Set();
+          serviceMap.set(service, domainSet)
+        }
+        domainSet.add(domain)
+      }
+    }
+    this.layersCount = counts
+  }
+
+  layerDisplay(layer: ArcEventLayer): string {
+    let displayName = layer.name
+    const serviceMap = this.layersCount.get(layer.name)
+    if (serviceMap != null) {
+      if (serviceMap.size > 1) {
+        displayName += " (" + layer.service
+        const domainSet = serviceMap.get(layer.service)
+        if (domainSet != null && domainSet.size > 1) {
+          displayName += ", " + layer.domain
+        }
+        displayName += ")"
+      } else if (serviceMap.size == 1) {
+        const domainSet = serviceMap.get(layer.service)
+        if (domainSet != null && domainSet.size > 1) {
+          displayName += " (" + layer.domain + ")"
+        }
+      }
+    }
+    return displayName
+  }
+
+  selectedChanged(layer: ArcEventLayer) {
     console.log('Selection changed for ' + layer.name);
     layer.isSelected = !layer.isSelected;
   }
 
   saveChanges() {
     console.log('Saving changes to event sync');
-    for (const layer of this.layers) {
-      for (const featureService of this.config.featureServices) {
-        for (const configLayer of featureService.layers) {
-          if (configLayer.layer == layer.name) {
+    for (const featureService of this.config.featureServices) {
+      const domain = this.domain(featureService);
+      const service = this.service(featureService);
+      for (const featureLayer of featureService.layers) {
 
-            if (layer.isSelected) {
-              // Only add the event if layer events are specified and do not contain the event
-              if (configLayer.events != null
-                && configLayer.events.indexOf(this.currentEditingEvent.name) == -1) {
-                configLayer.events.push(this.currentEditingEvent.name);
-              }
-            } else if (configLayer.events != null) {
-              const indexOf = configLayer.events.indexOf(this.currentEditingEvent.name);
-              if (indexOf >= 0) {
-                configLayer.events.splice(indexOf, 1);
-              }
-            } else {
-              // Specify all other events to remove the event from the layer
-              configLayer.events = []
-              for (const event of this.model.events) {
-                if (event.name != this.currentEditingEvent.name) {
-                  configLayer.events.push(event.name)
-                }
+        const index = this.layers.findIndex((element) => {
+          return element.name === featureLayer.layer && element.domain === domain && element.service === service;
+        })
+
+        if (index != -1) {
+          const layer = this.layers[index];
+          if (layer.isSelected) {
+            // Only add the event if layer events are specified and do not contain the event
+            if (featureLayer.events != null
+              && featureLayer.events.indexOf(this.currentEditingEvent.name) == -1) {
+                featureLayer.events.push(this.currentEditingEvent.name);
+            }
+          } else if (featureLayer.events != null) {
+            const indexOf = featureLayer.events.indexOf(this.currentEditingEvent.name);
+            if (indexOf >= 0) {
+              featureLayer.events.splice(indexOf, 1);
+            }
+          } else {
+            // Specify all other events to remove the event from the layer
+            featureLayer.events = []
+            for (const event of this.model.events) {
+              if (event.name != this.currentEditingEvent.name) {
+                featureLayer.events.push(event.name)
               }
             }
-
           }
+
         }
       }
-      this.currentEditingEvent.layers = this.eventLayers(this.currentEditingEvent.name)
     }
+    this.currentEditingEvent.layers = this.eventLayers(this.currentEditingEvent.name)
 
     this.configChanged.emit(this.config);
     this.arcService.putArcConfig(this.config);
   }
+
+  private domain(featureService: FeatureServiceConfig): string {
+    const url = new URL(featureService.url)
+    return url.hostname
+  }
+
+  private service(featureService: FeatureServiceConfig): string {
+    const url = new URL(featureService.url)
+    let service = url.pathname
+    let index = service.indexOf('/FeatureServer')
+    if (index != -1) {
+      service = service.substring(0, index)
+    }
+    index = service.lastIndexOf('/')
+    if (index != -1) {
+      service = service.substring(index + 1)
+    }
+    return service
+  }
+
 }

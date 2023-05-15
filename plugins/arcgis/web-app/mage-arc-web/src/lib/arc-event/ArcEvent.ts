@@ -1,8 +1,10 @@
+import { ArcEventLayer } from "./ArcEventLayer";
+
 export class ArcEvent {
     name: string;
-    layers: string[];
+    layers: ArcEventLayer[];
 
-    constructor(name: string, layers: string[]) {
+    constructor(name: string, layers: ArcEventLayer[]) {
         this.name = name;
         this.layers = layers;
     }

@@ -121,6 +121,7 @@ export class ArcLayerComponent implements OnInit {
     if (index < this.config.featureServices.length) {
       this.config.featureServices.splice(index, 1);
     }
+    this.configChanged.emit(this.config);
     this.arcService.putArcConfig(this.config);
   }
 

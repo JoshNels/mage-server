@@ -15,11 +15,12 @@ import { EventResult } from '../EventsResult';
   templateUrl: './arc-event.component.html',
   styleUrls: ['./arc-event.component.scss']
 })
-export class ArcEventComponent implements OnInit {
+export class ArcEventComponent implements OnInit, OnChanges {
 
   private eventsSubscription: Subscription;
 
   @Input('config') config: ArcGISPluginConfig;
+  private configSet = false;
 
   @Input() configChangedNotifier: Observable<void>;
 
@@ -38,11 +39,17 @@ export class ArcEventComponent implements OnInit {
     this.config = defaultArcGISPluginConfig;
     this.model = new ArcEventsModel();
     this.layersCount = new Map();
-    arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
   ngOnInit(): void {
     this.eventsSubscription = this.configChangedNotifier.subscribe(() => this.handleConfigChanged());
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if(!this.configSet) {
+      this.configSet = true;
+      this.arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
+    }
   }
 
   handleConfigChanged() {

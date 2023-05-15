@@ -89,8 +89,6 @@ export class ArcLayerComponent implements OnInit {
           const selectableLayer = new ArcLayerSelectable(layer.name);
           if (selectedLayers.length > 0) {
             selectableLayer.isSelected = selectedLayers.indexOf(layer.name) >= 0;
-          } else {
-            selectableLayer.isSelected = false
           }
           this.layers.push(selectableLayer);
         }

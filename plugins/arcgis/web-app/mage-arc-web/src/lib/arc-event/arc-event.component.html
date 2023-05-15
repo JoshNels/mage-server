@@ -26,7 +26,7 @@
         </div>
         <div class="featureLayers" *ngFor="let featureLayer of event.layers">
           <div class="featureLayer__value">
-            {{featureLayer}}
+            {{layerDisplay(featureLayer)}}
           </div>
         </div>
       </ng-container>
@@ -39,7 +39,7 @@
     <div class="arc-layers" *ngFor="let arcLayer of layers">
       <div class="featureLayer__value">
         <input type="checkbox" [checked]="arcLayer.isSelected" (change)="selectedChanged(arcLayer)" />
-        {{arcLayer.name}}
+        {{layerDisplay(arcLayer)}}
       </div>
     </div>
   </mat-dialog-content>

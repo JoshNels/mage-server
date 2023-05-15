@@ -45,8 +45,12 @@ export class FeatureService {
     private parseFeatureService(url: string, callback: (featureService: FeatureServiceResult) => void) {
         return (chunk: any) => {
             this._console.log('Feature Service. url: ' + url + ', response: ' + chunk)
-            const service = JSON.parse(chunk) as FeatureServiceResult
-            callback(service)
+            try {
+                const service = JSON.parse(chunk) as FeatureServiceResult
+                callback(service)
+            } catch(e) {
+                this._console.error(e)
+            }
         }
     }
 
@@ -67,8 +71,12 @@ export class FeatureService {
     private parseLayerInfo(url: string, infoCallback: (layerInfo: LayerInfoResult) => void) {
         return (chunk: any) => {
             this._console.log('Query Layer. url: ' + url + ', response: ' + chunk)
-            const layerInfo = JSON.parse(chunk) as LayerInfoResult
-            infoCallback(layerInfo)
+            try {
+                const layerInfo = JSON.parse(chunk) as LayerInfoResult
+                infoCallback(layerInfo)
+            } catch(e) {
+                this._console.error(e)
+            }
         }
     }
 

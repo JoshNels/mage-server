@@ -57,16 +57,7 @@ export class ArcLayerComponent implements OnInit {
   }
 
   isSaveDisabled(): boolean {
-    let isDisabled = true;
-
-    for (const layer of this.layers) {
-      if (layer.isSelected) {
-        isDisabled = false;
-        break;
-      }
-    }
-
-    return isDisabled;
+    return this.layers.length == 0;
   }
 
   inputChanged(layerUrl: string, token?: string) {

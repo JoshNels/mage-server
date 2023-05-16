@@ -75,10 +75,10 @@ export class ArcLayerComponent implements OnInit {
     if (this.timeoutId !== undefined) {
       window.clearTimeout(this.timeoutId);
     }
-    this.timeoutId = window.setTimeout(() => this.fetchLayers(url, []), 1000);
+    this.timeoutId = window.setTimeout(() => this.fetchLayers(url), 1000);
   }
 
-  fetchLayers(url: string, selectedLayers: string[]) {
+  fetchLayers(url: string, selectedLayers?: string[]) {
     console.log('Fetching layers for ' + url);
     this.isLoading = true;
     this.layers = []
@@ -87,8 +87,12 @@ export class ArcLayerComponent implements OnInit {
       if (x.layers !== undefined) {
         for (const layer of x.layers) {
           const selectableLayer = new ArcLayerSelectable(layer.name);
-          if (selectedLayers.length > 0) {
-            selectableLayer.isSelected = selectedLayers.indexOf(layer.name) >= 0;
+          if (selectedLayers != null) {
+            if (selectedLayers.length > 0) {
+              selectableLayer.isSelected = selectedLayers.indexOf(layer.name) >= 0;
+            } else {
+              selectableLayer.isSelected = false
+            }
           }
           this.layers.push(selectableLayer);
         }

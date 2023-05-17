@@ -5,6 +5,7 @@ import { ArcService } from '../arc.service'
 import { FeatureLayerConfig, FeatureServiceConfig } from '../ArcGISConfig';
 import { MatDialog } from '@angular/material/dialog'
 import { ArcLayerSelectable } from './ArcLayerSelectable';
+import { EventResult } from '../EventsResult';
 
 @Component({
   selector: 'arc-layer',
@@ -17,6 +18,7 @@ export class ArcLayerComponent implements OnInit {
   @Output() configChanged = new EventEmitter<ArcGISPluginConfig>();
 
   layers: ArcLayerSelectable[];
+  events: string[] = [];
   arcLayerControl = new FormControl('', [Validators.required])
   arcTokenControl = new FormControl('')
   isLoading: boolean;
@@ -32,10 +34,19 @@ export class ArcLayerComponent implements OnInit {
     this.config = defaultArcGISPluginConfig;
     this.layers = new Array<ArcLayerSelectable>();
     this.isLoading = false;
+    arcService.fetchEvents().subscribe(x => this.handleEventResults(x));
   }
 
   ngOnInit(): void {
 
+  }
+
+  handleEventResults(x: EventResult[]) {
+    const events = []
+    for (const event of x) {
+      events.push(event.name)
+    }
+    this.events = events
   }
 
   onEditLayer(arcService: FeatureServiceConfig) {
@@ -144,7 +155,8 @@ export class ArcLayerComponent implements OnInit {
       for (const aLayer of layers) {
         if (aLayer.isSelected) {
           const layerConfig = {
-            layer: aLayer.name
+            layer: aLayer.name,
+            events: this.events
           }
           featureLayer.layers.push(layerConfig);
         }
@@ -152,15 +164,28 @@ export class ArcLayerComponent implements OnInit {
       this.config.featureServices.push(featureLayer);
     } else {
       console.log('Saving edited layer ' + layerUrl)
-      serviceConfigToEdit.layers = new Array<FeatureLayerConfig>();
+      const editedLayers = [];
       for (const aLayer of layers) {
         if (aLayer.isSelected) {
-          const layerConfig = {
-            layer: aLayer.name
+          let layerConfig = null
+          if (serviceConfigToEdit.layers != null) {
+            const index = serviceConfigToEdit.layers.findIndex((element) => {
+              return element.layer === aLayer.name;
+            })
+            if (index != -1) {
+              layerConfig = serviceConfigToEdit.layers[index]
+            }
           }
-          serviceConfigToEdit.layers.push(layerConfig);
+          if (layerConfig == null) {
+            layerConfig = {
+              layer: aLayer.name,
+              events: this.events
+            }
+          }
+          editedLayers.push(layerConfig);
         }
       }
+      serviceConfigToEdit.layers = editedLayers
     }
 
     this.configChanged.emit(this.config);

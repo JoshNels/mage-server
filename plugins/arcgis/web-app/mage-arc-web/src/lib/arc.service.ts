@@ -31,7 +31,7 @@ export class ArcService {
   }
 
   fetchEvents() {
-    return this.http.get<EventResult[]>(`${apiBaseUrl}/events?populate=false&projection={"name":true}`)
+    return this.http.get<EventResult[]>(`${apiBaseUrl}/events?populate=false&projection={"name":true,"id":true}`)
   }
 
   fetchPopulatedEvents() {

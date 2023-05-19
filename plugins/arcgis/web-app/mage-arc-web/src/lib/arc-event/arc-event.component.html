@@ -13,7 +13,7 @@
       <ng-container>
         <div class="arcEvent">
           <div class="arcEvent__value">
-            {{event.name}}
+            <a href="/#/admin/events/{{event.id}}" target="_blank">{{event.name}}</a>
           </div>
           <div class="arcEvent__edit">
             <button class="edit-button" mat-icon-button (click)="onEditEvent(event)"><mat-icon class="edit-icon" [inline]="true">edit</mat-icon></button>

@@ -58,6 +58,7 @@ export class ArcEventComponent implements OnInit, OnChanges {
       for (const arcEvent of this.model.events) {
         const result = new EventResult();
         result.name = arcEvent.name;
+        result.id = arcEvent.id;
         eventResults.push(result);
       }
 
@@ -72,7 +73,7 @@ export class ArcEventComponent implements OnInit, OnChanges {
     for (const event of x) {
       activeEventMessage += event.name + ' ';
       let eventsLayers = this.eventLayers(event.name)
-      const arcEvent = new ArcEvent(event.name, eventsLayers);
+      const arcEvent = new ArcEvent(event.name, event.id, eventsLayers);
       this.model.events.push(arcEvent);
     }
     console.log(activeEventMessage);

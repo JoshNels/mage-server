@@ -4,7 +4,7 @@ import { AttributeConfig, AttributeConcatenationConfig, AttributeDefaultConfig, 
 import { ArcGISPluginConfig, defaultArcGISPluginConfig } from '../ArcGISPluginConfig'
 import { ArcService } from '../arc.service'
 import { Subject } from 'rxjs';
-import { EventResult } from '../EventsResult';
+import { EventResult, FormResult } from '../EventsResult';
 
 @Component({
   selector: 'arc-admin',
@@ -26,7 +26,7 @@ export class ArcAdminComponent implements OnInit {
   editName: string;
   editValue: any;
   editOptions: any[];
-  events: any = {};
+  events: EventResult[] = [];
 
   @ViewChild('infoDialog', { static: true })
   private infoTemplate: TemplateRef<unknown>
@@ -72,19 +72,7 @@ export class ArcAdminComponent implements OnInit {
   }
 
   handleEventResults(x: EventResult[]) {
-    const eventResults: any = {}
-    for (const event of x) {
-      const forms: any = {}
-      for (const form of event.forms) {
-        const fields: string[] = []
-        for (const field of form.fields) {
-          fields.push(field.title)
-        }
-        forms[form.name] = fields
-      }
-      eventResults[event.name] = forms
-    }
-    this.events = eventResults
+    this.events = x
   }
 
   onDeleteLayer(layerUrl: string) {
@@ -323,24 +311,63 @@ export class ArcAdminComponent implements OnInit {
     return omit
   }
 
-  selectableEvents(): string[] {
-    const events: string[] = []
-    for (const event of Object.keys(this.events)) {
-      if (this.eventMappings(event) == undefined) {
-        events.push(event)
+  findEvent(event: string): EventResult | undefined {
+    let eventResult = undefined
+    if (this.events != undefined) {
+      const index = this.events.findIndex((element) => {
+        return element.name === event;
+      })
+      if (index != -1) {
+        eventResult = this.events[index]
       }
     }
-    this.sortArray(events)
+    return eventResult
+  }
+
+  findForm(event: string, form: string): FormResult | undefined {
+    let formResult = undefined
+    let eventResult = this.findEvent(event)
+    if (eventResult != undefined && eventResult.forms != undefined) {
+      const index = eventResult.forms.findIndex((element) => {
+        return element.name === form;
+      })
+      if (index != -1) {
+        formResult = eventResult.forms[index]
+      }
+    }
+    return formResult
+  }
+
+  eventId(event: string): number {
+    const eventResult = this.findEvent(event)
+    return eventResult != undefined ? eventResult.id : -1
+  }
+
+  formId(event: string, form: string): number {
+    const formResult = this.findForm(event, form)
+    return formResult != undefined ? formResult.id : -1
+  }
+
+  selectableEvents(): string[] {
+    const events: string[] = []
+    if (this.events != undefined) {
+      for (const event of this.events) {
+        if (this.eventMappings(event.name) == undefined) {
+          events.push(event.name)
+        }
+      }
+      this.sortArray(events)
+    }
     return events
   }
 
   selectableForms(event: string): string[] {
     const forms: string[] = []
-    const eventForms = this.events[event]
-    if (eventForms != undefined) {
-      for (const form of Object.keys(eventForms)) {
-        if (this.formMappings(event, form) == undefined) {
-          forms.push(form)
+    const eventResult = this.findEvent(event)
+    if (eventResult != undefined && eventResult.forms != undefined) {
+      for (const form of eventResult.forms) {
+        if (this.formMappings(event, form.name) == undefined) {
+          forms.push(form.name)
         }
       }
     }
@@ -350,14 +377,11 @@ export class ArcAdminComponent implements OnInit {
 
   selectableFields(event: string, form: string): string[] {
     const fields: string[] = []
-    const eventForms = this.events[event]
-    if (eventForms != undefined) {
-      const eventFormFields = eventForms[form]
-      if (eventFormFields != undefined) {
-        for (const field of eventFormFields) {
-          if (this.fieldMapping(event, form, field) == undefined) {
-              fields.push(field)
-          }
+    const formResult = this.findForm(event, form)
+    if (formResult != undefined && formResult.fields != undefined) {
+      for (const field of formResult.fields) {
+        if (this.fieldMapping(event, form, field.title) == undefined) {
+            fields.push(field.title)
         }
       }
     }
@@ -411,11 +435,17 @@ export class ArcAdminComponent implements OnInit {
       }
     }
 
-    for (const event of Object.keys(this.events)) {
-      for (const form of Object.keys(this.events[event])) {
-        for (const field of this.events[event][form]) {
-          if (this.fieldMapping(event, form, field) == undefined) {
-            this.addAttribute(field, attributes, exclude)
+    if (this.events != undefined) {
+      for (const event of this.events) {
+        if (event.forms != undefined) {
+          for (const form of event.forms) {
+            if (form.fields != undefined) {
+              for (const field of form.fields) {
+                if (this.fieldMapping(event.name, form.name, field.title) == undefined) {
+                  this.addAttribute(field.title, attributes, exclude)
+                }
+              }
+            }
           }
         }
       }

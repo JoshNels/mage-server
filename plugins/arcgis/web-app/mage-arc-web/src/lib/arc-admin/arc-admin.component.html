@@ -202,7 +202,13 @@
         </tr>
         <ng-container *ngFor="let event of keys(config.fieldAttributes)">
           <tr>
-            <td>{{event}}
+            <td>
+              <ng-container *ngIf="findEvent(event) == undefined; else eventExists">
+                {{event}}
+              </ng-container>
+              <ng-template #eventExists>
+                <a href="/#/admin/events/{{eventId(event)}}" target="_blank">{{event}}</a>
+              </ng-template>
               <ng-container *ngIf="editFieldMappings">
                 <button class="edit-button" mat-icon-button
                   (click)="showEditFieldAuto('Event', 'fieldAttributes', config, event, selectableEvents())">
@@ -218,7 +224,13 @@
           <ng-container *ngFor="let form of keys(config.fieldAttributes[event])">
             <tr>
               <td></td>
-              <td>{{form}}
+              <td>
+                <ng-container *ngIf="findForm(event, form) == undefined; else formExists">
+                  {{form}}
+                </ng-container>
+                <ng-template #formExists>
+                  <a href="/#/admin/events/{{eventId(event)}}/forms/{{formId(event, form)}}" target="_blank">{{form}}</a>
+                </ng-template>
                 <ng-container *ngIf="editFieldMappings">
                   <button class="edit-button" mat-icon-button
                     (click)="showEditFieldAuto('Form', event, config.fieldAttributes, form, selectableForms(event))">

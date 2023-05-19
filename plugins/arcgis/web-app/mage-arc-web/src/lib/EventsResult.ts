@@ -6,6 +6,7 @@ export class EventResult {
 
 export class FormResult {
     name: string;
+    id: number;
     fields: FieldResult[];
 }
 

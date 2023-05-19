@@ -17,7 +17,7 @@
       <ng-container>
         <div class="arcLayer">
           <div class="arcLayer__value">
-            {{arcLayer.url}}
+            <a href="{{addToken(arcLayer.url, arcLayer.token)}}" target="_blank">{{arcLayer.url}}</a>
           </div>
           <div class="arcLayer__edit">
             <button class="edit-button" mat-icon-button (click)="onEditLayer(arcLayer)"><mat-icon class="edit-icon" [inline]="true">edit</mat-icon></button>

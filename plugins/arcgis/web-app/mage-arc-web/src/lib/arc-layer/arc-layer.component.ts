@@ -192,7 +192,7 @@ export class ArcLayerComponent implements OnInit {
     this.arcService.putArcConfig(this.config);
   }
 
-  private addToken(url: string, token?: string) {
+  addToken(url: string, token?: string) {
     let newUrl = url
     if (token != null && token.length > 0) {
       const index = url.indexOf('?')

@@ -405,8 +405,10 @@ export class ArcAdminComponent implements OnInit {
 
     const exclude = new Set<string>()
     exclude.add(attribute)
-    for (const condition of conditions) {
-      exclude.add(condition.attribute)
+    if (conditions != undefined) {
+      for (const condition of conditions) {
+        exclude.add(condition.attribute)
+      }
     }
 
     return this.getSelectableAttributes(exclude)

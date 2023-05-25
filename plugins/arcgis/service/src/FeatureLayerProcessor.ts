@@ -32,6 +32,11 @@ export class FeatureLayerProcessor {
     featureQuerier: FeatureQuerier;
 
     /**
+     * The last time we checked for new/modified observations.
+     */
+    lastTimeStamp: number;
+
+    /**
      * Constructor.
      * @param layerInfo Information about the arc feature layer this class sends observations to.
      * @param config Contains certain parameters that can be configured.
@@ -39,6 +44,7 @@ export class FeatureLayerProcessor {
      */
     constructor(layerInfo: LayerInfo, config: ArcGISPluginConfig, console: Console) {
         this.layerInfo = layerInfo;
+        this.lastTimeStamp = 0;
         this.featureQuerier = new FeatureQuerier(layerInfo, config, console);
         this._binner = new ObservationBinner(layerInfo, this.featureQuerier, config);
         this.sender = new ObservationsSender(layerInfo, config, console);

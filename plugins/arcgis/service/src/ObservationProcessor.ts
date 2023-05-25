@@ -40,11 +40,6 @@ export class ObservationProcessor {
     private _eventRepo: MageEventRepository;
 
     /**
-     * The last time we checked for new/modified observations.
-     */
-    private _lastTimeStamp: number;
-
-    /**
      * Used to get new observations.
      */
     private _obsRepos: ObservationRepositoryForEvent;
@@ -113,7 +108,6 @@ export class ObservationProcessor {
         this._eventRepo = eventRepo;
         this._obsRepos = obsRepos;
         this._userRepo = userRepo;
-        this._lastTimeStamp = 0;
         this._console = console;
         this._firstRun = true;
         this._organizer = new EventLayerProcessorOrganizer();
@@ -152,7 +146,6 @@ export class ObservationProcessor {
             this._layerProcessors = [];
             this.getFeatureServiceLayers(config);
             this._previousConfig = configJson
-            this._lastTimeStamp = 0;
             this._firstRun = true;
         }
         return config
@@ -302,6 +295,8 @@ export class ObservationProcessor {
             const info = new LayerInfo(url, events, layerInfo, featureLayer.token)
             const layerProcessor = new FeatureLayerProcessor(info, config, this._console);
             this._layerProcessors.push(layerProcessor);
+            clearTimeout(this._nextTimeout);
+            this.scheduleNext(config);
         }
     }
 
@@ -317,8 +312,6 @@ export class ObservationProcessor {
                     layerProcessor.processPendingUpdates();
                 }
                 this._console.info('ArcGIS plugin processing new observations...');
-                const queryTime = this._lastTimeStamp;
-                this._lastTimeStamp = Date.now();
                 const activeEvents = await this._eventRepo.findActiveEvents();
                 this._eventDeletionHandler.checkForEventDeletion(activeEvents, this._layerProcessors, this._firstRun);
                 const eventsToProcessors = this._organizer.organize(activeEvents, this._layerProcessors);
@@ -333,26 +326,30 @@ export class ObservationProcessor {
                     let morePages = true;
                     let numberLeft = 0;
                     while (morePages) {
-                        numberLeft = await this.queryAndSend(config, pair.featureLayerProcessors, obsRepo, pagingSettings, queryTime, numberLeft);
+                        numberLeft = await this.queryAndSend(config, pair.featureLayerProcessors, obsRepo, pagingSettings, numberLeft);
                         morePages = numberLeft > 0;
                     }
                 }
                 this._firstRun = false;
             }
-            if (this._isRunning) {
-                let interval = config.intervalSeconds;
-                if (this._firstRun && config.featureServices.length > 0) {
-                    interval = config.startupIntervalSeconds;
-                } else {
-                    for (const layerProcessor of this._layerProcessors) {
-                        if (layerProcessor.hasPendingUpdates()) {
-                            interval = config.updateIntervalSeconds;
-                            break;
-                        }
+            this.scheduleNext(config);
+        }
+    }
+
+    private scheduleNext(config: ArcGISPluginConfig) {
+        if (this._isRunning) {
+            let interval = config.intervalSeconds;
+            if (this._firstRun && config.featureServices.length > 0) {
+                interval = config.startupIntervalSeconds;
+            } else {
+                for (const layerProcessor of this._layerProcessors) {
+                    if (layerProcessor.hasPendingUpdates()) {
+                        interval = config.updateIntervalSeconds;
+                        break;
                     }
                 }
-                this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, interval * 1000);
             }
+            this._nextTimeout = setTimeout(() => { this.processAndScheduleNext() }, interval * 1000);
         }
     }
 
@@ -362,13 +359,21 @@ export class ObservationProcessor {
      * @param layerProcessors The layer processors to use when processing arc objects.
      * @param obsRepo The observation repo for an event.
      * @param pagingSettings Current paging settings.
-     * @param queryTime The time to query for.
      * @param numberLeft The number of observations left to query and send to arc.
      * @returns The number of observations still needing to be queried and sent to arc.
      */
-    private async queryAndSend(config: ArcGISPluginConfig, layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, queryTime: number, numberLeft: number): Promise<number> {
+    private async queryAndSend(config: ArcGISPluginConfig, layerProcessors: FeatureLayerProcessor[], obsRepo: EventScopedObservationRepository, pagingSettings: PagingParameters, numberLeft: number): Promise<number> {
         let newNumberLeft = numberLeft;
 
+        let queryTime = -1;
+        const nextQueryTime = Date.now();
+        for (const layerProcessor of layerProcessors) {
+            if (queryTime == -1 || layerProcessor.lastTimeStamp < queryTime) {
+                queryTime = layerProcessor.lastTimeStamp;
+            }
+            layerProcessor.lastTimeStamp = nextQueryTime;
+        }
+        
         let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
         if (latestObs != null && latestObs.totalCount != null && latestObs.totalCount > 0) {
             if (pagingSettings.pageIndex == 0) {

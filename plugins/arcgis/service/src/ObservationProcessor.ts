@@ -315,6 +315,7 @@ export class ObservationProcessor {
                 const activeEvents = await this._eventRepo.findActiveEvents();
                 this._eventDeletionHandler.checkForEventDeletion(activeEvents, this._layerProcessors, this._firstRun);
                 const eventsToProcessors = this._organizer.organize(activeEvents, this._layerProcessors);
+                const nextQueryTime = Date.now();
                 for (const pair of eventsToProcessors) {
                     this._console.info('ArcGIS getting newest observations for event ' + pair.event.name);
                     const obsRepo = await this._obsRepos(pair.event.id);
@@ -330,6 +331,11 @@ export class ObservationProcessor {
                         morePages = numberLeft > 0;
                     }
                 }
+
+                for (const layerProcessor of this._layerProcessors) {
+                    layerProcessor.lastTimeStamp = nextQueryTime;
+                }
+
                 this._firstRun = false;
             }
             this.scheduleNext(config);
@@ -366,14 +372,12 @@ export class ObservationProcessor {
         let newNumberLeft = numberLeft;
 
         let queryTime = -1;
-        const nextQueryTime = Date.now();
         for (const layerProcessor of layerProcessors) {
             if (queryTime == -1 || layerProcessor.lastTimeStamp < queryTime) {
                 queryTime = layerProcessor.lastTimeStamp;
             }
-            layerProcessor.lastTimeStamp = nextQueryTime;
         }
-        
+
         let latestObs = await obsRepo.findLastModifiedAfter(queryTime, pagingSettings);
         if (latestObs != null && latestObs.totalCount != null && latestObs.totalCount > 0) {
             if (pagingSettings.pageIndex == 0) {

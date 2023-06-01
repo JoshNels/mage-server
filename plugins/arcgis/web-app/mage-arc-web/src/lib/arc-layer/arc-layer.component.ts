@@ -156,7 +156,7 @@ export class ArcLayerComponent implements OnInit {
         if (aLayer.isSelected) {
           const layerConfig = {
             layer: aLayer.name,
-            events: this.events
+            events: JSON.parse(JSON.stringify(this.events))
           }
           featureLayer.layers.push(layerConfig);
         }
@@ -179,7 +179,7 @@ export class ArcLayerComponent implements OnInit {
           if (layerConfig == null) {
             layerConfig = {
               layer: aLayer.name,
-              events: this.events
+              events: JSON.parse(JSON.stringify(this.events))
             }
           }
           editedLayers.push(layerConfig);

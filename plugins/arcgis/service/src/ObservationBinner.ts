@@ -18,7 +18,7 @@ export class ObservationBinner {
     /**
      * The number of existence queries we are still waiting for.
      */
-    private _existenceQueryCount: number;
+    private _existenceQueryIds: Set<string>;
 
     /**
      * The query url to find out if an observations exists on the server.
@@ -46,7 +46,7 @@ export class ObservationBinner {
         this._featureQuerier = featureQuerier;
         this._pendingNewAndUpdates = new ObservationBins;
         this._config = config;
-        this._existenceQueryCount = 0;
+        this._existenceQueryIds = new Set();
     }
 
     /**
@@ -54,7 +54,7 @@ export class ObservationBinner {
      * @returns True if it is still waiting for updates to be processed, false otherwise.
      */
     hasPendingUpdates(): boolean {
-        return this._existenceQueryCount > 0;
+        return this._existenceQueryIds.size > 0;
     }
 
     /**
@@ -106,9 +106,9 @@ export class ObservationBinner {
      * @returns True if it exists, false if it does not.
      */
     checkForExistence(arcObservation: ArcObservation) {
-        this._existenceQueryCount++;
+        this._existenceQueryIds.add(arcObservation.id);
         this._featureQuerier.queryObservation(arcObservation.id, (result) => {
-            this._existenceQueryCount--;
+            this._existenceQueryIds.delete(arcObservation.id);
             if (result.features != null && result.features.length > 0) {
 
                 const arcAttributes = result.features[0].attributes

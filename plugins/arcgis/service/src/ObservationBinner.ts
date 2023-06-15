@@ -35,6 +35,8 @@ export class ObservationBinner {
      */
     private _config: ArcGISPluginConfig;
 
+    private _addedObs: Set<string>;
+
     /**
      * Constructor.
      * @param layerInfo Information about the arc feature layer this class sends observations to.
@@ -47,6 +49,7 @@ export class ObservationBinner {
         this._pendingNewAndUpdates = new ObservationBins;
         this._config = config;
         this._existenceQueryCounts = 0;
+        this._addedObs = new Set<string>();
     }
 
     /**
@@ -64,7 +67,10 @@ export class ObservationBinner {
     pendingUpdates(): ObservationBins {
         const newAndUpdates = new ObservationBins();
         for (let i = 0; i < this._pendingNewAndUpdates.adds.count(); i++) {
-            newAndUpdates.adds.add(this._pendingNewAndUpdates.adds.observations[i]);
+            if (!this._addedObs.has(this._pendingNewAndUpdates.adds.observations[i].id)) {
+                newAndUpdates.adds.add(this._pendingNewAndUpdates.adds.observations[i]);
+                this._addedObs.add(this._pendingNewAndUpdates.adds.observations[i].id);
+            }
         }
         for (let i = 0; i < this._pendingNewAndUpdates.updates.count(); i++) {
             newAndUpdates.updates.add(this._pendingNewAndUpdates.updates.observations[i]);
@@ -87,8 +93,9 @@ export class ObservationBinner {
             if (observations.firstRun
                 || arcObservation.lastModified != arcObservation.createdAt) {
                 bins.updates.add(arcObservation);
-            } else {
+            } else if (!this._addedObs.has(arcObservation.id)) {
                 bins.adds.add(arcObservation);
+                this._addedObs.add(arcObservation.id);
             }
         }
 
